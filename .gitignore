@@ -2,6 +2,8 @@
 .playwright-cli/
 .local/
 output/
+reports/
+supabase/.temp/
 
 # Editor / IDE
 .idea/
