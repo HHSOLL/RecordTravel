@@ -1,0 +1,264 @@
+{
+  "schema_version": "1.0.0",
+  "bundle_version": "v1",
+  "generated_at": "2026-03-11T09:56:55Z",
+  "source_records": [
+    {
+      "slot": "earth_day_albedo",
+      "source_family": "NASA Blue Marble Next Generation",
+      "raw_filename": "world.200401.3x5400x2700.jpg",
+      "source_url": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-base/january/world.200401.3x5400x2700.jpg",
+      "retrieved_at": "2026-03-11T09:54:21Z",
+      "sha256": "99f5faad74efe985fbf1714c8be7296ca9999759a1215b65f99b7f1df278dde5",
+      "license_status": "approved_human_review_2026-03-10",
+      "license_checked_at": "2026-03-10T09:10:00Z",
+      "storage_policy": "git",
+      "size_bytes": 1884678,
+      "target_tiers": [
+        "web_standard",
+        "web_high",
+        "mobile_medium_experimental"
+      ]
+    },
+    {
+      "slot": "earth_borders_overlay_boundaries",
+      "source_family": "Natural Earth boundary lines",
+      "raw_filename": "ne_10m_admin_0_boundary_lines_land.zip",
+      "source_url": "https://naciscdn.org/naturalearth/10m/cultural/ne_10m_admin_0_boundary_lines_land.zip",
+      "retrieved_at": "2026-03-11T09:54:23Z",
+      "sha256": "16ead035f539c8b6c23650c5845d86ad3556553e7456bdf9b4730210f26aacbe",
+      "license_status": "approved_human_review_2026-03-10",
+      "license_checked_at": "2026-03-10T09:10:00Z",
+      "storage_policy": "git",
+      "size_bytes": 1036202,
+      "target_tiers": [
+        "web_standard",
+        "web_high",
+        "mobile_medium_experimental"
+      ]
+    },
+    {
+      "slot": "earth_borders_overlay_coastline",
+      "source_family": "Natural Earth coastline",
+      "raw_filename": "ne_10m_coastline.zip",
+      "source_url": "https://naciscdn.org/naturalearth/10m/physical/ne_10m_coastline.zip",
+      "retrieved_at": "2026-03-11T09:54:26Z",
+      "sha256": "bfa04cdbcbef07ef90dfca1dabb48062eca29900a113df0f389303e255484017",
+      "license_status": "approved_human_review_2026-03-10",
+      "license_checked_at": "2026-03-10T09:10:00Z",
+      "storage_policy": "git",
+      "size_bytes": 3069451,
+      "target_tiers": [
+        "web_standard",
+        "web_high",
+        "mobile_medium_experimental"
+      ]
+    },
+    {
+      "slot": "earth_country_id_map",
+      "source_family": "Natural Earth admin-0 countries",
+      "raw_filename": "ne_10m_admin_0_countries.zip",
+      "source_url": "https://naciscdn.org/naturalearth/10m/cultural/ne_10m_admin_0_countries.zip",
+      "retrieved_at": "2026-03-11T09:54:28Z",
+      "sha256": "ce1ac7036499a0edd641fbc093cd209a98f96a49d2eca8480aaacad35138a7f6",
+      "license_status": "approved_human_review_2026-03-10",
+      "license_checked_at": "2026-03-10T09:10:00Z",
+      "storage_policy": "git",
+      "size_bytes": 4930492,
+      "target_tiers": [
+        "web_standard",
+        "web_high",
+        "mobile_medium_experimental"
+      ]
+    },
+    {
+      "slot": "starfield_background",
+      "source_family": "NASA SVS Deep Star Maps 2020",
+      "raw_filename": "starmap_2020_4k.exr",
+      "source_url": "https://svs.gsfc.nasa.gov/vis/a000000/a004800/a004851/starmap_2020_4k.exr",
+      "retrieved_at": "2026-03-11T09:55:02Z",
+      "sha256": "69b841cd048c2ef35543eb1c5819b322530e78aa4b0cab97ec1de3ef56a4ddcd",
+      "license_status": "approved_human_review_2026-03-10",
+      "license_checked_at": "2026-03-10T09:10:00Z",
+      "storage_policy": "git_lfs",
+      "size_bytes": 35997085,
+      "target_tiers": [
+        "web_standard",
+        "web_high",
+        "mobile_medium_experimental"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "slot": "earth_day_albedo",
+      "tier": "web_standard",
+      "relative_path": "assets/globe/processed/web_standard/earth_day_albedo_v1_4096.webp",
+      "runtime_path": "globe/v1/earth_day_albedo_v1_4096.webp",
+      "width": 4096,
+      "height": 2048,
+      "format": "webp",
+      "sha256": "b4f38a89a58afbb88177fa7e7c3c84715c0c7cbcdfd2f4261cee6b53db8a060e",
+      "size_bytes": 599326,
+      "sample_mode": "linear",
+      "mipmaps": true,
+      "color_space": "srgb"
+    },
+    {
+      "slot": "earth_borders_overlay",
+      "tier": "web_standard",
+      "relative_path": "assets/globe/processed/web_standard/earth_borders_overlay_v1_4096.png",
+      "runtime_path": "globe/v1/earth_borders_overlay_v1_4096.png",
+      "width": 4096,
+      "height": 2048,
+      "format": "png",
+      "sha256": "8948369afd356c2fcc14a702ad6c16bf860637a11c5a73899a0ca9f42b454a0c",
+      "size_bytes": 184517,
+      "sample_mode": "linear",
+      "mipmaps": true,
+      "color_space": "srgb"
+    },
+    {
+      "slot": "earth_country_id_map",
+      "tier": "web_standard",
+      "relative_path": "assets/globe/processed/web_standard/earth_country_id_map_v1_4096.png",
+      "runtime_path": "globe/v1/earth_country_id_map_v1_4096.png",
+      "width": 4096,
+      "height": 2048,
+      "format": "png",
+      "sha256": "5bf36d1455220645901ebdf1d2a2e0974db94d5b89e5e8d294d7f5a32bb1b290",
+      "size_bytes": 154288,
+      "sample_mode": "nearest",
+      "mipmaps": false,
+      "color_space": "none"
+    },
+    {
+      "slot": "starfield_background",
+      "tier": "web_standard",
+      "relative_path": "assets/space/processed/web_standard/starfield_background_v1_4096.jpg",
+      "runtime_path": "space/v1/starfield_background_v1_4096.jpg",
+      "width": 4096,
+      "height": 2048,
+      "format": "jpg",
+      "sha256": "ccd90e4312305e729afe5e98729a24508a0518452cde382b2428b7e19228a7b7",
+      "size_bytes": 2120748,
+      "sample_mode": "linear",
+      "mipmaps": true,
+      "color_space": "srgb"
+    },
+    {
+      "slot": "earth_atmosphere_profile",
+      "tier": "web_standard",
+      "relative_path": "assets/globe/processed/web_standard/earth_atmosphere_profile_v1.json",
+      "runtime_path": "globe/v1/earth_atmosphere_profile_v1.json",
+      "width": null,
+      "height": null,
+      "format": "json",
+      "sha256": "bfbad4411fbaeb3be9c4d445ef7ed95034647235313e037da74f32a79ad2f0aa",
+      "size_bytes": 152,
+      "sample_mode": null,
+      "mipmaps": null,
+      "color_space": null
+    },
+    {
+      "slot": "country_id_palette",
+      "tier": "web_standard",
+      "relative_path": "manifests/country_id_palette_v1.json",
+      "runtime_path": "manifests/country_id_palette_v1.json",
+      "width": null,
+      "height": null,
+      "format": "json",
+      "sha256": "b9009db4f491a52e74f7da23bf2163e1db14ffea316202c847dbd6aa59f907d6",
+      "size_bytes": 85604,
+      "sample_mode": null,
+      "mipmaps": null,
+      "color_space": null
+    }
+  ],
+  "runtime": {
+    "base_url": "/runtime-assets",
+    "cache_policy": {
+      "versioned_immutable": true,
+      "cache_control": "public, max-age=31536000, immutable",
+      "requires_manifest_version_bump_on_change": true
+    },
+    "bundles": {
+      "web_standard": {
+        "version": "v1",
+        "slots": {
+          "earth_day_albedo": {
+            "slot": "earth_day_albedo",
+            "tier": "web_standard",
+            "relative_path": "assets/globe/processed/web_standard/earth_day_albedo_v1_4096.webp",
+            "runtime_path": "globe/v1/earth_day_albedo_v1_4096.webp",
+            "width": 4096,
+            "height": 2048,
+            "format": "webp",
+            "sha256": "b4f38a89a58afbb88177fa7e7c3c84715c0c7cbcdfd2f4261cee6b53db8a060e",
+            "size_bytes": 599326,
+            "sample_mode": "linear",
+            "mipmaps": true,
+            "color_space": "srgb"
+          },
+          "earth_borders_overlay": {
+            "slot": "earth_borders_overlay",
+            "tier": "web_standard",
+            "relative_path": "assets/globe/processed/web_standard/earth_borders_overlay_v1_4096.png",
+            "runtime_path": "globe/v1/earth_borders_overlay_v1_4096.png",
+            "width": 4096,
+            "height": 2048,
+            "format": "png",
+            "sha256": "8948369afd356c2fcc14a702ad6c16bf860637a11c5a73899a0ca9f42b454a0c",
+            "size_bytes": 184517,
+            "sample_mode": "linear",
+            "mipmaps": true,
+            "color_space": "srgb"
+          },
+          "earth_country_id_map": {
+            "slot": "earth_country_id_map",
+            "tier": "web_standard",
+            "relative_path": "assets/globe/processed/web_standard/earth_country_id_map_v1_4096.png",
+            "runtime_path": "globe/v1/earth_country_id_map_v1_4096.png",
+            "width": 4096,
+            "height": 2048,
+            "format": "png",
+            "sha256": "5bf36d1455220645901ebdf1d2a2e0974db94d5b89e5e8d294d7f5a32bb1b290",
+            "size_bytes": 154288,
+            "sample_mode": "nearest",
+            "mipmaps": false,
+            "color_space": "none",
+            "palette_manifest": "/runtime-assets/manifests/country_id_palette_v1.json"
+          },
+          "starfield_background": {
+            "slot": "starfield_background",
+            "tier": "web_standard",
+            "relative_path": "assets/space/processed/web_standard/starfield_background_v1_4096.jpg",
+            "runtime_path": "space/v1/starfield_background_v1_4096.jpg",
+            "width": 4096,
+            "height": 2048,
+            "format": "jpg",
+            "sha256": "ccd90e4312305e729afe5e98729a24508a0518452cde382b2428b7e19228a7b7",
+            "size_bytes": 2120748,
+            "sample_mode": "linear",
+            "mipmaps": true,
+            "color_space": "srgb"
+          },
+          "earth_atmosphere_profile": {
+            "slot": "earth_atmosphere_profile",
+            "tier": "web_standard",
+            "relative_path": "assets/globe/processed/web_standard/earth_atmosphere_profile_v1.json",
+            "runtime_path": "globe/v1/earth_atmosphere_profile_v1.json",
+            "width": null,
+            "height": null,
+            "format": "json",
+            "sha256": "bfbad4411fbaeb3be9c4d445ef7ed95034647235313e037da74f32a79ad2f0aa",
+            "size_bytes": 152,
+            "sample_mode": null,
+            "mipmaps": null,
+            "color_space": null
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-03-11T09:56:55Z",
+  "records": [
+    {
+      "path": "assets/globe/processed/web_standard/earth_day_albedo_v1_4096.webp",
+      "sha256": "b4f38a89a58afbb88177fa7e7c3c84715c0c7cbcdfd2f4261cee6b53db8a060e",
+      "size_bytes": 599326
+    },
+    {
+      "path": "assets/globe/processed/web_standard/earth_borders_overlay_v1_4096.png",
+      "sha256": "8948369afd356c2fcc14a702ad6c16bf860637a11c5a73899a0ca9f42b454a0c",
+      "size_bytes": 184517
+    },
+    {
+      "path": "assets/globe/processed/web_standard/earth_country_id_map_v1_4096.png",
+      "sha256": "5bf36d1455220645901ebdf1d2a2e0974db94d5b89e5e8d294d7f5a32bb1b290",
+      "size_bytes": 154288
+    },
+    {
+      "path": "manifests/country_id_palette_v1.json",
+      "sha256": "b9009db4f491a52e74f7da23bf2163e1db14ffea316202c847dbd6aa59f907d6",
+      "size_bytes": 85604
+    },
+    {
+      "path": "assets/space/processed/web_standard/starfield_background_v1_4096.jpg",
+      "sha256": "ccd90e4312305e729afe5e98729a24508a0518452cde382b2428b7e19228a7b7",
+      "size_bytes": 2120748
+    },
+    {
+      "path": "assets/globe/processed/web_standard/earth_atmosphere_profile_v1.json",
+      "sha256": "bfbad4411fbaeb3be9c4d445ef7ed95034647235313e037da74f32a79ad2f0aa",
+      "size_bytes": 152
+    }
+  ]
+}

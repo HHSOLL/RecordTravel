@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://travelrecord.local/schemas/asset_manifest.schema.json",
+  "title": "Travel Globe Asset Manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "bundle_version",
+    "generated_at",
+    "source_records",
+    "outputs",
+    "runtime"
+  ],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "bundle_version": {"type": "string"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "source_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "slot",
+          "raw_filename",
+          "source_url",
+          "retrieved_at",
+          "sha256",
+          "license_status",
+          "storage_policy"
+        ],
+        "properties": {
+          "slot": {"type": "string"},
+          "raw_filename": {"type": "string"},
+          "source_url": {"type": "string"},
+          "retrieved_at": {"type": "string", "format": "date-time"},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "license_status": {"type": "string"},
+          "license_checked_at": {"type": ["string", "null"], "format": "date-time"},
+          "storage_policy": {"type": "string", "enum": ["git", "git_lfs", "fetch_on_demand"]},
+          "size_bytes": {"type": "integer", "minimum": 0}
+        },
+        "additionalProperties": true
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "slot",
+          "tier",
+          "relative_path",
+          "format",
+          "sha256",
+          "size_bytes"
+        ],
+        "properties": {
+          "slot": {"type": "string"},
+          "tier": {"type": "string"},
+          "relative_path": {"type": "string"},
+          "width": {"type": ["integer", "null"]},
+          "height": {"type": ["integer", "null"]},
+          "format": {"type": "string"},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "size_bytes": {"type": "integer", "minimum": 0},
+          "runtime_path": {"type": ["string", "null"]},
+          "sample_mode": {"type": ["string", "null"]},
+          "mipmaps": {"type": ["boolean", "null"]},
+          "color_space": {"type": ["string", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["base_url", "cache_policy", "bundles"],
+      "properties": {
+        "base_url": {"type": "string"},
+        "cache_policy": {
+          "type": "object",
+          "required": ["versioned_immutable", "requires_manifest_version_bump_on_change"],
+          "properties": {
+            "versioned_immutable": {"type": "boolean"},
+            "cache_control": {"type": "string"},
+            "requires_manifest_version_bump_on_change": {"type": "boolean"}
+          },
+          "additionalProperties": true
+        },
+        "bundles": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["version", "slots"],
+            "properties": {
+              "version": {"type": "string"},
+              "slots": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "required": ["runtime_path"],
+                  "properties": {
+                    "runtime_path": {"type": "string"},
+                    "width": {"type": ["integer", "null"]},
+                    "height": {"type": ["integer", "null"]},
+                    "format": {"type": ["string", "null"]},
+                    "sample_mode": {"type": ["string", "null"]},
+                    "mipmaps": {"type": ["boolean", "null"]},
+                    "color_space": {"type": ["string", "null"]},
+                    "palette_manifest": {"type": ["string", "null"]}
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
