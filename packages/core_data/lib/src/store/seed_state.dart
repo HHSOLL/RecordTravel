@@ -1,0 +1,162 @@
+import 'package:core_domain/core_domain.dart';
+
+TravelAppState buildSeedTravelState() {
+  return TravelAppState(
+    trips: [
+      TripSummary(
+        id: 'trip-seoul-kyoto',
+        title: 'Spring between Seoul and Kyoto',
+        subtitle: 'Museums, rainy alleys, and late-night notes',
+        startDate: DateTime(2025, 4, 14),
+        endDate: DateTime(2025, 4, 22),
+        heroPlace: const PlaceRef(
+          countryCode: 'JP',
+          countryName: 'Japan',
+          cityName: 'Kyoto',
+          latitude: 35.0116,
+          longitude: 135.7681,
+        ),
+        coverHint: 'Temple mornings and soft rain',
+        memoryCount: 3,
+        photoCount: 4,
+        countryCount: 2,
+      ),
+      TripSummary(
+        id: 'trip-paris-lisbon',
+        title: 'Atlantic light in Lisbon',
+        subtitle: 'A quieter week after Paris meetings',
+        startDate: DateTime(2025, 9, 3),
+        endDate: DateTime(2025, 9, 11),
+        heroPlace: const PlaceRef(
+          countryCode: 'PT',
+          countryName: 'Portugal',
+          cityName: 'Lisbon',
+          latitude: 38.7223,
+          longitude: -9.1393,
+        ),
+        coverHint: 'Warm tram rides and tiled streets',
+        memoryCount: 2,
+        photoCount: 3,
+        countryCount: 2,
+      ),
+      TripSummary(
+        id: 'trip-busan-jeju',
+        title: 'Coastline reset',
+        subtitle: 'Short domestic escape with camera-first days',
+        startDate: DateTime(2026, 1, 19),
+        endDate: DateTime(2026, 1, 23),
+        heroPlace: const PlaceRef(
+          countryCode: 'KR',
+          countryName: 'South Korea',
+          cityName: 'Jeju',
+          latitude: 33.4996,
+          longitude: 126.5312,
+        ),
+        coverHint: 'Cold sea air, volcanic ridges',
+        memoryCount: 2,
+        photoCount: 6,
+        countryCount: 1,
+      ),
+    ],
+    entries: [
+      JournalEntry(
+        id: 'entry-1',
+        tripId: 'trip-busan-jeju',
+        title: 'First ferry morning',
+        body:
+            'Started the day with almost no plan and let the coastline decide the route.',
+        recordedAt: DateTime(2026, 1, 20, 8, 12),
+        place: const PlaceRef(
+          countryCode: 'KR',
+          countryName: 'South Korea',
+          cityName: 'Jeju',
+          latitude: 33.4996,
+          longitude: 126.5312,
+        ),
+        type: MemoryType.note,
+        photoAssetIds: const [],
+        hasPendingUpload: false,
+      ),
+      JournalEntry(
+        id: 'entry-2',
+        tripId: 'trip-seoul-kyoto',
+        title: 'Shrine path in the rain',
+        body:
+            'The path was almost empty. It felt like the whole city had gone quiet for an hour.',
+        recordedAt: DateTime(2025, 4, 18, 17, 25),
+        place: const PlaceRef(
+          countryCode: 'JP',
+          countryName: 'Japan',
+          cityName: 'Kyoto',
+          latitude: 35.0116,
+          longitude: 135.7681,
+        ),
+        type: MemoryType.note,
+        photoAssetIds: const [],
+        hasPendingUpload: false,
+      ),
+      JournalEntry(
+        id: 'entry-3',
+        tripId: 'trip-paris-lisbon',
+        title: 'Blue hour tram window',
+        body:
+            'Caught the city as the lights came on. This is the one I want to remember later.',
+        recordedAt: DateTime(2025, 9, 7, 19, 42),
+        place: const PlaceRef(
+          countryCode: 'PT',
+          countryName: 'Portugal',
+          cityName: 'Lisbon',
+          latitude: 38.7223,
+          longitude: -9.1393,
+        ),
+        type: MemoryType.photo,
+        photoAssetIds: const ['photo-1'],
+        hasPendingUpload: true,
+      ),
+      JournalEntry(
+        id: 'entry-4',
+        tripId: 'trip-seoul-kyoto',
+        title: 'Quiet breakfast in Seoul',
+        body:
+            'Wrote route notes while the city was still slow. Good start before the airport rush.',
+        recordedAt: DateTime(2025, 4, 14, 7, 50),
+        place: const PlaceRef(
+          countryCode: 'KR',
+          countryName: 'South Korea',
+          cityName: 'Seoul',
+          latitude: 37.5665,
+          longitude: 126.9780,
+        ),
+        type: MemoryType.note,
+        photoAssetIds: const [],
+        hasPendingUpload: false,
+      ),
+    ],
+    photos: [
+      PhotoAsset(
+        id: 'photo-1',
+        fileName: 'lisbon-tram.heic',
+        previewLabel: 'TRAM',
+        format: 'HEIC',
+        takenAt: DateTime(2025, 9, 7, 19, 40),
+        place: const PlaceRef(
+          countryCode: 'PT',
+          countryName: 'Portugal',
+          cityName: 'Lisbon',
+          latitude: 38.7223,
+          longitude: -9.1393,
+        ),
+        uploadState: UploadState.queued,
+      ),
+    ],
+    syncSnapshot: SyncSnapshot(
+      severity: SyncSeverity.pending,
+      bannerTitle: '2 uploads waiting',
+      bannerMessage:
+          'Everything is saved locally. Upload will resume when the connection is stable.',
+      pendingChanges: 3,
+      pendingUploads: 2,
+      lastSyncedAt: DateTime(2026, 3, 11, 19, 14),
+    ),
+  );
+}

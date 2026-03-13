@@ -1,0 +1,27 @@
+name: feature_places
+description: Shared UI feature package for the Travel Atlas mobile app.
+version: 0.1.0
+publish_to: 'none'
+
+environment:
+  sdk: ^3.8.0
+  flutter: '>=3.22.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.2.1
+  intl: ^0.20.2
+  core_domain:
+    path: ../core_domain
+  core_data:
+    path: ../core_data
+  core_ui:
+    path: ../core_ui
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
