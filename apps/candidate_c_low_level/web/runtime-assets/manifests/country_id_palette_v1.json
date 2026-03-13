@@ -1,0 +1,4921 @@
+{
+  "schema_version": "1.0.0",
+  "version": "v1",
+  "generated_at": "2026-03-11T09:56:55Z",
+  "null_entry": {
+    "id": 0,
+    "rgb": [
+      0,
+      0,
+      0
+    ],
+    "semantic": "OCEAN_NULL",
+    "display_name": "Ocean / No Hit",
+    "iso_a2": null,
+    "iso_a3": null
+  },
+  "entries": [
+    {
+      "id": 1,
+      "rgb": [
+        1,
+        0,
+        0
+      ],
+      "iso_a2": "AW",
+      "iso_a3": "ABW",
+      "display_name": "Aruba",
+      "center_lat": 12.524909,
+      "center_lon": -69.969614,
+      "bbox": [
+        -70.062408,
+        12.41767,
+        -69.87682,
+        12.632148
+      ]
+    },
+    {
+      "id": 2,
+      "rgb": [
+        2,
+        0,
+        0
+      ],
+      "iso_a2": "AF",
+      "iso_a3": "AFG",
+      "display_name": "Afghanistan",
+      "center_lat": 33.930139,
+      "center_lon": 67.689542,
+      "bbox": [
+        60.486778,
+        29.386605,
+        74.892307,
+        38.473673
+      ]
+    },
+    {
+      "id": 3,
+      "rgb": [
+        3,
+        0,
+        0
+      ],
+      "iso_a2": "AO",
+      "iso_a3": "AGO",
+      "display_name": "Angola",
+      "center_lat": -11.211304,
+      "center_lon": 17.865554,
+      "bbox": [
+        11.669394,
+        -18.031405,
+        24.061714,
+        -4.391204
+      ]
+    },
+    {
+      "id": 4,
+      "rgb": [
+        4,
+        0,
+        0
+      ],
+      "iso_a2": "AI",
+      "iso_a3": "AIA",
+      "display_name": "Anguilla",
+      "center_lat": 18.369094,
+      "center_lon": -63.228822,
+      "bbox": [
+        -63.428822,
+        18.169094,
+        -62.925682,
+        18.601264
+      ]
+    },
+    {
+      "id": 5,
+      "rgb": [
+        5,
+        0,
+        0
+      ],
+      "iso_a2": "AL",
+      "iso_a3": "ALB",
+      "display_name": "Albania",
+      "center_lat": 41.145913,
+      "center_lon": 20.154356,
+      "bbox": [
+        19.272033,
+        39.637013,
+        21.036679,
+        42.654814
+      ]
+    },
+    {
+      "id": 6,
+      "rgb": [
+        6,
+        0,
+        0
+      ],
+      "iso_a2": "AX",
+      "iso_a3": "ALD",
+      "display_name": "\u00c5land",
+      "center_lat": 60.192633,
+      "center_lon": 20.304942,
+      "bbox": [
+        19.513194,
+        59.904486,
+        21.09669,
+        60.48078
+      ]
+    },
+    {
+      "id": 7,
+      "rgb": [
+        7,
+        0,
+        0
+      ],
+      "iso_a2": "AD",
+      "iso_a3": "AND",
+      "display_name": "Andorra",
+      "center_lat": 42.53902,
+      "center_lon": 1.585774,
+      "bbox": [
+        1.406456,
+        42.428677,
+        1.765091,
+        42.649362
+      ]
+    },
+    {
+      "id": 8,
+      "rgb": [
+        8,
+        0,
+        0
+      ],
+      "iso_a2": "AE",
+      "iso_a3": "ARE",
+      "display_name": "United Arab Emirates",
+      "center_lat": 24.175177,
+      "center_lon": 53.976492,
+      "bbox": [
+        51.569347,
+        22.620946,
+        56.383637,
+        26.074792
+      ]
+    },
+    {
+      "id": 9,
+      "rgb": [
+        9,
+        0,
+        0
+      ],
+      "iso_a2": "AR",
+      "iso_a3": "ARG",
+      "display_name": "Argentina",
+      "center_lat": -38.419477,
+      "center_lon": -63.617146,
+      "bbox": [
+        -73.57274,
+        -55.052016,
+        -53.661552,
+        -21.786938
+      ]
+    },
+    {
+      "id": 10,
+      "rgb": [
+        10,
+        0,
+        0
+      ],
+      "iso_a2": "AM",
+      "iso_a3": "ARM",
+      "display_name": "Armenia",
+      "center_lat": 40.077077,
+      "center_lon": 45.019453,
+      "bbox": [
+        43.436294,
+        38.863701,
+        46.602612,
+        41.290452
+      ]
+    },
+    {
+      "id": 11,
+      "rgb": [
+        11,
+        0,
+        0
+      ],
+      "iso_a2": "AS",
+      "iso_a3": "ASM",
+      "display_name": "American Samoa",
+      "center_lat": -14.184739,
+      "center_lon": -169.623504,
+      "bbox": [
+        -171.086537,
+        -14.532892,
+        -168.160471,
+        -11.051365
+      ]
+    },
+    {
+      "id": 12,
+      "rgb": [
+        12,
+        0,
+        0
+      ],
+      "iso_a2": "AQ",
+      "iso_a3": "ATA",
+      "display_name": "Antarctica",
+      "center_lat": -75.258104,
+      "center_lon": 0.0,
+      "bbox": [
+        -180.0,
+        -90.0,
+        180.0,
+        -60.516209
+      ]
+    },
+    {
+      "id": 13,
+      "rgb": [
+        13,
+        0,
+        0
+      ],
+      "iso_a2": "AU",
+      "iso_a3": "ATC",
+      "display_name": "Ashmore and Cartier Islands",
+      "center_lat": -12.388572,
+      "center_lon": 123.575043,
+      "bbox": [
+        123.575043,
+        -12.438572,
+        123.597748,
+        -12.426609
+      ]
+    },
+    {
+      "id": 14,
+      "rgb": [
+        14,
+        0,
+        0
+      ],
+      "iso_a2": "TF",
+      "iso_a3": "ATF",
+      "display_name": "French Southern and Antarctic Lands",
+      "center_lat": -30.636122,
+      "center_lon": 58.656749,
+      "bbox": [
+        39.728282,
+        -49.721612,
+        77.585216,
+        -11.550632
+      ]
+    },
+    {
+      "id": 15,
+      "rgb": [
+        15,
+        0,
+        0
+      ],
+      "iso_a2": "AG",
+      "iso_a3": "ATG",
+      "display_name": "Antigua and Barbuda",
+      "center_lat": 17.23197,
+      "center_lon": -61.94826,
+      "bbox": [
+        -62.34826,
+        16.93197,
+        -61.667592,
+        17.727688
+      ]
+    },
+    {
+      "id": 16,
+      "rgb": [
+        16,
+        0,
+        0
+      ],
+      "iso_a2": "AU",
+      "iso_a3": "AUS",
+      "display_name": "Australia",
+      "center_lat": -31.995294,
+      "center_lon": 136.01295,
+      "bbox": [
+        112.919444,
+        -54.750421,
+        159.106456,
+        -9.240167
+      ]
+    },
+    {
+      "id": 17,
+      "rgb": [
+        17,
+        0,
+        0
+      ],
+      "iso_a2": "AT",
+      "iso_a3": "AUT",
+      "display_name": "Austria",
+      "center_lat": 47.694209,
+      "center_lon": 13.334746,
+      "bbox": [
+        9.521155,
+        46.378643,
+        17.148338,
+        49.009774
+      ]
+    },
+    {
+      "id": 18,
+      "rgb": [
+        18,
+        0,
+        0
+      ],
+      "iso_a2": "AZ",
+      "iso_a3": "AZE",
+      "display_name": "Azerbaijan",
+      "center_lat": 40.141543,
+      "center_lon": 47.700151,
+      "bbox": [
+        44.774559,
+        38.392645,
+        50.625743,
+        41.890442
+      ]
+    },
+    {
+      "id": 19,
+      "rgb": [
+        19,
+        0,
+        0
+      ],
+      "iso_a2": "BI",
+      "iso_a3": "BDI",
+      "display_name": "Burundi",
+      "center_lat": -3.383203,
+      "center_lon": 29.910427,
+      "bbox": [
+        28.986892,
+        -4.463344,
+        30.833962,
+        -2.303062
+      ]
+    },
+    {
+      "id": 20,
+      "rgb": [
+        20,
+        0,
+        0
+      ],
+      "iso_a2": "BE",
+      "iso_a3": "BEL",
+      "display_name": "Belgium",
+      "center_lat": 50.49573,
+      "center_lon": 4.448163,
+      "bbox": [
+        2.5218,
+        49.495223,
+        6.374525,
+        51.496238
+      ]
+    },
+    {
+      "id": 21,
+      "rgb": [
+        21,
+        0,
+        0
+      ],
+      "iso_a2": "BJ",
+      "iso_a3": "BEN",
+      "display_name": "Benin",
+      "center_lat": 9.306569,
+      "center_lon": 2.29865,
+      "bbox": [
+        0.759881,
+        6.213894,
+        3.837419,
+        12.399244
+      ]
+    },
+    {
+      "id": 22,
+      "rgb": [
+        22,
+        0,
+        0
+      ],
+      "iso_a2": "BF",
+      "iso_a3": "BFA",
+      "display_name": "Burkina Faso",
+      "center_lat": 12.235895,
+      "center_lon": -1.566205,
+      "bbox": [
+        -5.522578,
+        9.391883,
+        2.390169,
+        15.079908
+      ]
+    },
+    {
+      "id": 23,
+      "rgb": [
+        23,
+        0,
+        0
+      ],
+      "iso_a2": "BD",
+      "iso_a3": "BGD",
+      "display_name": "Bangladesh",
+      "center_lat": 23.681129,
+      "center_lon": 90.33232,
+      "bbox": [
+        88.02179,
+        20.738715,
+        92.642851,
+        26.623544
+      ]
+    },
+    {
+      "id": 24,
+      "rgb": [
+        24,
+        0,
+        0
+      ],
+      "iso_a2": "BG",
+      "iso_a3": "BGR",
+      "display_name": "Bulgaria",
+      "center_lat": 42.733269,
+      "center_lon": 25.474275,
+      "bbox": [
+        22.345023,
+        41.238104,
+        28.603526,
+        44.228435
+      ]
+    },
+    {
+      "id": 25,
+      "rgb": [
+        25,
+        0,
+        0
+      ],
+      "iso_a2": "BH",
+      "iso_a3": "BHR",
+      "display_name": "Bahrain",
+      "center_lat": 25.933665,
+      "center_lon": 50.600202,
+      "bbox": [
+        50.38053,
+        25.579891,
+        50.819875,
+        26.287439
+      ]
+    },
+    {
+      "id": 26,
+      "rgb": [
+        26,
+        0,
+        0
+      ],
+      "iso_a2": "BS",
+      "iso_a3": "BHS",
+      "display_name": "The Bahamas",
+      "center_lat": 23.619605,
+      "center_lon": -75.827848,
+      "bbox": [
+        -79.59435,
+        20.912399,
+        -72.746165,
+        26.928412
+      ]
+    },
+    {
+      "id": 27,
+      "rgb": [
+        27,
+        0,
+        0
+      ],
+      "iso_a2": "BA",
+      "iso_a3": "BIH",
+      "display_name": "Bosnia and Herzegovina",
+      "center_lat": 43.921868,
+      "center_lon": 17.667479,
+      "bbox": [
+        15.716074,
+        42.559212,
+        19.618885,
+        45.284524
+      ]
+    },
+    {
+      "id": 28,
+      "rgb": [
+        28,
+        0,
+        0
+      ],
+      "iso_a2": "XX",
+      "iso_a3": "BJN",
+      "display_name": "Bajo Nuevo Bank",
+      "center_lat": 15.795193,
+      "center_lon": -79.987843,
+      "bbox": [
+        -79.989288,
+        15.794176,
+        -79.986399,
+        15.79621
+      ]
+    },
+    {
+      "id": 29,
+      "rgb": [
+        29,
+        0,
+        0
+      ],
+      "iso_a2": "BL",
+      "iso_a3": "BLM",
+      "display_name": "Saint Barth\u00e9lemy",
+      "center_lat": 17.905565,
+      "center_lon": -62.829498,
+      "bbox": [
+        -62.86734,
+        17.881985,
+        -62.791656,
+        17.929145
+      ]
+    },
+    {
+      "id": 30,
+      "rgb": [
+        30,
+        0,
+        0
+      ],
+      "iso_a2": "BY",
+      "iso_a3": "BLR",
+      "display_name": "Belarus",
+      "center_lat": 53.695987,
+      "center_lon": 27.942589,
+      "bbox": [
+        23.165645,
+        51.235168,
+        32.719532,
+        56.156806
+      ]
+    },
+    {
+      "id": 31,
+      "rgb": [
+        31,
+        0,
+        0
+      ],
+      "iso_a2": "BZ",
+      "iso_a3": "BLZ",
+      "display_name": "Belize",
+      "center_lat": 17.185205,
+      "center_lon": -88.509791,
+      "bbox": [
+        -89.236512,
+        15.879652,
+        -87.78307,
+        18.490759
+      ]
+    },
+    {
+      "id": 32,
+      "rgb": [
+        32,
+        0,
+        0
+      ],
+      "iso_a2": "BM",
+      "iso_a3": "BMU",
+      "display_name": "Bermuda",
+      "center_lat": 32.318368,
+      "center_lon": -64.766812,
+      "bbox": [
+        -64.885994,
+        32.248077,
+        -64.647631,
+        32.388658
+      ]
+    },
+    {
+      "id": 33,
+      "rgb": [
+        33,
+        0,
+        0
+      ],
+      "iso_a2": "BO",
+      "iso_a3": "BOL",
+      "display_name": "Bolivia",
+      "center_lat": -16.28854,
+      "center_lon": -63.566077,
+      "bbox": [
+        -69.666492,
+        -22.897258,
+        -57.465661,
+        -9.679821
+      ]
+    },
+    {
+      "id": 34,
+      "rgb": [
+        34,
+        0,
+        0
+      ],
+      "iso_a2": "BR",
+      "iso_a3": "BRA",
+      "display_name": "Brazil",
+      "center_lat": -14.237528,
+      "center_lon": -51.44777,
+      "bbox": [
+        -74.018475,
+        -33.74228,
+        -28.877065,
+        5.267225
+      ]
+    },
+    {
+      "id": 35,
+      "rgb": [
+        35,
+        0,
+        0
+      ],
+      "iso_a2": "BB",
+      "iso_a3": "BRB",
+      "display_name": "Barbados",
+      "center_lat": 13.197862,
+      "center_lon": -59.540557,
+      "bbox": [
+        -59.654205,
+        13.051174,
+        -59.42691,
+        13.34455
+      ]
+    },
+    {
+      "id": 36,
+      "rgb": [
+        36,
+        0,
+        0
+      ],
+      "iso_a2": "BR",
+      "iso_a3": "BRI",
+      "display_name": "Brazilian Island",
+      "center_lat": -30.143092,
+      "center_lon": -57.642466,
+      "bbox": [
+        -57.642466,
+        -30.193092,
+        -57.602793,
+        -30.182963
+      ]
+    },
+    {
+      "id": 37,
+      "rgb": [
+        37,
+        0,
+        0
+      ],
+      "iso_a2": "BN",
+      "iso_a3": "BRN",
+      "display_name": "Brunei",
+      "center_lat": 4.536939,
+      "center_lon": 114.679765,
+      "bbox": [
+        113.99879,
+        4.016681,
+        115.360741,
+        5.057196
+      ]
+    },
+    {
+      "id": 38,
+      "rgb": [
+        38,
+        0,
+        0
+      ],
+      "iso_a2": "XX",
+      "iso_a3": "BRT",
+      "display_name": "Bir Tawil",
+      "center_lat": 21.853206,
+      "center_lon": 33.632657,
+      "bbox": [
+        33.181136,
+        21.710957,
+        34.084179,
+        21.995454
+      ]
+    },
+    {
+      "id": 39,
+      "rgb": [
+        39,
+        0,
+        0
+      ],
+      "iso_a2": "BT",
+      "iso_a3": "BTN",
+      "display_name": "Bhutan",
+      "center_lat": 27.527274,
+      "center_lon": 90.409422,
+      "bbox": [
+        88.730067,
+        26.696149,
+        92.088776,
+        28.358399
+      ]
+    },
+    {
+      "id": 40,
+      "rgb": [
+        40,
+        0,
+        0
+      ],
+      "iso_a2": "BW",
+      "iso_a3": "BWA",
+      "display_name": "Botswana",
+      "center_lat": -22.336801,
+      "center_lon": 24.66421,
+      "bbox": [
+        19.978346,
+        -26.891794,
+        29.350074,
+        -17.781808
+      ]
+    },
+    {
+      "id": 41,
+      "rgb": [
+        41,
+        0,
+        0
+      ],
+      "iso_a2": "CF",
+      "iso_a3": "CAF",
+      "display_name": "Central African Republic",
+      "center_lat": 6.618641,
+      "center_lon": 20.914284,
+      "bbox": [
+        14.387266,
+        2.236454,
+        27.441301,
+        11.000828
+      ]
+    },
+    {
+      "id": 42,
+      "rgb": [
+        42,
+        0,
+        0
+      ],
+      "iso_a2": "CA",
+      "iso_a3": "CAN",
+      "display_name": "Canada",
+      "center_lat": 62.392804,
+      "center_lon": -96.811086,
+      "bbox": [
+        -141.005564,
+        41.669086,
+        -52.616607,
+        83.116523
+      ]
+    },
+    {
+      "id": 43,
+      "rgb": [
+        43,
+        0,
+        0
+      ],
+      "iso_a2": "CH",
+      "iso_a3": "CHE",
+      "display_name": "Switzerland",
+      "center_lat": 46.810942,
+      "center_lon": 8.210718,
+      "bbox": [
+        5.954809,
+        45.820718,
+        10.466627,
+        47.801166
+      ]
+    },
+    {
+      "id": 44,
+      "rgb": [
+        44,
+        0,
+        0
+      ],
+      "iso_a2": "CL",
+      "iso_a3": "CHL",
+      "display_name": "Chile",
+      "center_lat": -36.712546,
+      "center_lon": -72.875744,
+      "bbox": [
+        -109.453725,
+        -55.918504,
+        -66.420806,
+        -17.506588
+      ]
+    },
+    {
+      "id": 45,
+      "rgb": [
+        45,
+        0,
+        0
+      ],
+      "iso_a2": "CN",
+      "iso_a3": "CHN",
+      "display_name": "People's Republic of China",
+      "center_lat": 34.672411,
+      "center_lon": 104.187418,
+      "bbox": [
+        73.602256,
+        15.775377,
+        134.772579,
+        53.569444
+      ]
+    },
+    {
+      "id": 46,
+      "rgb": [
+        46,
+        0,
+        0
+      ],
+      "iso_a2": "CI",
+      "iso_a3": "CIV",
+      "display_name": "Ivory Coast",
+      "center_lat": 7.53527,
+      "center_lon": -5.562524,
+      "bbox": [
+        -8.61872,
+        4.344062,
+        -2.506328,
+        10.726478
+      ]
+    },
+    {
+      "id": 47,
+      "rgb": [
+        47,
+        0,
+        0
+      ],
+      "iso_a2": "FR",
+      "iso_a3": "CLP",
+      "display_name": "Clipperton Island",
+      "center_lat": 10.296291,
+      "center_lon": -109.2223,
+      "bbox": [
+        -109.234242,
+        10.281562,
+        -109.210357,
+        10.311021
+      ]
+    },
+    {
+      "id": 48,
+      "rgb": [
+        48,
+        0,
+        0
+      ],
+      "iso_a2": "CM",
+      "iso_a3": "CMR",
+      "display_name": "Cameroon",
+      "center_lat": 7.367846,
+      "center_lon": 12.35639,
+      "bbox": [
+        8.505056,
+        1.654551,
+        16.207723,
+        13.081141
+      ]
+    },
+    {
+      "id": 49,
+      "rgb": [
+        49,
+        0,
+        0
+      ],
+      "iso_a2": "XX",
+      "iso_a3": "CNM",
+      "display_name": "United Nations Buffer Zone in Cyprus",
+      "center_lat": 35.088583,
+      "center_lon": 33.303385,
+      "bbox": [
+        32.584809,
+        34.977763,
+        34.021961,
+        35.199403
+      ]
+    },
+    {
+      "id": 50,
+      "rgb": [
+        50,
+        0,
+        0
+      ],
+      "iso_a2": "CD",
+      "iso_a3": "COD",
+      "display_name": "Democratic Republic of the Congo",
+      "center_lat": -4.041535,
+      "center_lon": 21.745494,
+      "bbox": [
+        12.210541,
+        -13.458351,
+        31.280447,
+        5.37528
+      ]
+    },
+    {
+      "id": 51,
+      "rgb": [
+        51,
+        0,
+        0
+      ],
+      "iso_a2": "CG",
+      "iso_a3": "COG",
+      "display_name": "Republic of the Congo",
+      "center_lat": -0.655677,
+      "center_lon": 14.878212,
+      "bbox": [
+        11.114016,
+        -5.019631,
+        18.642407,
+        3.708276
+      ]
+    },
+    {
+      "id": 52,
+      "rgb": [
+        52,
+        0,
+        0
+      ],
+      "iso_a2": "CK",
+      "iso_a3": "COK",
+      "display_name": "Cook Islands",
+      "center_lat": -19.990069,
+      "center_lon": -158.163987,
+      "bbox": [
+        -165.824534,
+        -21.938897,
+        -157.312815,
+        -8.94671
+      ]
+    },
+    {
+      "id": 53,
+      "rgb": [
+        53,
+        0,
+        0
+      ],
+      "iso_a2": "CO",
+      "iso_a3": "COL",
+      "display_name": "Colombia",
+      "center_lat": 4.670935,
+      "center_lon": -74.299382,
+      "bbox": [
+        -81.723704,
+        -4.236484,
+        -66.875061,
+        13.578355
+      ]
+    },
+    {
+      "id": 54,
+      "rgb": [
+        54,
+        0,
+        0
+      ],
+      "iso_a2": "KM",
+      "iso_a3": "COM",
+      "display_name": "Comoros",
+      "center_lat": -11.870782,
+      "center_lon": 43.476394,
+      "bbox": [
+        43.213227,
+        -12.380304,
+        44.529063,
+        -11.361261
+      ]
+    },
+    {
+      "id": 55,
+      "rgb": [
+        55,
+        0,
+        0
+      ],
+      "iso_a2": "CV",
+      "iso_a3": "CPV",
+      "display_name": "Cape Verde",
+      "center_lat": 16.598436,
+      "center_lon": -24.013499,
+      "bbox": [
+        -25.360422,
+        14.803941,
+        -22.666575,
+        17.196601
+      ]
+    },
+    {
+      "id": 56,
+      "rgb": [
+        56,
+        0,
+        0
+      ],
+      "iso_a2": "CR",
+      "iso_a3": "CRI",
+      "display_name": "Costa Rica",
+      "center_lat": 9.501481,
+      "center_lon": -84.61251,
+      "bbox": [
+        -87.117665,
+        5.515082,
+        -82.562837,
+        11.209937
+      ]
+    },
+    {
+      "id": 57,
+      "rgb": [
+        57,
+        0,
+        0
+      ],
+      "iso_a2": "AU",
+      "iso_a3": "CSI",
+      "display_name": "Coral Sea Islands",
+      "center_lat": -21.029392,
+      "center_lon": 154.389903,
+      "bbox": [
+        154.38852,
+        -21.030043,
+        154.391287,
+        -21.028741
+      ]
+    },
+    {
+      "id": 58,
+      "rgb": [
+        58,
+        0,
+        0
+      ],
+      "iso_a2": "CU",
+      "iso_a3": "CUB",
+      "display_name": "Cuba",
+      "center_lat": 21.718586,
+      "center_lon": -79.541249,
+      "bbox": [
+        -84.949615,
+        19.827826,
+        -74.132883,
+        23.26557
+      ]
+    },
+    {
+      "id": 59,
+      "rgb": [
+        59,
+        0,
+        0
+      ],
+      "iso_a2": "CW",
+      "iso_a3": "CUW",
+      "display_name": "Cura\u00e7ao",
+      "center_lat": 12.216417,
+      "center_lon": -68.955739,
+      "bbox": [
+        -69.171742,
+        12.041327,
+        -68.739735,
+        12.391506
+      ]
+    },
+    {
+      "id": 60,
+      "rgb": [
+        60,
+        0,
+        0
+      ],
+      "iso_a2": "KY",
+      "iso_a3": "CYM",
+      "display_name": "Cayman Islands",
+      "center_lat": 19.413864,
+      "center_lon": -81.078562,
+      "bbox": [
+        -81.416542,
+        19.263864,
+        -79.726643,
+        19.757631
+      ]
+    },
+    {
+      "id": 61,
+      "rgb": [
+        61,
+        0,
+        0
+      ],
+      "iso_a2": "XX",
+      "iso_a3": "CYN",
+      "display_name": "Turkish Republic of Northern Cyprus",
+      "center_lat": 35.347342,
+      "center_lon": 33.597219,
+      "bbox": [
+        32.601899,
+        35.002722,
+        34.59254,
+        35.691962
+      ]
+    },
+    {
+      "id": 62,
+      "rgb": [
+        62,
+        0,
+        0
+      ],
+      "iso_a2": "CY",
+      "iso_a3": "CYP",
+      "display_name": "Cyprus",
+      "center_lat": 34.906051,
+      "center_lon": 33.185435,
+      "bbox": [
+        32.271739,
+        34.625019,
+        34.099132,
+        35.187082
+      ]
+    },
+    {
+      "id": 63,
+      "rgb": [
+        63,
+        0,
+        0
+      ],
+      "iso_a2": "CZ",
+      "iso_a3": "CZE",
+      "display_name": "Czech Republic",
+      "center_lat": 49.798964,
+      "center_lon": 15.456787,
+      "bbox": [
+        12.076141,
+        48.557916,
+        18.837434,
+        51.040012
+      ]
+    },
+    {
+      "id": 64,
+      "rgb": [
+        64,
+        0,
+        0
+      ],
+      "iso_a2": "DE",
+      "iso_a3": "DEU",
+      "display_name": "Germany",
+      "center_lat": 51.168228,
+      "center_lon": 10.437275,
+      "bbox": [
+        5.85249,
+        47.271121,
+        15.022059,
+        55.065334
+      ]
+    },
+    {
+      "id": 65,
+      "rgb": [
+        65,
+        0,
+        0
+      ],
+      "iso_a2": "DJ",
+      "iso_a3": "DJI",
+      "display_name": "Djibouti",
+      "center_lat": 11.818869,
+      "center_lon": 42.583911,
+      "bbox": [
+        41.74911,
+        10.929825,
+        43.418712,
+        12.707913
+      ]
+    },
+    {
+      "id": 66,
+      "rgb": [
+        66,
+        0,
+        0
+      ],
+      "iso_a2": "DM",
+      "iso_a3": "DMA",
+      "display_name": "Dominica",
+      "center_lat": 15.417833,
+      "center_lon": -61.369089,
+      "bbox": [
+        -61.488922,
+        15.201809,
+        -61.249257,
+        15.633857
+      ]
+    },
+    {
+      "id": 67,
+      "rgb": [
+        67,
+        0,
+        0
+      ],
+      "iso_a2": "DK",
+      "iso_a3": "DNK",
+      "display_name": "Denmark",
+      "center_lat": 56.000749,
+      "center_lon": 11.622691,
+      "bbox": [
+        8.094005,
+        54.56859,
+        15.151378,
+        57.751166
+      ]
+    },
+    {
+      "id": 68,
+      "rgb": [
+        68,
+        0,
+        0
+      ],
+      "iso_a2": "DO",
+      "iso_a3": "DOM",
+      "display_name": "Dominican Republic",
+      "center_lat": 18.741624,
+      "center_lon": -70.16922,
+      "bbox": [
+        -72.009838,
+        17.545559,
+        -68.328603,
+        19.93769
+      ]
+    },
+    {
+      "id": 69,
+      "rgb": [
+        69,
+        0,
+        0
+      ],
+      "iso_a2": "DZ",
+      "iso_a3": "DZA",
+      "display_name": "Algeria",
+      "center_lat": 28.03475,
+      "center_lon": 1.643238,
+      "bbox": [
+        -8.682385,
+        18.975561,
+        11.968861,
+        37.09394
+      ]
+    },
+    {
+      "id": 70,
+      "rgb": [
+        70,
+        0,
+        0
+      ],
+      "iso_a2": "EC",
+      "iso_a3": "ECU",
+      "display_name": "Ecuador",
+      "center_lat": -1.673499,
+      "center_lon": -80.262561,
+      "bbox": [
+        -92.011586,
+        -5.011373,
+        -75.227264,
+        1.664374
+      ]
+    },
+    {
+      "id": 71,
+      "rgb": [
+        71,
+        0,
+        0
+      ],
+      "iso_a2": "EG",
+      "iso_a3": "EGY",
+      "display_name": "Egypt",
+      "center_lat": 26.825425,
+      "center_lon": 30.793762,
+      "bbox": [
+        24.688343,
+        21.994369,
+        36.899181,
+        31.65648
+      ]
+    },
+    {
+      "id": 72,
+      "rgb": [
+        72,
+        0,
+        0
+      ],
+      "iso_a2": "ER",
+      "iso_a3": "ERI",
+      "display_name": "Eritrea",
+      "center_lat": 15.182425,
+      "center_lon": 39.773759,
+      "bbox": [
+        36.423647,
+        12.360022,
+        43.123871,
+        18.004828
+      ]
+    },
+    {
+      "id": 73,
+      "rgb": [
+        73,
+        0,
+        0
+      ],
+      "iso_a2": "XX",
+      "iso_a3": "ESB",
+      "display_name": "Dhekelia Cantonment",
+      "center_lat": 35.028444,
+      "center_lon": 33.797787,
+      "bbox": [
+        33.674099,
+        34.937893,
+        33.921474,
+        35.118994
+      ]
+    },
+    {
+      "id": 74,
+      "rgb": [
+        74,
+        0,
+        0
+      ],
+      "iso_a2": "ES",
+      "iso_a3": "ESP",
+      "display_name": "Spain",
+      "center_lat": 37.332961,
+      "center_lon": -6.915069,
+      "bbox": [
+        -18.167226,
+        27.642239,
+        4.337087,
+        43.793443
+      ]
+    },
+    {
+      "id": 75,
+      "rgb": [
+        75,
+        0,
+        0
+      ],
+      "iso_a2": "EE",
+      "iso_a3": "EST",
+      "display_name": "Estonia",
+      "center_lat": 58.593352,
+      "center_lon": 25.009421,
+      "bbox": [
+        21.832367,
+        57.515819,
+        28.186475,
+        59.670885
+      ]
+    },
+    {
+      "id": 76,
+      "rgb": [
+        76,
+        0,
+        0
+      ],
+      "iso_a2": "ET",
+      "iso_a3": "ETH",
+      "display_name": "Ethiopia",
+      "center_lat": 9.141433,
+      "center_lon": 40.484484,
+      "bbox": [
+        32.9898,
+        3.403333,
+        47.979169,
+        14.879532
+      ]
+    },
+    {
+      "id": 77,
+      "rgb": [
+        77,
+        0,
+        0
+      ],
+      "iso_a2": "FI",
+      "iso_a3": "FIN",
+      "display_name": "Finland",
+      "center_lat": 64.943268,
+      "center_lon": 26.096345,
+      "bbox": [
+        20.623165,
+        59.811225,
+        31.569525,
+        70.07531
+      ]
+    },
+    {
+      "id": 78,
+      "rgb": [
+        78,
+        0,
+        0
+      ],
+      "iso_a2": "FJ",
+      "iso_a3": "FJI",
+      "display_name": "Fiji",
+      "center_lat": -16.631402,
+      "center_lon": -180.0,
+      "bbox": [
+        -180.0,
+        -21.711114,
+        180.0,
+        -12.475274
+      ]
+    },
+    {
+      "id": 79,
+      "rgb": [
+        79,
+        0,
+        0
+      ],
+      "iso_a2": "FK",
+      "iso_a3": "FLK",
+      "display_name": "Falkland Islands",
+      "center_lat": -51.648206,
+      "center_lon": -59.526235,
+      "bbox": [
+        -61.318186,
+        -52.406523,
+        -57.734283,
+        -51.027765
+      ]
+    },
+    {
+      "id": 80,
+      "rgb": [
+        80,
+        0,
+        0
+      ],
+      "iso_a2": "FR",
+      "iso_a3": "FRA",
+      "display_name": "France",
+      "center_lat": 43.841709,
+      "center_lon": 2.910948,
+      "bbox": [
+        -61.797841,
+        -21.370782,
+        55.854503,
+        51.087541
+      ]
+    },
+    {
+      "id": 81,
+      "rgb": [
+        81,
+        0,
+        0
+      ],
+      "iso_a2": "FO",
+      "iso_a3": "FRO",
+      "display_name": "Faroe Islands",
+      "center_lat": 61.946751,
+      "center_lon": -6.959971,
+      "bbox": [
+        -7.644154,
+        61.39411,
+        -6.275787,
+        62.398912
+      ]
+    },
+    {
+      "id": 82,
+      "rgb": [
+        82,
+        0,
+        0
+      ],
+      "iso_a2": "FM",
+      "iso_a3": "FSM",
+      "display_name": "Federated States of Micronesia",
+      "center_lat": 7.561225,
+      "center_lon": 151.804324,
+      "bbox": [
+        138.063813,
+        0.918158,
+        163.04656,
+        9.77558
+      ]
+    },
+    {
+      "id": 83,
+      "rgb": [
+        83,
+        0,
+        0
+      ],
+      "iso_a2": "GA",
+      "iso_a3": "GAB",
+      "display_name": "Gabon",
+      "center_lat": -0.807181,
+      "center_lon": 11.597279,
+      "bbox": [
+        8.695567,
+        -3.936856,
+        14.498991,
+        2.322495
+      ]
+    },
+    {
+      "id": 84,
+      "rgb": [
+        84,
+        0,
+        0
+      ],
+      "iso_a2": "GB",
+      "iso_a3": "GBR",
+      "display_name": "United Kingdom",
+      "center_lat": 54.831836,
+      "center_lon": -5.960072,
+      "bbox": [
+        -13.691314,
+        49.909613,
+        1.771169,
+        60.847886
+      ]
+    },
+    {
+      "id": 85,
+      "rgb": [
+        85,
+        0,
+        0
+      ],
+      "iso_a2": "GE",
+      "iso_a3": "GEO",
+      "display_name": "Georgia",
+      "center_lat": 42.309977,
+      "center_lon": 43.34039,
+      "bbox": [
+        39.985976,
+        41.044111,
+        46.694803,
+        43.575843
+      ]
+    },
+    {
+      "id": 86,
+      "rgb": [
+        86,
+        0,
+        0
+      ],
+      "iso_a2": "GG",
+      "iso_a3": "GGY",
+      "display_name": "Guernsey",
+      "center_lat": 49.561566,
+      "center_lon": -2.473451,
+      "bbox": [
+        -2.673451,
+        49.411566,
+        -2.170318,
+        49.731391
+      ]
+    },
+    {
+      "id": 87,
+      "rgb": [
+        87,
+        0,
+        0
+      ],
+      "iso_a2": "GH",
+      "iso_a3": "GHA",
+      "display_name": "Ghana",
+      "center_lat": 7.950033,
+      "center_lon": -1.03727,
+      "bbox": [
+        -3.262509,
+        4.737128,
+        1.187968,
+        11.162937
+      ]
+    },
+    {
+      "id": 88,
+      "rgb": [
+        88,
+        0,
+        0
+      ],
+      "iso_a2": "GI",
+      "iso_a3": "GIB",
+      "display_name": "Gibraltar",
+      "center_lat": 36.12581,
+      "center_lon": -5.34858,
+      "bbox": [
+        -5.358387,
+        36.1105,
+        -5.338773,
+        36.14112
+      ]
+    },
+    {
+      "id": 89,
+      "rgb": [
+        89,
+        0,
+        0
+      ],
+      "iso_a2": "GN",
+      "iso_a3": "GIN",
+      "display_name": "Guinea",
+      "center_lat": 10.205957,
+      "center_lon": -11.371786,
+      "bbox": [
+        -15.081125,
+        7.190208,
+        -7.662447,
+        12.673388
+      ]
+    },
+    {
+      "id": 90,
+      "rgb": [
+        90,
+        0,
+        0
+      ],
+      "iso_a2": "GM",
+      "iso_a3": "GMB",
+      "display_name": "The Gambia",
+      "center_lat": 13.442497,
+      "center_lon": -15.324207,
+      "bbox": [
+        -16.829701,
+        13.065009,
+        -13.818713,
+        13.819984
+      ]
+    },
+    {
+      "id": 91,
+      "rgb": [
+        91,
+        0,
+        0
+      ],
+      "iso_a2": "GW",
+      "iso_a3": "GNB",
+      "display_name": "Guinea-Bissau",
+      "center_lat": 11.803536,
+      "center_lon": -15.194574,
+      "bbox": [
+        -16.728437,
+        10.927639,
+        -13.660712,
+        12.679434
+      ]
+    },
+    {
+      "id": 92,
+      "rgb": [
+        92,
+        0,
+        0
+      ],
+      "iso_a2": "GQ",
+      "iso_a3": "GNQ",
+      "display_name": "Equatorial Guinea",
+      "center_lat": 1.148363,
+      "center_lon": 9.332818,
+      "bbox": [
+        5.61199,
+        -1.475681,
+        11.336341,
+        3.772406
+      ]
+    },
+    {
+      "id": 93,
+      "rgb": [
+        93,
+        0,
+        0
+      ],
+      "iso_a2": "GR",
+      "iso_a3": "GRC",
+      "display_name": "Greece",
+      "center_lat": 38.282742,
+      "center_lon": 23.933116,
+      "bbox": [
+        19.626475,
+        34.815009,
+        28.239757,
+        41.750476
+      ]
+    },
+    {
+      "id": 94,
+      "rgb": [
+        94,
+        0,
+        0
+      ],
+      "iso_a2": "GD",
+      "iso_a3": "GRD",
+      "display_name": "Grenada",
+      "center_lat": 12.252834,
+      "center_lon": -61.640517,
+      "bbox": [
+        -61.790517,
+        12.002834,
+        -61.42162,
+        12.529731
+      ]
+    },
+    {
+      "id": 95,
+      "rgb": [
+        95,
+        0,
+        0
+      ],
+      "iso_a2": "GL",
+      "iso_a3": "GRL",
+      "display_name": "Greenland",
+      "center_lat": 71.713365,
+      "center_lon": -42.21703,
+      "bbox": [
+        -73.05724,
+        59.792629,
+        -11.37682,
+        83.634101
+      ]
+    },
+    {
+      "id": 96,
+      "rgb": [
+        96,
+        0,
+        0
+      ],
+      "iso_a2": "GT",
+      "iso_a3": "GTM",
+      "display_name": "Guatemala",
+      "center_lat": 15.773712,
+      "center_lon": -90.233597,
+      "bbox": [
+        -92.246257,
+        13.731404,
+        -88.220937,
+        17.81602
+      ]
+    },
+    {
+      "id": 97,
+      "rgb": [
+        97,
+        0,
+        0
+      ],
+      "iso_a2": "GU",
+      "iso_a3": "GUM",
+      "display_name": "Guam",
+      "center_lat": 13.447577,
+      "center_lon": 144.788178,
+      "bbox": [
+        144.624197,
+        13.241034,
+        144.952159,
+        13.65412
+      ]
+    },
+    {
+      "id": 98,
+      "rgb": [
+        98,
+        0,
+        0
+      ],
+      "iso_a2": "GY",
+      "iso_a3": "GUY",
+      "display_name": "Guyana",
+      "center_lat": 4.871915,
+      "center_lon": -58.939266,
+      "bbox": [
+        -61.396713,
+        1.18582,
+        -56.481819,
+        8.55801
+      ]
+    },
+    {
+      "id": 99,
+      "rgb": [
+        99,
+        0,
+        0
+      ],
+      "iso_a2": "HK",
+      "iso_a3": "HKG",
+      "display_name": "Hong Kong",
+      "center_lat": 22.370508,
+      "center_lon": 114.119314,
+      "bbox": [
+        113.837332,
+        22.177069,
+        114.401296,
+        22.563946
+      ]
+    },
+    {
+      "id": 100,
+      "rgb": [
+        100,
+        0,
+        0
+      ],
+      "iso_a2": "HM",
+      "iso_a3": "HMD",
+      "display_name": "Heard Island and McDonald Islands",
+      "center_lat": -53.077081,
+      "center_lon": 73.524099,
+      "bbox": [
+        73.236013,
+        -53.19256,
+        73.812185,
+        -52.961602
+      ]
+    },
+    {
+      "id": 101,
+      "rgb": [
+        101,
+        0,
+        0
+      ],
+      "iso_a2": "HN",
+      "iso_a3": "HND",
+      "display_name": "Honduras",
+      "center_lat": 15.199212,
+      "center_lon": -86.247118,
+      "bbox": [
+        -89.363791,
+        12.979777,
+        -83.130444,
+        17.418647
+      ]
+    },
+    {
+      "id": 102,
+      "rgb": [
+        102,
+        0,
+        0
+      ],
+      "iso_a2": "HR",
+      "iso_a3": "HRV",
+      "display_name": "Croatia",
+      "center_lat": 44.481653,
+      "center_lon": 16.159339,
+      "bbox": [
+        13.501475,
+        42.416327,
+        19.407838,
+        46.546979
+      ]
+    },
+    {
+      "id": 103,
+      "rgb": [
+        103,
+        0,
+        0
+      ],
+      "iso_a2": "HT",
+      "iso_a3": "HTI",
+      "display_name": "Haiti",
+      "center_lat": 18.954676,
+      "center_lon": -73.064138,
+      "bbox": [
+        -74.489166,
+        18.025946,
+        -71.639111,
+        20.089789
+      ]
+    },
+    {
+      "id": 104,
+      "rgb": [
+        104,
+        0,
+        0
+      ],
+      "iso_a2": "HU",
+      "iso_a3": "HUN",
+      "display_name": "Hungary",
+      "center_lat": 47.155288,
+      "center_lon": 19.485818,
+      "bbox": [
+        16.094035,
+        45.741343,
+        22.877601,
+        48.569233
+      ]
+    },
+    {
+      "id": 105,
+      "rgb": [
+        105,
+        0,
+        0
+      ],
+      "iso_a2": "ID",
+      "iso_a3": "IDN",
+      "display_name": "Indonesia",
+      "center_lat": -2.50626,
+      "center_lon": 115.69692,
+      "bbox": [
+        95.012706,
+        -10.922621,
+        140.977627,
+        5.910102
+      ]
+    },
+    {
+      "id": 106,
+      "rgb": [
+        106,
+        0,
+        0
+      ],
+      "iso_a2": "IM",
+      "iso_a3": "IMN",
+      "display_name": "Isle of Man",
+      "center_lat": 54.237982,
+      "center_lon": -4.551035,
+      "bbox": [
+        -4.790151,
+        54.056952,
+        -4.31192,
+        54.419013
+      ]
+    },
+    {
+      "id": 107,
+      "rgb": [
+        107,
+        0,
+        0
+      ],
+      "iso_a2": "IN",
+      "iso_a3": "IND",
+      "display_name": "India",
+      "center_lat": 21.120478,
+      "center_lon": 82.752828,
+      "bbox": [
+        68.143403,
+        6.745551,
+        97.362253,
+        35.495406
+      ]
+    },
+    {
+      "id": 108,
+      "rgb": [
+        108,
+        0,
+        0
+      ],
+      "iso_a2": "AU",
+      "iso_a3": "IOA",
+      "display_name": "Australian Indian Ocean Territories",
+      "center_lat": -12.111509,
+      "center_lon": 96.821544,
+      "bbox": [
+        96.821544,
+        -12.199965,
+        105.714692,
+        -10.430841
+      ]
+    },
+    {
+      "id": 109,
+      "rgb": [
+        109,
+        0,
+        0
+      ],
+      "iso_a2": "IO",
+      "iso_a3": "IOT",
+      "display_name": "British Indian Ocean Territory",
+      "center_lat": -6.219342,
+      "center_lon": 71.384361,
+      "bbox": [
+        71.260997,
+        -7.432224,
+        72.49464,
+        -5.226983
+      ]
+    },
+    {
+      "id": 110,
+      "rgb": [
+        110,
+        0,
+        0
+      ],
+      "iso_a2": "IE",
+      "iso_a3": "IRL",
+      "display_name": "Ireland",
+      "center_lat": 53.416042,
+      "center_lon": -8.23585,
+      "bbox": [
+        -10.478179,
+        51.445705,
+        -5.99352,
+        55.386379
+      ]
+    },
+    {
+      "id": 111,
+      "rgb": [
+        111,
+        0,
+        0
+      ],
+      "iso_a2": "IR",
+      "iso_a3": "IRN",
+      "display_name": "Iran",
+      "center_lat": 32.415468,
+      "center_lon": 53.667246,
+      "bbox": [
+        44.014863,
+        25.059408,
+        63.319628,
+        39.771527
+      ]
+    },
+    {
+      "id": 112,
+      "rgb": [
+        112,
+        0,
+        0
+      ],
+      "iso_a2": "IQ",
+      "iso_a3": "IRQ",
+      "display_name": "Iraq",
+      "center_lat": 33.219317,
+      "center_lon": 43.666883,
+      "bbox": [
+        38.774511,
+        29.063137,
+        48.559255,
+        37.375498
+      ]
+    },
+    {
+      "id": 113,
+      "rgb": [
+        113,
+        0,
+        0
+      ],
+      "iso_a2": "IS",
+      "iso_a3": "ISL",
+      "display_name": "Iceland",
+      "center_lat": 64.980434,
+      "center_lon": -19.021413,
+      "bbox": [
+        -24.539906,
+        63.396715,
+        -13.502919,
+        66.564154
+      ]
+    },
+    {
+      "id": 114,
+      "rgb": [
+        114,
+        0,
+        0
+      ],
+      "iso_a2": "IL",
+      "iso_a3": "ISR",
+      "display_name": "Israel",
+      "center_lat": 31.448207,
+      "center_lon": 35.068212,
+      "bbox": [
+        34.248351,
+        29.489691,
+        35.888073,
+        33.406722
+      ]
+    },
+    {
+      "id": 115,
+      "rgb": [
+        115,
+        0,
+        0
+      ],
+      "iso_a2": "IT",
+      "iso_a3": "ITA",
+      "display_name": "Italy",
+      "center_lat": 41.867028,
+      "center_lon": 12.560077,
+      "bbox": [
+        6.602728,
+        35.489244,
+        18.517426,
+        47.085215
+      ]
+    },
+    {
+      "id": 116,
+      "rgb": [
+        116,
+        0,
+        0
+      ],
+      "iso_a2": "JM",
+      "iso_a3": "JAM",
+      "display_name": "Jamaica",
+      "center_lat": 18.114142,
+      "center_lon": -77.281321,
+      "bbox": [
+        -78.374664,
+        17.703192,
+        -76.187978,
+        18.525092
+      ]
+    },
+    {
+      "id": 117,
+      "rgb": [
+        117,
+        0,
+        0
+      ],
+      "iso_a2": "JE",
+      "iso_a3": "JEY",
+      "display_name": "Jersey",
+      "center_lat": 49.219184,
+      "center_lon": -2.125152,
+      "bbox": [
+        -2.242014,
+        49.171332,
+        -2.00829,
+        49.267035
+      ]
+    },
+    {
+      "id": 118,
+      "rgb": [
+        118,
+        0,
+        0
+      ],
+      "iso_a2": "JO",
+      "iso_a3": "JOR",
+      "display_name": "Jordan",
+      "center_lat": 31.280818,
+      "center_lon": 37.120692,
+      "bbox": [
+        34.949385,
+        29.189951,
+        39.291999,
+        33.371685
+      ]
+    },
+    {
+      "id": 119,
+      "rgb": [
+        119,
+        0,
+        0
+      ],
+      "iso_a2": "JP",
+      "iso_a3": "JPN",
+      "display_name": "Japan",
+      "center_lat": 35.931673,
+      "center_lon": 138.461884,
+      "bbox": [
+        122.938162,
+        24.212104,
+        153.985606,
+        45.520413
+      ]
+    },
+    {
+      "id": 120,
+      "rgb": [
+        120,
+        0,
+        0
+      ],
+      "iso_a2": "KZ",
+      "iso_a3": "KAB",
+      "display_name": "Baikonur",
+      "center_lat": 45.978332,
+      "center_lon": 63.383888,
+      "bbox": [
+        62.800642,
+        45.565824,
+        63.967134,
+        46.390839
+      ]
+    },
+    {
+      "id": 121,
+      "rgb": [
+        121,
+        0,
+        0
+      ],
+      "iso_a2": "XX",
+      "iso_a3": "KAS",
+      "display_name": "Siachen Glacier",
+      "center_lat": 35.379121,
+      "center_lon": 77.288849,
+      "bbox": [
+        76.777351,
+        35.110442,
+        77.800346,
+        35.647799
+      ]
+    },
+    {
+      "id": 122,
+      "rgb": [
+        122,
+        0,
+        0
+      ],
+      "iso_a2": "KZ",
+      "iso_a3": "KAZ",
+      "display_name": "Kazakhstan",
+      "center_lat": 48.009603,
+      "center_lon": 66.901037,
+      "bbox": [
+        46.478279,
+        40.584656,
+        87.323796,
+        55.43455
+      ]
+    },
+    {
+      "id": 123,
+      "rgb": [
+        123,
+        0,
+        0
+      ],
+      "iso_a2": "KE",
+      "iso_a3": "KEN",
+      "display_name": "Kenya",
+      "center_lat": 0.176436,
+      "center_lon": 37.887744,
+      "bbox": [
+        33.890468,
+        -4.677504,
+        41.885019,
+        5.030376
+      ]
+    },
+    {
+      "id": 124,
+      "rgb": [
+        124,
+        0,
+        0
+      ],
+      "iso_a2": "KG",
+      "iso_a3": "KGZ",
+      "display_name": "Kyrgyzstan",
+      "center_lat": 41.225469,
+      "center_lon": 74.741928,
+      "bbox": [
+        69.226296,
+        39.189237,
+        80.257561,
+        43.261702
+      ]
+    },
+    {
+      "id": 125,
+      "rgb": [
+        125,
+        0,
+        0
+      ],
+      "iso_a2": "KH",
+      "iso_a3": "KHM",
+      "display_name": "Cambodia",
+      "center_lat": 12.560178,
+      "center_lon": 104.96197,
+      "bbox": [
+        102.313424,
+        10.415774,
+        107.610516,
+        14.704582
+      ]
+    },
+    {
+      "id": 126,
+      "rgb": [
+        126,
+        0,
+        0
+      ],
+      "iso_a2": "KI",
+      "iso_a3": "KIR",
+      "display_name": "Kiribati",
+      "center_lat": -2.559802,
+      "center_lon": 176.850922,
+      "bbox": [
+        -174.543406,
+        -11.461114,
+        176.850922,
+        4.72309
+      ]
+    },
+    {
+      "id": 127,
+      "rgb": [
+        127,
+        0,
+        0
+      ],
+      "iso_a2": "KN",
+      "iso_a3": "KNA",
+      "display_name": "Saint Kitts and Nevis",
+      "center_lat": 17.258185,
+      "center_lon": -62.698923,
+      "bbox": [
+        -62.861073,
+        17.100531,
+        -62.536773,
+        17.415839
+      ]
+    },
+    {
+      "id": 128,
+      "rgb": [
+        128,
+        0,
+        0
+      ],
+      "iso_a2": "KR",
+      "iso_a3": "KOR",
+      "display_name": "South Korea",
+      "center_lat": 35.910956,
+      "center_lon": 128.23807,
+      "bbox": [
+        124.613617,
+        33.197577,
+        131.862522,
+        38.624335
+      ]
+    },
+    {
+      "id": 129,
+      "rgb": [
+        129,
+        0,
+        0
+      ],
+      "iso_a2": "XK",
+      "iso_a3": "KOS",
+      "display_name": "Kosovo",
+      "center_lat": 42.553541,
+      "center_lon": 20.898755,
+      "bbox": [
+        20.024751,
+        41.84401,
+        21.772758,
+        43.263071
+      ]
+    },
+    {
+      "id": 130,
+      "rgb": [
+        130,
+        0,
+        0
+      ],
+      "iso_a2": "KW",
+      "iso_a3": "KWT",
+      "display_name": "Kuwait",
+      "center_lat": 29.31586,
+      "center_lon": 47.482608,
+      "bbox": [
+        46.532436,
+        28.533505,
+        48.432781,
+        30.098216
+      ]
+    },
+    {
+      "id": 131,
+      "rgb": [
+        131,
+        0,
+        0
+      ],
+      "iso_a2": "LA",
+      "iso_a3": "LAO",
+      "display_name": "Laos",
+      "center_lat": 18.20575,
+      "center_lon": 104.259083,
+      "bbox": [
+        100.097073,
+        13.915457,
+        107.664363,
+        22.496044
+      ]
+    },
+    {
+      "id": 132,
+      "rgb": [
+        132,
+        0,
+        0
+      ],
+      "iso_a2": "LB",
+      "iso_a3": "LBN",
+      "display_name": "Lebanon",
+      "center_lat": 33.871564,
+      "center_lon": 35.851861,
+      "bbox": [
+        35.09962,
+        33.05558,
+        36.604101,
+        34.687548
+      ]
+    },
+    {
+      "id": 133,
+      "rgb": [
+        133,
+        0,
+        0
+      ],
+      "iso_a2": "LR",
+      "iso_a3": "LBR",
+      "display_name": "Liberia",
+      "center_lat": 6.456316,
+      "center_lon": -9.430152,
+      "bbox": [
+        -11.476186,
+        4.347235,
+        -7.384118,
+        8.565396
+      ]
+    },
+    {
+      "id": 134,
+      "rgb": [
+        134,
+        0,
+        0
+      ],
+      "iso_a2": "LY",
+      "iso_a3": "LBY",
+      "display_name": "Libya",
+      "center_lat": 26.338675,
+      "center_lon": 17.221402,
+      "bbox": [
+        9.286544,
+        19.496124,
+        25.156261,
+        33.181225
+      ]
+    },
+    {
+      "id": 135,
+      "rgb": [
+        135,
+        0,
+        0
+      ],
+      "iso_a2": "LC",
+      "iso_a3": "LCA",
+      "display_name": "Saint Lucia",
+      "center_lat": 13.913275,
+      "center_lon": -60.980743,
+      "bbox": [
+        -61.078521,
+        13.714667,
+        -60.882965,
+        14.111884
+      ]
+    },
+    {
+      "id": 136,
+      "rgb": [
+        136,
+        0,
+        0
+      ],
+      "iso_a2": "LI",
+      "iso_a3": "LIE",
+      "display_name": "Liechtenstein",
+      "center_lat": 47.157601,
+      "center_lon": 9.545804,
+      "bbox": [
+        9.475886,
+        47.0524,
+        9.615723,
+        47.262801
+      ]
+    },
+    {
+      "id": 137,
+      "rgb": [
+        137,
+        0,
+        0
+      ],
+      "iso_a2": "LK",
+      "iso_a3": "LKA",
+      "display_name": "Sri Lanka",
+      "center_lat": 7.876654,
+      "center_lon": 80.773041,
+      "bbox": [
+        79.655772,
+        5.923733,
+        81.89031,
+        9.829576
+      ]
+    },
+    {
+      "id": 138,
+      "rgb": [
+        138,
+        0,
+        0
+      ],
+      "iso_a2": "LS",
+      "iso_a3": "LSO",
+      "display_name": "Lesotho",
+      "center_lat": -29.61478,
+      "center_lon": 28.219032,
+      "bbox": [
+        27.002155,
+        -30.658799,
+        29.435908,
+        -28.570761
+      ]
+    },
+    {
+      "id": 139,
+      "rgb": [
+        139,
+        0,
+        0
+      ],
+      "iso_a2": "LT",
+      "iso_a3": "LTU",
+      "display_name": "Lithuania",
+      "center_lat": 55.164722,
+      "center_lon": 23.862644,
+      "bbox": [
+        20.924569,
+        53.886841,
+        26.80072,
+        56.442602
+      ]
+    },
+    {
+      "id": 140,
+      "rgb": [
+        140,
+        0,
+        0
+      ],
+      "iso_a2": "LU",
+      "iso_a3": "LUX",
+      "display_name": "Luxembourg",
+      "center_lat": 49.80815,
+      "center_lon": 6.108753,
+      "bbox": [
+        5.714927,
+        49.441324,
+        6.502579,
+        50.174975
+      ]
+    },
+    {
+      "id": 141,
+      "rgb": [
+        141,
+        0,
+        0
+      ],
+      "iso_a2": "LV",
+      "iso_a3": "LVA",
+      "display_name": "Latvia",
+      "center_lat": 56.871065,
+      "center_lon": 24.592936,
+      "bbox": [
+        20.968598,
+        55.666991,
+        28.217275,
+        58.075138
+      ]
+    },
+    {
+      "id": 142,
+      "rgb": [
+        142,
+        0,
+        0
+      ],
+      "iso_a2": "MO",
+      "iso_a3": "MAC",
+      "display_name": "Macau",
+      "center_lat": 22.163072,
+      "center_lon": 113.553681,
+      "bbox": [
+        113.519867,
+        22.105373,
+        113.587494,
+        22.220771
+      ]
+    },
+    {
+      "id": 143,
+      "rgb": [
+        143,
+        0,
+        0
+      ],
+      "iso_a2": "MF",
+      "iso_a3": "MAF",
+      "display_name": "Saint Martin",
+      "center_lat": 18.077765,
+      "center_lon": -63.078786,
+      "bbox": [
+        -63.14684,
+        18.033391,
+        -63.010732,
+        18.122138
+      ]
+    },
+    {
+      "id": 144,
+      "rgb": [
+        144,
+        0,
+        0
+      ],
+      "iso_a2": "MA",
+      "iso_a3": "MAR",
+      "display_name": "Morocco",
+      "center_lat": 28.673245,
+      "center_lon": -9.022871,
+      "bbox": [
+        -17.013743,
+        21.419971,
+        -1.031999,
+        35.926519
+      ]
+    },
+    {
+      "id": 145,
+      "rgb": [
+        145,
+        0,
+        0
+      ],
+      "iso_a2": "MC",
+      "iso_a3": "MCO",
+      "display_name": "Monaco",
+      "center_lat": 43.740737,
+      "center_lon": 7.401602,
+      "bbox": [
+        7.36575,
+        43.717969,
+        7.437454,
+        43.763506
+      ]
+    },
+    {
+      "id": 146,
+      "rgb": [
+        146,
+        0,
+        0
+      ],
+      "iso_a2": "MD",
+      "iso_a3": "MDA",
+      "display_name": "Moldova",
+      "center_lat": 46.973904,
+      "center_lon": 28.374733,
+      "bbox": [
+        26.617889,
+        45.461774,
+        30.131576,
+        48.486034
+      ]
+    },
+    {
+      "id": 147,
+      "rgb": [
+        147,
+        0,
+        0
+      ],
+      "iso_a2": "MG",
+      "iso_a3": "MDG",
+      "display_name": "Madagascar",
+      "center_lat": -18.771091,
+      "center_lon": 46.863414,
+      "bbox": [
+        43.222911,
+        -25.598565,
+        50.503917,
+        -11.943617
+      ]
+    },
+    {
+      "id": 148,
+      "rgb": [
+        148,
+        0,
+        0
+      ],
+      "iso_a2": "MV",
+      "iso_a3": "MDV",
+      "display_name": "Maldives",
+      "center_lat": 3.209337,
+      "center_lon": 73.005333,
+      "bbox": [
+        72.684825,
+        -0.688572,
+        73.753184,
+        7.107245
+      ]
+    },
+    {
+      "id": 149,
+      "rgb": [
+        149,
+        0,
+        0
+      ],
+      "iso_a2": "MX",
+      "iso_a3": "MEX",
+      "display_name": "Mexico",
+      "center_lat": 23.629558,
+      "center_lon": -102.534698,
+      "bbox": [
+        -118.368804,
+        14.546279,
+        -86.700592,
+        32.712836
+      ]
+    },
+    {
+      "id": 150,
+      "rgb": [
+        150,
+        0,
+        0
+      ],
+      "iso_a2": "MH",
+      "iso_a3": "MHL",
+      "display_name": "Marshall Islands",
+      "center_lat": 4.573798,
+      "center_lon": 168.656016,
+      "bbox": [
+        165.282237,
+        4.573798,
+        172.029796,
+        14.6105
+      ]
+    },
+    {
+      "id": 151,
+      "rgb": [
+        151,
+        0,
+        0
+      ],
+      "iso_a2": "MK",
+      "iso_a3": "MKD",
+      "display_name": "North Macedonia",
+      "center_lat": 41.609864,
+      "center_lon": 21.72687,
+      "bbox": [
+        20.444157,
+        40.849394,
+        23.009582,
+        42.370335
+      ]
+    },
+    {
+      "id": 152,
+      "rgb": [
+        152,
+        0,
+        0
+      ],
+      "iso_a2": "ML",
+      "iso_a3": "MLI",
+      "display_name": "Mali",
+      "center_lat": 17.567559,
+      "center_lon": -4.014246,
+      "bbox": [
+        -12.26413,
+        10.140054,
+        4.235638,
+        24.995065
+      ]
+    },
+    {
+      "id": 153,
+      "rgb": [
+        153,
+        0,
+        0
+      ],
+      "iso_a2": "MT",
+      "iso_a3": "MLT",
+      "display_name": "Malta",
+      "center_lat": 35.938402,
+      "center_lon": 14.375377,
+      "bbox": [
+        14.183604,
+        35.801215,
+        14.567149,
+        36.075588
+      ]
+    },
+    {
+      "id": 154,
+      "rgb": [
+        154,
+        0,
+        0
+      ],
+      "iso_a2": "MM",
+      "iso_a3": "MMR",
+      "display_name": "Myanmar",
+      "center_lat": 19.164591,
+      "center_lon": 96.674414,
+      "bbox": [
+        92.174973,
+        9.790717,
+        101.173855,
+        28.538466
+      ]
+    },
+    {
+      "id": 155,
+      "rgb": [
+        155,
+        0,
+        0
+      ],
+      "iso_a2": "ME",
+      "iso_a3": "MNE",
+      "display_name": "Montenegro",
+      "center_lat": 42.700124,
+      "center_lon": 19.394351,
+      "bbox": [
+        18.433531,
+        41.852362,
+        20.355171,
+        43.547886
+      ]
+    },
+    {
+      "id": 156,
+      "rgb": [
+        156,
+        0,
+        0
+      ],
+      "iso_a2": "MN",
+      "iso_a3": "MNG",
+      "display_name": "Mongolia",
+      "center_lat": 46.857864,
+      "center_lon": 103.821368,
+      "bbox": [
+        87.735709,
+        41.586145,
+        119.907027,
+        52.129584
+      ]
+    },
+    {
+      "id": 157,
+      "rgb": [
+        157,
+        0,
+        0
+      ],
+      "iso_a2": "MP",
+      "iso_a3": "MNP",
+      "display_name": "Northern Mariana Islands",
+      "center_lat": 17.333035,
+      "center_lon": 145.80211,
+      "bbox": [
+        144.90211,
+        14.110663,
+        145.868907,
+        20.555406
+      ]
+    },
+    {
+      "id": 158,
+      "rgb": [
+        158,
+        0,
+        0
+      ],
+      "iso_a2": "MZ",
+      "iso_a3": "MOZ",
+      "display_name": "Mozambique",
+      "center_lat": -18.66464,
+      "center_lon": 35.530919,
+      "bbox": [
+        30.213845,
+        -26.860272,
+        40.847992,
+        -10.469008
+      ]
+    },
+    {
+      "id": 159,
+      "rgb": [
+        159,
+        0,
+        0
+      ],
+      "iso_a2": "MR",
+      "iso_a3": "MRT",
+      "display_name": "Mauritania",
+      "center_lat": 21.009907,
+      "center_lon": -10.951394,
+      "bbox": [
+        -17.081175,
+        14.734399,
+        -4.821613,
+        27.285416
+      ]
+    },
+    {
+      "id": 160,
+      "rgb": [
+        160,
+        0,
+        0
+      ],
+      "iso_a2": "MS",
+      "iso_a3": "MSR",
+      "display_name": "Montserrat",
+      "center_lat": 16.747341,
+      "center_lon": -62.185333,
+      "bbox": [
+        -62.230133,
+        16.67536,
+        -62.140533,
+        16.819322
+      ]
+    },
+    {
+      "id": 161,
+      "rgb": [
+        161,
+        0,
+        0
+      ],
+      "iso_a2": "MU",
+      "iso_a3": "MUS",
+      "display_name": "Mauritius",
+      "center_lat": -20.007676,
+      "center_lon": 57.56964,
+      "bbox": [
+        56.524181,
+        -20.517348,
+        63.493907,
+        -10.323907
+      ]
+    },
+    {
+      "id": 162,
+      "rgb": [
+        162,
+        0,
+        0
+      ],
+      "iso_a2": "MW",
+      "iso_a3": "MWI",
+      "display_name": "Malawi",
+      "center_lat": -13.258285,
+      "center_lon": 34.283804,
+      "bbox": [
+        32.663308,
+        -17.135335,
+        35.904299,
+        -9.381235
+      ]
+    },
+    {
+      "id": 163,
+      "rgb": [
+        163,
+        0,
+        0
+      ],
+      "iso_a2": "MY",
+      "iso_a3": "MYS",
+      "display_name": "Malaysia",
+      "center_lat": 1.827032,
+      "center_lon": 109.461657,
+      "bbox": [
+        99.645228,
+        0.85137,
+        119.278087,
+        7.35578
+      ]
+    },
+    {
+      "id": 164,
+      "rgb": [
+        164,
+        0,
+        0
+      ],
+      "iso_a2": "NA",
+      "iso_a3": "NAM",
+      "display_name": "Namibia",
+      "center_lat": -22.955213,
+      "center_lon": 18.488701,
+      "bbox": [
+        11.717621,
+        -28.959368,
+        25.259781,
+        -16.951057
+      ]
+    },
+    {
+      "id": 165,
+      "rgb": [
+        165,
+        0,
+        0
+      ],
+      "iso_a2": "NC",
+      "iso_a3": "NCL",
+      "display_name": "New Caledonia",
+      "center_lat": -21.299538,
+      "center_lon": 167.866151,
+      "bbox": [
+        163.615733,
+        -22.670668,
+        171.343765,
+        -19.623712
+      ]
+    },
+    {
+      "id": 166,
+      "rgb": [
+        166,
+        0,
+        0
+      ],
+      "iso_a2": "NE",
+      "iso_a3": "NER",
+      "display_name": "Niger",
+      "center_lat": 17.606562,
+      "center_lon": 8.061632,
+      "bbox": [
+        0.152941,
+        11.695773,
+        15.970322,
+        23.517351
+      ]
+    },
+    {
+      "id": 167,
+      "rgb": [
+        167,
+        0,
+        0
+      ],
+      "iso_a2": "NF",
+      "iso_a3": "NFK",
+      "display_name": "Norfolk Island",
+      "center_lat": -29.038751,
+      "center_lon": 167.954234,
+      "bbox": [
+        167.91212,
+        -29.080011,
+        167.996349,
+        -28.997491
+      ]
+    },
+    {
+      "id": 168,
+      "rgb": [
+        168,
+        0,
+        0
+      ],
+      "iso_a2": "NG",
+      "iso_a3": "NGA",
+      "display_name": "Nigeria",
+      "center_lat": 9.076227,
+      "center_lon": 8.670509,
+      "bbox": [
+        2.671082,
+        4.272162,
+        14.669936,
+        13.880291
+      ]
+    },
+    {
+      "id": 169,
+      "rgb": [
+        169,
+        0,
+        0
+      ],
+      "iso_a2": "NI",
+      "iso_a3": "NIC",
+      "display_name": "Nicaragua",
+      "center_lat": 12.872226,
+      "center_lon": -85.205759,
+      "bbox": [
+        -87.685821,
+        10.713482,
+        -82.725697,
+        15.03097
+      ]
+    },
+    {
+      "id": 170,
+      "rgb": [
+        170,
+        0,
+        0
+      ],
+      "iso_a2": "NU",
+      "iso_a3": "NIU",
+      "display_name": "Niue",
+      "center_lat": -19.053399,
+      "center_lon": -169.866668,
+      "bbox": [
+        -169.950429,
+        -19.142755,
+        -169.782908,
+        -18.964044
+      ]
+    },
+    {
+      "id": 171,
+      "rgb": [
+        171,
+        0,
+        0
+      ],
+      "iso_a2": "NL",
+      "iso_a3": "NLD",
+      "display_name": "Netherlands",
+      "center_lat": 32.790066,
+      "center_lon": -30.609441,
+      "bbox": [
+        -68.417388,
+        12.02204,
+        7.198506,
+        53.558092
+      ]
+    },
+    {
+      "id": 172,
+      "rgb": [
+        172,
+        0,
+        0
+      ],
+      "iso_a2": "NO",
+      "iso_a3": "NOR",
+      "display_name": "Norway",
+      "center_lat": 60.485199,
+      "center_lon": 12.261485,
+      "bbox": [
+        -9.117421,
+        -54.462498,
+        33.640391,
+        80.770087
+      ]
+    },
+    {
+      "id": 173,
+      "rgb": [
+        173,
+        0,
+        0
+      ],
+      "iso_a2": "NP",
+      "iso_a3": "NPL",
+      "display_name": "Nepal",
+      "center_lat": 28.380336,
+      "center_lon": 84.099678,
+      "bbox": [
+        80.030288,
+        26.343768,
+        88.169067,
+        30.416904
+      ]
+    },
+    {
+      "id": 174,
+      "rgb": [
+        174,
+        0,
+        0
+      ],
+      "iso_a2": "NR",
+      "iso_a3": "NRU",
+      "display_name": "Nauru",
+      "center_lat": -0.521132,
+      "center_lon": 166.932628,
+      "bbox": [
+        166.906993,
+        -0.551853,
+        166.958263,
+        -0.490411
+      ]
+    },
+    {
+      "id": 175,
+      "rgb": [
+        175,
+        0,
+        0
+      ],
+      "iso_a2": "NZ",
+      "iso_a3": "NZL",
+      "display_name": "New Zealand",
+      "center_lat": -30.57177,
+      "center_lon": 0.442963,
+      "bbox": [
+        -177.957997,
+        -52.600313,
+        178.843923,
+        -8.543227
+      ]
+    },
+    {
+      "id": 176,
+      "rgb": [
+        176,
+        0,
+        0
+      ],
+      "iso_a2": "OM",
+      "iso_a3": "OMN",
+      "display_name": "Oman",
+      "center_lat": 21.514187,
+      "center_lon": 55.911595,
+      "bbox": [
+        51.978615,
+        16.642401,
+        59.844574,
+        26.385972
+      ]
+    },
+    {
+      "id": 177,
+      "rgb": [
+        177,
+        0,
+        0
+      ],
+      "iso_a2": "PK",
+      "iso_a3": "PAK",
+      "display_name": "Pakistan",
+      "center_lat": 30.374504,
+      "center_lon": 68.946675,
+      "bbox": [
+        60.844379,
+        23.694525,
+        77.048971,
+        37.054484
+      ]
+    },
+    {
+      "id": 178,
+      "rgb": [
+        178,
+        0,
+        0
+      ],
+      "iso_a2": "PA",
+      "iso_a3": "PAN",
+      "display_name": "Panama",
+      "center_lat": 8.417504,
+      "center_lon": -80.108258,
+      "bbox": [
+        -83.053246,
+        7.205715,
+        -77.16327,
+        9.629292
+      ]
+    },
+    {
+      "id": 179,
+      "rgb": [
+        179,
+        0,
+        0
+      ],
+      "iso_a2": "PN",
+      "iso_a3": "PCN",
+      "display_name": "Pitcairn Islands",
+      "center_lat": -24.327846,
+      "center_lon": -128.363075,
+      "bbox": [
+        -130.753082,
+        -25.077081,
+        -124.778066,
+        -23.924412
+      ]
+    },
+    {
+      "id": 180,
+      "rgb": [
+        180,
+        0,
+        0
+      ],
+      "iso_a2": "PE",
+      "iso_a3": "PER",
+      "display_name": "Peru",
+      "center_lat": -9.183419,
+      "center_lon": -75.010905,
+      "bbox": [
+        -81.337558,
+        -18.337746,
+        -68.684252,
+        -0.029093
+      ]
+    },
+    {
+      "id": 181,
+      "rgb": [
+        181,
+        0,
+        0
+      ],
+      "iso_a2": "XX",
+      "iso_a3": "PGA",
+      "display_name": "Wake Island",
+      "center_lat": 10.254901,
+      "center_lon": 115.302468,
+      "bbox": [
+        114.02768,
+        9.679511,
+        115.848806,
+        11.117987
+      ]
+    },
+    {
+      "id": 182,
+      "rgb": [
+        182,
+        0,
+        0
+      ],
+      "iso_a2": "PH",
+      "iso_a3": "PHL",
+      "display_name": "Philippines",
+      "center_lat": 12.889045,
+      "center_lon": 121.303168,
+      "bbox": [
+        116.954926,
+        4.655707,
+        126.617686,
+        21.122382
+      ]
+    },
+    {
+      "id": 183,
+      "rgb": [
+        183,
+        0,
+        0
+      ],
+      "iso_a2": "PW",
+      "iso_a3": "PLW",
+      "display_name": "Palau",
+      "center_lat": 7.067103,
+      "center_lon": 134.187909,
+      "bbox": [
+        131.131114,
+        2.949042,
+        134.727343,
+        8.096618
+      ]
+    },
+    {
+      "id": 184,
+      "rgb": [
+        184,
+        0,
+        0
+      ],
+      "iso_a2": "PG",
+      "iso_a3": "PNG",
+      "display_name": "Papua New Guinea",
+      "center_lat": -6.491347,
+      "center_lon": 147.652459,
+      "bbox": [
+        140.849211,
+        -11.636326,
+        155.96754,
+        -1.346368
+      ]
+    },
+    {
+      "id": 185,
+      "rgb": [
+        185,
+        0,
+        0
+      ],
+      "iso_a2": "PL",
+      "iso_a3": "POL",
+      "display_name": "Poland",
+      "center_lat": 51.916169,
+      "center_lon": 19.13354,
+      "bbox": [
+        14.123923,
+        48.994013,
+        24.143156,
+        54.838324
+      ]
+    },
+    {
+      "id": 186,
+      "rgb": [
+        186,
+        0,
+        0
+      ],
+      "iso_a2": "PR",
+      "iso_a3": "PRI",
+      "display_name": "Puerto Rico",
+      "center_lat": 18.222846,
+      "center_lon": -66.591217,
+      "bbox": [
+        -67.937815,
+        17.922919,
+        -65.244618,
+        18.522773
+      ]
+    },
+    {
+      "id": 187,
+      "rgb": [
+        187,
+        0,
+        0
+      ],
+      "iso_a2": "KP",
+      "iso_a3": "PRK",
+      "display_name": "North Korea",
+      "center_lat": 40.342937,
+      "center_lon": 127.455639,
+      "bbox": [
+        124.211316,
+        37.675605,
+        130.699962,
+        43.01027
+      ]
+    },
+    {
+      "id": 188,
+      "rgb": [
+        188,
+        0,
+        0
+      ],
+      "iso_a2": "PT",
+      "iso_a3": "PRT",
+      "display_name": "Portugal",
+      "center_lat": 37.303875,
+      "center_lon": -8.713843,
+      "bbox": [
+        -31.284901,
+        30.029242,
+        -6.205947,
+        42.15363
+      ]
+    },
+    {
+      "id": 189,
+      "rgb": [
+        189,
+        0,
+        0
+      ],
+      "iso_a2": "PY",
+      "iso_a3": "PRY",
+      "display_name": "Paraguay",
+      "center_lat": -23.436785,
+      "center_lon": -58.447823,
+      "bbox": [
+        -62.650357,
+        -27.586842,
+        -54.245289,
+        -19.286729
+      ]
+    },
+    {
+      "id": 190,
+      "rgb": [
+        190,
+        0,
+        0
+      ],
+      "iso_a2": "PS",
+      "iso_a3": "PSX",
+      "display_name": "Palestine",
+      "center_lat": 31.877045,
+      "center_lon": 34.955016,
+      "bbox": [
+        34.200269,
+        31.211449,
+        35.572536,
+        32.54264
+      ]
+    },
+    {
+      "id": 191,
+      "rgb": [
+        191,
+        0,
+        0
+      ],
+      "iso_a2": "PF",
+      "iso_a3": "PYF",
+      "display_name": "French Polynesia",
+      "center_lat": -17.795668,
+      "center_lon": -140.821181,
+      "bbox": [
+        -154.536977,
+        -27.641209,
+        -134.942983,
+        -7.950128
+      ]
+    },
+    {
+      "id": 192,
+      "rgb": [
+        192,
+        0,
+        0
+      ],
+      "iso_a2": "QA",
+      "iso_a3": "QAT",
+      "display_name": "Qatar",
+      "center_lat": 25.359987,
+      "center_lon": 51.183767,
+      "bbox": [
+        50.750987,
+        24.559872,
+        51.616547,
+        26.160102
+      ]
+    },
+    {
+      "id": 193,
+      "rgb": [
+        193,
+        0,
+        0
+      ],
+      "iso_a2": "RO",
+      "iso_a3": "ROU",
+      "display_name": "Romania",
+      "center_lat": 45.962441,
+      "center_lon": 24.97119,
+      "bbox": [
+        20.242826,
+        43.65005,
+        29.699555,
+        48.274832
+      ]
+    },
+    {
+      "id": 194,
+      "rgb": [
+        194,
+        0,
+        0
+      ],
+      "iso_a2": "RU",
+      "iso_a3": "RUS",
+      "display_name": "Russia",
+      "center_lat": 61.525695,
+      "center_lon": 36.0,
+      "bbox": [
+        -180.0,
+        41.192681,
+        180.0,
+        81.85871
+      ]
+    },
+    {
+      "id": 195,
+      "rgb": [
+        195,
+        0,
+        0
+      ],
+      "iso_a2": "RW",
+      "iso_a3": "RWA",
+      "display_name": "Rwanda",
+      "center_lat": -1.942774,
+      "center_lon": 29.872522,
+      "bbox": [
+        28.857236,
+        -2.826855,
+        30.887809,
+        -1.058694
+      ]
+    },
+    {
+      "id": 196,
+      "rgb": [
+        196,
+        0,
+        0
+      ],
+      "iso_a2": "EH",
+      "iso_a3": "SAH",
+      "display_name": "Western Sahara",
+      "center_lat": 24.214189,
+      "center_lon": -12.892727,
+      "bbox": [
+        -17.104644,
+        20.766913,
+        -8.680809,
+        27.661465
+      ]
+    },
+    {
+      "id": 197,
+      "rgb": [
+        197,
+        0,
+        0
+      ],
+      "iso_a2": "SA",
+      "iso_a3": "SAU",
+      "display_name": "Saudi Arabia",
+      "center_lat": 24.246153,
+      "center_lon": 45.105165,
+      "bbox": [
+        34.572765,
+        16.370958,
+        55.637565,
+        32.121348
+      ]
+    },
+    {
+      "id": 198,
+      "rgb": [
+        198,
+        0,
+        0
+      ],
+      "iso_a2": "XX",
+      "iso_a3": "SCR",
+      "display_name": "Scarborough Shoal",
+      "center_lat": 15.152226,
+      "center_lon": 117.753774,
+      "bbox": [
+        117.751856,
+        15.150082,
+        117.755692,
+        15.154369
+      ]
+    },
+    {
+      "id": 199,
+      "rgb": [
+        199,
+        0,
+        0
+      ],
+      "iso_a2": "SD",
+      "iso_a3": "SDN",
+      "display_name": "Sudan",
+      "center_lat": 15.454303,
+      "center_lon": 30.20665,
+      "bbox": [
+        21.809449,
+        8.681642,
+        38.603852,
+        22.226965
+      ]
+    },
+    {
+      "id": 200,
+      "rgb": [
+        200,
+        0,
+        0
+      ],
+      "iso_a2": "SS",
+      "iso_a3": "SDS",
+      "display_name": "South Sudan",
+      "center_lat": 7.853178,
+      "center_lon": 30.021196,
+      "bbox": [
+        24.121556,
+        3.490202,
+        35.920835,
+        12.216155
+      ]
+    },
+    {
+      "id": 201,
+      "rgb": [
+        201,
+        0,
+        0
+      ],
+      "iso_a2": "SN",
+      "iso_a3": "SEN",
+      "display_name": "Senegal",
+      "center_lat": 14.498496,
+      "center_lon": -14.456909,
+      "bbox": [
+        -17.536041,
+        12.305607,
+        -11.377776,
+        16.691385
+      ]
+    },
+    {
+      "id": 202,
+      "rgb": [
+        202,
+        0,
+        0
+      ],
+      "iso_a2": "XX",
+      "iso_a3": "SER",
+      "display_name": "Serranilla Bank",
+      "center_lat": 15.864691,
+      "center_lon": -78.638641,
+      "bbox": [
+        -78.640411,
+        15.862087,
+        -78.636871,
+        15.867296
+      ]
+    },
+    {
+      "id": 203,
+      "rgb": [
+        203,
+        0,
+        0
+      ],
+      "iso_a2": "SG",
+      "iso_a3": "SGP",
+      "display_name": "Singapore",
+      "center_lat": 1.356472,
+      "center_lon": 103.82191,
+      "bbox": [
+        103.640391,
+        1.264309,
+        104.003429,
+        1.448635
+      ]
+    },
+    {
+      "id": 204,
+      "rgb": [
+        204,
+        0,
+        0
+      ],
+      "iso_a2": "GS",
+      "iso_a3": "SGS",
+      "display_name": "South Georgia and the South Sandwich Islands",
+      "center_lat": -54.522459,
+      "center_lon": -36.309871,
+      "bbox": [
+        -38.087026,
+        -59.472752,
+        -26.239329,
+        -53.972426
+      ]
+    },
+    {
+      "id": 205,
+      "rgb": [
+        205,
+        0,
+        0
+      ],
+      "iso_a2": "SH",
+      "iso_a3": "SHN",
+      "display_name": "Saint Helena",
+      "center_lat": -7.877862,
+      "center_lon": -14.417714,
+      "bbox": [
+        -14.417714,
+        -40.397882,
+        -5.65038,
+        -7.877862
+      ]
+    },
+    {
+      "id": 206,
+      "rgb": [
+        206,
+        0,
+        0
+      ],
+      "iso_a2": "SB",
+      "iso_a3": "SLB",
+      "display_name": "Solomon Islands",
+      "center_lat": -9.729783,
+      "center_lon": 161.501028,
+      "bbox": [
+        155.507986,
+        -12.290623,
+        168.825857,
+        -6.599867
+      ]
+    },
+    {
+      "id": 207,
+      "rgb": [
+        207,
+        0,
+        0
+      ],
+      "iso_a2": "SL",
+      "iso_a3": "SLE",
+      "display_name": "Sierra Leone",
+      "center_lat": 8.457713,
+      "center_lon": -11.791666,
+      "bbox": [
+        -13.301096,
+        6.91942,
+        -10.282236,
+        9.996006
+      ]
+    },
+    {
+      "id": 208,
+      "rgb": [
+        208,
+        0,
+        0
+      ],
+      "iso_a2": "SV",
+      "iso_a3": "SLV",
+      "display_name": "El Salvador",
+      "center_lat": 13.802005,
+      "center_lon": -88.903986,
+      "bbox": [
+        -90.114779,
+        13.158637,
+        -87.693194,
+        14.445373
+      ]
+    },
+    {
+      "id": 209,
+      "rgb": [
+        209,
+        0,
+        0
+      ],
+      "iso_a2": "SM",
+      "iso_a3": "SMR",
+      "display_name": "San Marino",
+      "center_lat": 43.937311,
+      "center_lon": 12.43901,
+      "bbox": [
+        12.385629,
+        43.892056,
+        12.492392,
+        43.982567
+      ]
+    },
+    {
+      "id": 210,
+      "rgb": [
+        210,
+        0,
+        0
+      ],
+      "iso_a2": "XX",
+      "iso_a3": "SOL",
+      "display_name": "Somaliland",
+      "center_lat": 9.747722,
+      "center_lon": 45.793179,
+      "bbox": [
+        42.647247,
+        7.996516,
+        48.939112,
+        11.498928
+      ]
+    },
+    {
+      "id": 211,
+      "rgb": [
+        211,
+        0,
+        0
+      ],
+      "iso_a2": "SO",
+      "iso_a3": "SOM",
+      "display_name": "Somalia",
+      "center_lat": 5.146408,
+      "center_lon": 46.191212,
+      "bbox": [
+        40.965385,
+        -1.696303,
+        51.417038,
+        11.989119
+      ]
+    },
+    {
+      "id": 212,
+      "rgb": [
+        212,
+        0,
+        0
+      ],
+      "iso_a2": "XX",
+      "iso_a3": "SPI",
+      "display_name": "Southern Patagonian Ice Field",
+      "center_lat": -49.516356,
+      "center_lon": -73.32273,
+      "bbox": [
+        -73.588036,
+        -49.759959,
+        -73.057424,
+        -49.272754
+      ]
+    },
+    {
+      "id": 213,
+      "rgb": [
+        213,
+        0,
+        0
+      ],
+      "iso_a2": "PM",
+      "iso_a3": "SPM",
+      "display_name": "Saint Pierre and Miquelon",
+      "center_lat": 46.947008,
+      "center_lon": -56.27068,
+      "bbox": [
+        -56.396596,
+        46.752753,
+        -56.144765,
+        47.141262
+      ]
+    },
+    {
+      "id": 214,
+      "rgb": [
+        214,
+        0,
+        0
+      ],
+      "iso_a2": "RS",
+      "iso_a3": "SRB",
+      "display_name": "Serbia",
+      "center_lat": 44.20441,
+      "center_lon": 20.914775,
+      "bbox": [
+        18.844978,
+        42.234945,
+        22.984571,
+        46.173875
+      ]
+    },
+    {
+      "id": 215,
+      "rgb": [
+        215,
+        0,
+        0
+      ],
+      "iso_a2": "ST",
+      "iso_a3": "STP",
+      "display_name": "S\u00e3o Tom\u00e9 and Pr\u00edncipe",
+      "center_lat": 0.526813,
+      "center_lon": 6.661892,
+      "bbox": [
+        6.461681,
+        0.024115,
+        7.462738,
+        1.699774
+      ]
+    },
+    {
+      "id": 216,
+      "rgb": [
+        216,
+        0,
+        0
+      ],
+      "iso_a2": "SR",
+      "iso_a3": "SUR",
+      "display_name": "Suriname",
+      "center_lat": 3.92254,
+      "center_lon": -56.027024,
+      "bbox": [
+        -58.067691,
+        1.833507,
+        -53.986357,
+        6.011574
+      ]
+    },
+    {
+      "id": 217,
+      "rgb": [
+        217,
+        0,
+        0
+      ],
+      "iso_a2": "SK",
+      "iso_a3": "SVK",
+      "display_name": "Slovakia",
+      "center_lat": 48.675893,
+      "center_lon": 19.692059,
+      "bbox": [
+        16.84448,
+        47.750006,
+        22.539637,
+        49.60178
+      ]
+    },
+    {
+      "id": 218,
+      "rgb": [
+        218,
+        0,
+        0
+      ],
+      "iso_a2": "SI",
+      "iso_a3": "SVN",
+      "display_name": "Slovenia",
+      "center_lat": 46.1438,
+      "center_lon": 14.940281,
+      "bbox": [
+        13.365261,
+        45.423637,
+        16.515302,
+        46.863962
+      ]
+    },
+    {
+      "id": 219,
+      "rgb": [
+        219,
+        0,
+        0
+      ],
+      "iso_a2": "SE",
+      "iso_a3": "SWE",
+      "display_name": "Sweden",
+      "center_lat": 62.189517,
+      "center_lon": 16.983027,
+      "bbox": [
+        11.108165,
+        55.342678,
+        24.163414,
+        69.036356
+      ]
+    },
+    {
+      "id": 220,
+      "rgb": [
+        220,
+        0,
+        0
+      ],
+      "iso_a2": "SZ",
+      "iso_a3": "SWZ",
+      "display_name": "Eswatini",
+      "center_lat": -26.526132,
+      "center_lon": 31.450152,
+      "bbox": [
+        30.782906,
+        -27.316264,
+        32.117398,
+        -25.735999
+      ]
+    },
+    {
+      "id": 221,
+      "rgb": [
+        221,
+        0,
+        0
+      ],
+      "iso_a2": "SX",
+      "iso_a3": "SXM",
+      "display_name": "Sint Maarten",
+      "center_lat": 18.040615,
+      "center_lon": -63.068227,
+      "bbox": [
+        -63.118886,
+        18.01911,
+        -63.017569,
+        18.06212
+      ]
+    },
+    {
+      "id": 222,
+      "rgb": [
+        222,
+        0,
+        0
+      ],
+      "iso_a2": "SC",
+      "iso_a3": "SYC",
+      "display_name": "Seychelles",
+      "center_lat": -4.387555,
+      "center_lon": 55.783442,
+      "bbox": [
+        46.207367,
+        -9.755548,
+        56.287446,
+        -3.791111
+      ]
+    },
+    {
+      "id": 223,
+      "rgb": [
+        223,
+        0,
+        0
+      ],
+      "iso_a2": "SY",
+      "iso_a3": "SYR",
+      "display_name": "Syria",
+      "center_lat": 34.818974,
+      "center_lon": 39.050292,
+      "bbox": [
+        35.723399,
+        32.313042,
+        42.377186,
+        37.324906
+      ]
+    },
+    {
+      "id": 224,
+      "rgb": [
+        224,
+        0,
+        0
+      ],
+      "iso_a2": "TC",
+      "iso_a3": "TCA",
+      "display_name": "Turks and Caicos Islands",
+      "center_lat": 21.740107,
+      "center_lon": -71.805104,
+      "bbox": [
+        -72.481313,
+        21.290107,
+        -71.128896,
+        21.959215
+      ]
+    },
+    {
+      "id": 225,
+      "rgb": [
+        225,
+        0,
+        0
+      ],
+      "iso_a2": "TD",
+      "iso_a3": "TCD",
+      "display_name": "Chad",
+      "center_lat": 15.450143,
+      "center_lon": 18.716795,
+      "bbox": [
+        13.449184,
+        7.455567,
+        23.984406,
+        23.44472
+      ]
+    },
+    {
+      "id": 226,
+      "rgb": [
+        226,
+        0,
+        0
+      ],
+      "iso_a2": "TG",
+      "iso_a3": "TGO",
+      "display_name": "Togo",
+      "center_lat": 8.617735,
+      "center_lon": 0.808121,
+      "bbox": [
+        -0.166109,
+        6.100491,
+        1.782351,
+        11.13498
+      ]
+    },
+    {
+      "id": 227,
+      "rgb": [
+        227,
+        0,
+        0
+      ],
+      "iso_a2": "TH",
+      "iso_a3": "THA",
+      "display_name": "Thailand",
+      "center_lat": 13.037448,
+      "center_lon": 101.501199,
+      "bbox": [
+        97.351401,
+        5.62989,
+        105.650998,
+        20.445006
+      ]
+    },
+    {
+      "id": 228,
+      "rgb": [
+        228,
+        0,
+        0
+      ],
+      "iso_a2": "TJ",
+      "iso_a3": "TJK",
+      "display_name": "Tajikistan",
+      "center_lat": 38.859309,
+      "center_lon": 71.253407,
+      "bbox": [
+        67.34269,
+        36.678641,
+        75.164125,
+        41.039977
+      ]
+    },
+    {
+      "id": 229,
+      "rgb": [
+        229,
+        0,
+        0
+      ],
+      "iso_a2": "TM",
+      "iso_a3": "TKM",
+      "display_name": "Turkmenistan",
+      "center_lat": 38.965917,
+      "center_lon": 59.541726,
+      "bbox": [
+        52.437671,
+        35.140647,
+        66.645782,
+        42.791188
+      ]
+    },
+    {
+      "id": 230,
+      "rgb": [
+        230,
+        0,
+        0
+      ],
+      "iso_a2": "TL",
+      "iso_a3": "TLS",
+      "display_name": "East Timor",
+      "center_lat": -8.818126,
+      "center_lon": 125.671641,
+      "bbox": [
+        124.03004,
+        -9.501228,
+        127.313243,
+        -8.135024
+      ]
+    },
+    {
+      "id": 231,
+      "rgb": [
+        231,
+        0,
+        0
+      ],
+      "iso_a2": "TO",
+      "iso_a3": "TON",
+      "display_name": "Tonga",
+      "center_lat": -19.627081,
+      "center_lon": -175.066782,
+      "bbox": [
+        -176.219309,
+        -22.3388,
+        -173.914255,
+        -15.559503
+      ]
+    },
+    {
+      "id": 232,
+      "rgb": [
+        232,
+        0,
+        0
+      ],
+      "iso_a2": "TT",
+      "iso_a3": "TTO",
+      "display_name": "Trinidad and Tobago",
+      "center_lat": 10.69656,
+      "center_lon": -61.225392,
+      "bbox": [
+        -61.9287,
+        10.04206,
+        -60.522084,
+        11.35106
+      ]
+    },
+    {
+      "id": 233,
+      "rgb": [
+        233,
+        0,
+        0
+      ],
+      "iso_a2": "TN",
+      "iso_a3": "TUN",
+      "display_name": "Tunisia",
+      "center_lat": 33.787053,
+      "center_lon": 9.521982,
+      "bbox": [
+        7.479832,
+        30.228905,
+        11.564131,
+        37.345201
+      ]
+    },
+    {
+      "id": 234,
+      "rgb": [
+        234,
+        0,
+        0
+      ],
+      "iso_a2": "TR",
+      "iso_a3": "TUR",
+      "display_name": "Turkey",
+      "center_lat": 38.95928,
+      "center_lon": 35.235126,
+      "bbox": [
+        25.663259,
+        35.819779,
+        44.806993,
+        42.098782
+      ]
+    },
+    {
+      "id": 235,
+      "rgb": [
+        235,
+        0,
+        0
+      ],
+      "iso_a2": "TV",
+      "iso_a3": "TUV",
+      "display_name": "Tuvalu",
+      "center_lat": -7.17477,
+      "center_lon": 177.070628,
+      "bbox": [
+        176.125255,
+        -9.420668,
+        179.906749,
+        -5.677504
+      ]
+    },
+    {
+      "id": 236,
+      "rgb": [
+        236,
+        0,
+        0
+      ],
+      "iso_a2": "TW",
+      "iso_a3": "TWN",
+      "display_name": "Taiwan",
+      "center_lat": 23.596015,
+      "center_lon": 120.142467,
+      "bbox": [
+        118.279552,
+        21.904608,
+        122.005382,
+        25.287421
+      ]
+    },
+    {
+      "id": 237,
+      "rgb": [
+        237,
+        0,
+        0
+      ],
+      "iso_a2": "TZ",
+      "iso_a3": "TZA",
+      "display_name": "Tanzania",
+      "center_lat": -6.358551,
+      "center_lon": 34.885212,
+      "bbox": [
+        29.321032,
+        -11.731272,
+        40.449392,
+        -0.98583
+      ]
+    },
+    {
+      "id": 238,
+      "rgb": [
+        238,
+        0,
+        0
+      ],
+      "iso_a2": "UG",
+      "iso_a3": "UGA",
+      "display_name": "Uganda",
+      "center_lat": 1.372243,
+      "center_lon": 32.277466,
+      "bbox": [
+        29.54846,
+        -1.475206,
+        35.006473,
+        4.219692
+      ]
+    },
+    {
+      "id": 239,
+      "rgb": [
+        239,
+        0,
+        0
+      ],
+      "iso_a2": "UA",
+      "iso_a3": "UKR",
+      "display_name": "Ukraine",
+      "center_lat": 48.791259,
+      "center_lon": 31.146191,
+      "bbox": [
+        22.13284,
+        45.213568,
+        40.159543,
+        52.368949
+      ]
+    },
+    {
+      "id": 240,
+      "rgb": [
+        240,
+        0,
+        0
+      ],
+      "iso_a2": "UM",
+      "iso_a3": "UMI",
+      "display_name": "United States Minor Outlying Islands",
+      "center_lat": 13.913275,
+      "center_lon": -5.368621,
+      "bbox": [
+        -177.389597,
+        -0.388767,
+        166.652354,
+        28.215318
+      ]
+    },
+    {
+      "id": 241,
+      "rgb": [
+        241,
+        0,
+        0
+      ],
+      "iso_a2": "UY",
+      "iso_a3": "URY",
+      "display_name": "Uruguay",
+      "center_lat": -32.535136,
+      "center_lon": -55.775099,
+      "bbox": [
+        -58.439361,
+        -34.973403,
+        -53.110836,
+        -30.09687
+      ]
+    },
+    {
+      "id": 242,
+      "rgb": [
+        242,
+        0,
+        0
+      ],
+      "iso_a2": "US",
+      "iso_a3": "USA",
+      "display_name": "United States of America",
+      "center_lat": 45.15931,
+      "center_lon": -71.466172,
+      "bbox": [
+        -179.143503,
+        18.906117,
+        179.780935,
+        71.412502
+      ]
+    },
+    {
+      "id": 243,
+      "rgb": [
+        243,
+        0,
+        0
+      ],
+      "iso_a2": "XX",
+      "iso_a3": "USG",
+      "display_name": "Guantanamo Bay Naval Base",
+      "center_lat": 19.931363,
+      "center_lon": -75.163905,
+      "bbox": [
+        -75.232859,
+        19.891142,
+        -75.09495,
+        19.971584
+      ]
+    },
+    {
+      "id": 244,
+      "rgb": [
+        244,
+        0,
+        0
+      ],
+      "iso_a2": "UZ",
+      "iso_a3": "UZB",
+      "display_name": "Uzbekistan",
+      "center_lat": 41.371933,
+      "center_lon": 64.56224,
+      "bbox": [
+        55.975839,
+        37.185147,
+        73.148641,
+        45.558719
+      ]
+    },
+    {
+      "id": 245,
+      "rgb": [
+        245,
+        0,
+        0
+      ],
+      "iso_a2": "VA",
+      "iso_a3": "VAT",
+      "display_name": "Vatican City",
+      "center_lat": 41.952752,
+      "center_lon": 12.452714,
+      "bbox": [
+        12.452714,
+        41.902752,
+        12.454035,
+        41.903915
+      ]
+    },
+    {
+      "id": 246,
+      "rgb": [
+        246,
+        0,
+        0
+      ],
+      "iso_a2": "VC",
+      "iso_a3": "VCT",
+      "display_name": "Saint Vincent and the Grenadines",
+      "center_lat": 12.98515,
+      "center_lon": -61.259828,
+      "bbox": [
+        -61.459828,
+        12.58515,
+        -61.123931,
+        13.380764
+      ]
+    },
+    {
+      "id": 247,
+      "rgb": [
+        247,
+        0,
+        0
+      ],
+      "iso_a2": "VE",
+      "iso_a3": "VEN",
+      "display_name": "Venezuela",
+      "center_lat": 8.176132,
+      "center_lon": -66.603372,
+      "bbox": [
+        -73.391149,
+        0.649315,
+        -59.815595,
+        15.702948
+      ]
+    },
+    {
+      "id": 248,
+      "rgb": [
+        248,
+        0,
+        0
+      ],
+      "iso_a2": "VG",
+      "iso_a3": "VGB",
+      "display_name": "British Virgin Islands",
+      "center_lat": 18.540452,
+      "center_lon": -64.522369,
+      "bbox": [
+        -64.773997,
+        18.334662,
+        -64.270741,
+        18.746243
+      ]
+    },
+    {
+      "id": 249,
+      "rgb": [
+        249,
+        0,
+        0
+      ],
+      "iso_a2": "VI",
+      "iso_a3": "VIR",
+      "display_name": "United States Virgin Islands",
+      "center_lat": 17.832766,
+      "center_lon": -64.791493,
+      "bbox": [
+        -65.041493,
+        17.682766,
+        -64.559397,
+        18.386599
+      ]
+    },
+    {
+      "id": 250,
+      "rgb": [
+        250,
+        0,
+        0
+      ],
+      "iso_a2": "VN",
+      "iso_a3": "VNM",
+      "display_name": "Vietnam",
+      "center_lat": 15.965927,
+      "center_lon": 107.266292,
+      "bbox": [
+        102.118655,
+        8.565579,
+        109.472423,
+        23.366275
+      ]
+    },
+    {
+      "id": 251,
+      "rgb": [
+        251,
+        0,
+        0
+      ],
+      "iso_a2": "VU",
+      "iso_a3": "VUT",
+      "display_name": "Vanuatu",
+      "center_lat": -16.65899,
+      "center_lon": 168.209727,
+      "bbox": [
+        166.520518,
+        -20.253106,
+        169.898936,
+        -13.064874
+      ]
+    },
+    {
+      "id": 252,
+      "rgb": [
+        252,
+        0,
+        0
+      ],
+      "iso_a2": "WF",
+      "iso_a3": "WLF",
+      "display_name": "Wallis and Futuna",
+      "center_lat": -13.319968,
+      "center_lon": -176.228607,
+      "bbox": [
+        -178.18574,
+        -14.319431,
+        -176.1256,
+        -13.208917
+      ]
+    },
+    {
+      "id": 253,
+      "rgb": [
+        253,
+        0,
+        0
+      ],
+      "iso_a2": "XX",
+      "iso_a3": "WSB",
+      "display_name": "Akrotiri Sovereign Base Area",
+      "center_lat": 34.634749,
+      "center_lon": 32.895193,
+      "bbox": [
+        32.760102,
+        34.568549,
+        33.030284,
+        34.700948
+      ]
+    },
+    {
+      "id": 254,
+      "rgb": [
+        254,
+        0,
+        0
+      ],
+      "iso_a2": "WS",
+      "iso_a3": "WSM",
+      "display_name": "Samoa",
+      "center_lat": -13.757826,
+      "center_lon": -172.110137,
+      "bbox": [
+        -172.782582,
+        -14.05283,
+        -171.437693,
+        -13.462823
+      ]
+    },
+    {
+      "id": 255,
+      "rgb": [
+        255,
+        0,
+        0
+      ],
+      "iso_a2": "YE",
+      "iso_a3": "YEM",
+      "display_name": "Yemen",
+      "center_lat": 15.553541,
+      "center_lon": 48.54302,
+      "bbox": [
+        42.545746,
+        12.111444,
+        54.540294,
+        18.995638
+      ]
+    },
+    {
+      "id": 256,
+      "rgb": [
+        0,
+        1,
+        0
+      ],
+      "iso_a2": "ZA",
+      "iso_a3": "ZAF",
+      "display_name": "South Africa",
+      "center_lat": -33.304137,
+      "center_lon": 27.223888,
+      "bbox": [
+        16.469981,
+        -46.965753,
+        37.977794,
+        -22.126452
+      ]
+    },
+    {
+      "id": 257,
+      "rgb": [
+        1,
+        1,
+        0
+      ],
+      "iso_a2": "ZM",
+      "iso_a3": "ZMB",
+      "display_name": "Zambia",
+      "center_lat": -13.131678,
+      "center_lon": 27.82704,
+      "bbox": [
+        21.979878,
+        -18.069232,
+        33.674203,
+        -8.194124
+      ]
+    },
+    {
+      "id": 258,
+      "rgb": [
+        2,
+        1,
+        0
+      ],
+      "iso_a2": "ZW",
+      "iso_a3": "ZWE",
+      "display_name": "Zimbabwe",
+      "center_lat": -19.006074,
+      "center_lon": 29.131069,
+      "bbox": [
+        25.21937,
+        -22.39734,
+        33.042768,
+        -15.614808
+      ]
+    }
+  ]
+}

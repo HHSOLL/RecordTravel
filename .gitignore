@@ -1,0 +1,37 @@
+.DS_Store
+.playwright-cli/
+.local/
+output/
+
+# Editor / IDE
+.idea/
+.vscode/
+*.iml
+
+# Flutter / Dart
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.pub/
+**/.pub-cache/
+**/build/
+**/doc/api/
+
+# iOS generated
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+
+# Android generated
+**/android/.gradle/
+**/android/local.properties
+
+# macOS / SwiftPM
+**/.swiftpm/
+
+# Logs and temporary files
+*.log
+*.pyc
+*.swp
