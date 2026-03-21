@@ -2,6 +2,7 @@ import 'package:core_data/core_data.dart';
 import 'package:core_domain/core_domain.dart';
 import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AccountScreen extends ConsumerStatefulWidget {
@@ -40,6 +41,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final sync = ref.watch(syncSnapshotProvider);
     final session = ref.watch(sessionSnapshotProvider);
     final sessionRepository = ref.watch(sessionRepositoryProvider);
+    final theme = Theme.of(context);
 
     return AtlasBackground(
       child: SafeArea(
@@ -47,24 +49,104 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
           children: [
-            const AtlasSectionHeader(
-              title: 'Profile & sync',
-              subtitle:
-                  'A production-grade app still needs clear account ownership, recoverable sessions, and calm sync feedback.',
+            AtlasHeroPanel(
+              eyebrow: 'Profile & sync',
+              title: session.isSignedIn
+                  ? 'Your atlas should feel owned, recoverable, and calm.'
+                  : 'Account access should stay optional until you need cross-device sync.',
+              message: session.isSignedIn
+                  ? 'This screen is the trust layer: who owns the data, what is waiting to sync, and what needs attention next.'
+                  : 'You can keep writing locally first. Sign in only when you want restore, backup, and multi-device continuity.',
+              trailing: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  AtlasStatusPill(
+                    label: sync.bannerTitle,
+                    color: _syncTone(sync.severity),
+                    icon: Icons.sync_rounded,
+                  ),
+                  const SizedBox(height: 16),
+                  AtlasOrbitalGraphic(
+                    size: 92,
+                    glowColor: _syncTone(sync.severity),
+                  ),
+                ],
+              ),
+              metrics: [
+                AtlasMiniMetric(
+                  label: 'Pending changes',
+                  value: '${sync.pendingChanges}',
+                  icon: Icons.compare_arrows_rounded,
+                ),
+                AtlasMiniMetric(
+                  label: 'Uploads',
+                  value: '${sync.pendingUploads}',
+                  icon: Icons.cloud_upload_rounded,
+                ),
+                AtlasMiniMetric(
+                  label: 'Last sync',
+                  value: _syncMetric(sync),
+                  icon: Icons.schedule_rounded,
+                ),
+              ],
             ),
             const SizedBox(height: 20),
             AtlasPanel(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const CircleAvatar(
-                      child: Icon(Icons.person_rounded),
+                  AtlasSectionHeader(
+                    title: 'Identity',
+                    subtitle: session.isSignedIn
+                        ? 'The signed-in account is the owner of synced memories and uploads.'
+                        : 'Local-first mode is active. Remote account ownership is not required yet.',
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF13253B),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFF21405F)),
                     ),
-                    title: Text(session.user.displayName),
-                    subtitle: Text(
-                      '${session.user.email}\n${session.user.homeBase}',
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const CircleAvatar(
+                          radius: 24,
+                          child: Icon(Icons.person_rounded),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                session.user.displayName,
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                session.user.email,
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                session.user.homeBase,
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                        AtlasStatusPill(
+                          label: session.isSignedIn
+                              ? 'Signed in'
+                              : 'Local only',
+                          color: session.isSignedIn
+                              ? const Color(0xFF67E2B7)
+                              : const Color(0xFFFFD37A),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -85,6 +167,21 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      AtlasMetricChip(
+                        label: 'Pending changes',
+                        value: '${sync.pendingChanges}',
+                      ),
+                      AtlasMetricChip(
+                        label: 'Pending uploads',
+                        value: '${sync.pendingUploads}',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                   if (session.isSignedIn) ...[
                     Text(
                       'Session restore is automatic once Supabase auth is configured. Sign out here only when you intentionally want to clear the local session.',
@@ -100,7 +197,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                               ? widget.onSyncNow
                               : null,
                           icon: const Icon(Icons.sync_rounded),
-                          label: const Text('Sync now'),
+                          label: const Text('Run sync now'),
                         ),
                         OutlinedButton.icon(
                           onPressed: _isSubmitting ? null : _handleSignOut,
@@ -135,7 +232,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            const AtlasSectionHeader(title: 'Offline behavior'),
+            const AtlasSectionHeader(
+              title: 'How this stays calm offline',
+              subtitle:
+                  'A premium travel app should explain resilience without exposing backend mechanics.',
+            ),
             const SizedBox(height: 12),
             const AtlasPanel(
               child: Column(
@@ -148,6 +249,28 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   ),
                 ],
               ),
+            ),
+            const SizedBox(height: 20),
+            AtlasSectionHeader(
+              title: 'Recommended next step',
+              subtitle: session.isSignedIn
+                  ? 'Use this area for explicit recovery actions only when something needs attention.'
+                  : 'Keep local mode if you are still shaping the product. Connect remote auth later.',
+            ),
+            const SizedBox(height: 12),
+            AtlasActionTile(
+              icon: session.isSignedIn
+                  ? Icons.verified_user_rounded
+                  : Icons.lock_outline_rounded,
+              title: session.isSignedIn
+                  ? 'Account is ready'
+                  : 'Remote auth is not required yet',
+              subtitle: session.isSignedIn
+                  ? 'Your next action should be writing and importing, not babysitting sync.'
+                  : 'You can continue using the app locally until shared sync is worth turning on.',
+              onTap: session.backendProfile.remoteSyncEnabled
+                  ? widget.onSyncNow
+                  : null,
             ),
           ],
         ),
@@ -298,3 +421,6 @@ Color _syncTone(SyncSeverity severity) => switch (severity) {
   SyncSeverity.pending => const Color(0xFFFFD37A),
   SyncSeverity.attention => const Color(0xFFFF8B8B),
 };
+
+String _syncMetric(SyncSnapshot sync) =>
+    sync.lastSyncedAt == null ? 'Waiting' : formatShortDate(sync.lastSyncedAt!);

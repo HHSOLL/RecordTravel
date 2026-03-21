@@ -1,15 +1,13 @@
+import 'dart:ui' as ui;
+
 import 'package:core_data/core_data.dart';
-import 'package:core_domain/core_domain.dart';
 import 'package:core_navigation/core_navigation.dart';
 import 'package:core_ui/core_ui.dart';
-import 'package:feature_account/feature_account.dart';
-import 'package:feature_atlas_home/feature_atlas_home.dart';
-import 'package:feature_journal/feature_journal.dart';
-import 'package:feature_places/feature_places.dart';
-import 'package:feature_search/feature_search.dart';
-import 'package:feature_timeline/feature_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:feature_record/feature_record.dart';
+
+import '../app/app_preferences.dart';
 
 class MobileAppShell extends ConsumerStatefulWidget {
   const MobileAppShell({super.key});
@@ -23,162 +21,197 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell> {
 
   @override
   Widget build(BuildContext context) {
-    final sync = ref.watch(syncSnapshotProvider);
-    final pages = <Widget>[
-      AtlasHomeScreen(
-        onOpenTrip: _openTrip,
-        onOpenCountry: _openCountry,
-        onOpenCity: _openCity,
-        onOpenJournal: _openJournalHub,
-        onImportPhotos: _openPhotoImport,
-      ),
-      TimelineScreen(
-        onOpenTrip: _openTrip,
-        onOpenCity: _openCity,
-        onComposeEntry: _openJournalComposer,
-        onImportPhotos: _openPhotoImport,
-      ),
-      SearchScreen(
-        onOpenTrip: _openTrip,
-        onOpenCountry: _openCountry,
-        onOpenCity: _openCity,
-      ),
-      AccountScreen(onSyncNow: _syncNow),
-    ];
+    final prefs = ref.watch(appPreferencesProvider);
+    final palette = context.atlasPalette;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          IndexedStack(index: _currentTab.index, children: pages),
-          Positioned(
-            left: 20,
-            right: 20,
-            bottom: 92,
-            child: IgnorePointer(
-              ignoring: true,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 180),
-                opacity: sync.needsAttention ? 1 : 0,
-                child: SyncBanner(
-                  title: sync.bannerTitle,
-                  message: sync.bannerMessage,
-                  tone: _syncTone(sync.severity),
+      body: _buildCurrentPage(prefs),
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.only(left: 24, right: 24, bottom: 18),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: [
+                palette.isLight
+                    ? const Color(0xFFF5F5F4)
+                    : const Color(0xFF0A0A0A),
+                (palette.isLight
+                        ? const Color(0xFFF5F5F4)
+                        : const Color(0xFF0A0A0A))
+                    .withValues(alpha: 0),
+              ],
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(0, 14, 0, 6),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: BackdropFilter(
+                filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                child: Container(
+                  height: 68,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  decoration: BoxDecoration(
+                    color: palette.isLight
+                        ? Colors.white.withValues(alpha: 0.9)
+                        : const Color(0xFF292524).withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: palette.isLight
+                          ? const Color(0xFFE7E5E4)
+                          : Colors.white.withValues(alpha: 0.10),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          alpha: palette.isLight ? 0.14 : 0.28,
+                        ),
+                        blurRadius: 26,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _NavButton(
+                        icon: Icons.public_rounded,
+                        isActive: _currentTab == AppTab.home,
+                        onTap: () => setState(() => _currentTab = AppTab.home),
+                      ),
+                      _NavButton(
+                        icon: Icons.map_rounded,
+                        isActive: _currentTab == AppTab.archive,
+                        onTap: () =>
+                            setState(() => _currentTab = AppTab.archive),
+                      ),
+                      GestureDetector(
+                        onTap: _openCreateTrip,
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: palette.isLight
+                                ? const Color(0xFFF59E0B)
+                                : const Color(0xFFFBBF24),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color:
+                                    (palette.isLight
+                                            ? const Color(0xFFF59E0B)
+                                            : const Color(0xFFFBBF24))
+                                        .withValues(alpha: 0.40),
+                                blurRadius: 20,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.add_rounded,
+                            color: palette.isLight
+                                ? Colors.white
+                                : const Color(0xFF1C1917),
+                            size: 28,
+                          ),
+                        ),
+                      ),
+                      _NavButton(
+                        icon: Icons.calendar_month_rounded,
+                        isActive: _currentTab == AppTab.planner,
+                        onTap: () =>
+                            setState(() => _currentTab = AppTab.planner),
+                      ),
+                      _NavButton(
+                        icon: Icons.person_rounded,
+                        isActive: _currentTab == AppTab.profile,
+                        onTap: () =>
+                            setState(() => _currentTab = AppTab.profile),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showCreateMenu,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Capture'),
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentTab.index,
-        onDestinationSelected: (index) =>
-            setState(() => _currentTab = AppTab.values[index]),
-        destinations: [
-          for (final tab in AppTab.values)
-            NavigationDestination(icon: Icon(tab.icon), label: tab.label),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _showCreateMenu() async {
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return AtlasPanel(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.edit_note_rounded),
-                title: const Text('Write memory'),
-                subtitle: const Text('Quick note with local-first draft save'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _openJournalComposer();
-                },
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.add_photo_alternate_outlined),
-                title: const Text('Import photos'),
-                subtitle: const Text(
-                  'Use platform metadata extraction, then confirm inferred place',
-                ),
-                onTap: () async {
-                  Navigator.of(context).pop();
-                  await _openPhotoImport();
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _openTrip(String tripId) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => TripDetailScreen(
-          tripId: tripId,
-          onOpenCity: _openCity,
-          onComposeEntry: _openJournalComposer,
-          onImportPhotos: _openPhotoImport,
         ),
       ),
     );
   }
 
-  void _openCountry(String countryCode) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => CountryDetailScreen(
-          countryCode: countryCode,
-          onOpenCity: _openCity,
+  Widget _buildCurrentPage(AppPreferencesController prefs) =>
+      switch (_currentTab) {
+        AppTab.home => RecordHomeScreen(
+          isDarkMode: Theme.of(context).brightness == Brightness.dark,
+          onOpenProfile: () {
+            setState(() => _currentTab = AppTab.profile);
+          },
         ),
-      ),
+        AppTab.planner => const RecordPlannerScreen(),
+        AppTab.archive => const RecordArchiveScreen(),
+        AppTab.profile => RecordProfileScreen(
+          isDarkMode: Theme.of(context).brightness == Brightness.dark,
+          languageCode: prefs.locale.languageCode,
+          onLanguageChanged: (languageCode) {
+            ref.read(appPreferencesProvider).setLanguageCode(languageCode);
+          },
+          onSignOut: () {
+            ref.read(sessionRepositoryProvider).signOut();
+          },
+        ),
+      };
+
+  void _openCreateTrip() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const RecordCreateTripScreen()),
     );
-  }
-
-  void _openCity(String cityKey) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => CityDetailScreen(cityKey: cityKey)),
-    );
-  }
-
-  void _openJournalHub() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => JournalHubScreen(onOpenCity: _openCity),
-      ),
-    );
-  }
-
-  void _openJournalComposer() {
-    showJournalComposerSheet(context, ref);
-  }
-
-  Future<void> _openPhotoImport() {
-    return showPhotoImportSheet(context, ref);
-  }
-
-  void _syncNow() {
-    ref.read(travelAppControllerProvider.notifier).markSyncRequested();
   }
 }
 
-Color _syncTone(SyncSeverity severity) => switch (severity) {
-  SyncSeverity.synced => const Color(0xFF67E2B7),
-  SyncSeverity.syncing => const Color(0xFF8DEBFF),
-  SyncSeverity.pending => const Color(0xFFFFD37A),
-  SyncSeverity.attention => const Color(0xFFFF8B8B),
-};
+class _NavButton extends StatelessWidget {
+  const _NavButton({
+    required this.icon,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.atlasPalette;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: isActive
+            ? BoxDecoration(
+                color: palette.isLight
+                    ? const Color(0xFFF5F5F4)
+                    : Colors.white.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(999),
+              )
+            : null,
+        child: Center(
+          child: Icon(
+            icon,
+            size: 24,
+            color: isActive
+                ? Theme.of(context).colorScheme.onSurface
+                : palette.isLight
+                ? const Color(0xFFA8A29E)
+                : Colors.white.withValues(alpha: 0.50),
+          ),
+        ),
+      ),
+    );
+  }
+}

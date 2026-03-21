@@ -2,6 +2,7 @@ import 'package:core_data/core_data.dart';
 import 'package:core_domain/core_domain.dart';
 import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
@@ -48,6 +49,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               title: 'Places, trips, and memories should feel like one index.',
               message:
                   'Search stays useful only if it helps you jump into the right layer fast: trip, place, or memory.',
+              trailing: const AtlasOrbitalGraphic(size: 92),
               metrics: [
                 AtlasMiniMetric(
                   label: 'Trips',
@@ -70,13 +72,31 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _controller,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search_rounded),
-                hintText: 'Search places, trips, or memories',
+            ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: BackdropFilter(
+                filter: ui.ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                child: TextField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.search_rounded, color: Colors.white70),
+                    hintText: 'Search places, trips, or memories',
+                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.08),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      borderSide: BorderSide(color: Colors.white.withOpacity(0.15)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      borderSide: BorderSide(color: Colors.white.withOpacity(0.15)),
+                    ),
+                  ),
+                  onChanged: (_) => setState(() {}),
+                  style: const TextStyle(color: Colors.white),
+                ),
               ),
-              onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: 16),
             Wrap(

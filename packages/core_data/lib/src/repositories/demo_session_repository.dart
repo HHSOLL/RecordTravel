@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 
 import '../contracts/session_repository.dart';
 
-class DemoSessionRepository extends ChangeNotifier implements SessionRepository {
+class DemoSessionRepository extends ChangeNotifier
+    implements SessionRepository {
   DemoSessionRepository({required BackendProfile backendProfile})
     : _backendProfile = backendProfile;
 

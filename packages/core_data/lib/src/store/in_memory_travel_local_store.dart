@@ -60,6 +60,38 @@ class InMemoryTravelLocalStore extends TravelLocalStore {
   TravelAppState get snapshot => _snapshot;
 
   @override
+  Future<void> upsertTrip(TripSummary trip) async {
+    final trips = [..._snapshot.trips];
+    final index = trips.indexWhere((item) => item.id == trip.id);
+    if (index == -1) {
+      trips.add(trip);
+    } else {
+      trips[index] = trip;
+    }
+    _snapshot = _snapshot.copyWith(trips: trips);
+    _outbox[_outboxId(OutboxOperation.upsertTrip, trip.id)] = SyncOutboxItem(
+      id: _outboxId(OutboxOperation.upsertTrip, trip.id),
+      operation: OutboxOperation.upsertTrip,
+      entityId: trip.id,
+      status: QueueDeliveryStatus.pending,
+      attemptCount: 0,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    _setBanner(
+      const SyncSnapshot(
+        severity: SyncSeverity.pending,
+        bannerTitle: 'Trip saved locally',
+        bannerMessage:
+            'Your trip plan is available right away on this device and can sync later.',
+        pendingChanges: 0,
+        pendingUploads: 0,
+      ),
+    );
+    notifyListeners();
+  }
+
+  @override
   Future<void> addJournalEntry(JournalEntry entry) async {
     final nextEntries = [..._snapshot.entries, entry];
     _snapshot = _snapshot.copyWith(

@@ -9,10 +9,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^3.2.1
   image_picker: ^1.2.1
   native_exif: ^0.7.0
+  shared_preferences: ^2.5.3
   sqlite3_flutter_libs: ^0.5.39
   supabase_flutter: ^2.10.2
   core_navigation:
@@ -35,6 +38,8 @@ dependencies:
     path: ../../packages/feature_search
   feature_account:
     path: ../../packages/feature_account
+  feature_record:
+    path: ../../packages/feature_record
 
 dev_dependencies:
   flutter_test:
@@ -43,3 +48,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/globe/earth-blue-marble.jpg
+    - assets/globe/earth-night.jpg
+    - assets/globe/earth-topology.png
+    - assets/globe/earth_day_albedo_v1_4096.webp
+    - assets/globe/earth_borders_overlay_v1_4096.png

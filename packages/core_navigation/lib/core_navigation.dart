@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 
-enum AppTab { home, timeline, search, profile }
+enum AppTab { home, planner, archive, profile }
 
 extension AppTabMeta on AppTab {
   String get label => switch (this) {
         AppTab.home => 'Home',
-        AppTab.timeline => 'Timeline',
-        AppTab.search => 'Search',
+        AppTab.planner => 'Planner',
+        AppTab.archive => 'Archive',
         AppTab.profile => 'Profile',
       };
 
   IconData get icon => switch (this) {
-        AppTab.home => Icons.home_rounded,
-        AppTab.timeline => Icons.auto_stories_rounded,
-        AppTab.search => Icons.travel_explore_rounded,
+        AppTab.home => Icons.language_rounded,
+        AppTab.planner => Icons.calendar_month_rounded,
+        AppTab.archive => Icons.auto_awesome_motion_rounded,
         AppTab.profile => Icons.person_rounded,
       };
 }

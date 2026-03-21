@@ -86,8 +86,13 @@ final atlasHomeSnapshotProvider = Provider<AtlasHomeSnapshot>((ref) {
   final sortedTrips = [...state.trips]
     ..sort((a, b) => b.startDate.compareTo(a.startDate));
   final countries = _buildCountrySummaries(state.entries);
+  final cityCount = state.entries
+      .map((entry) => entry.place.cityKey)
+      .toSet()
+      .length;
   return AtlasHomeSnapshot(
     visitedCountries: countries.length,
+    visitedCities: cityCount,
     totalTrips: state.trips.length,
     pendingUploads: state.syncSnapshot.pendingUploads,
     syncSnapshot: state.syncSnapshot,
@@ -282,6 +287,29 @@ class TravelAppController extends Notifier<TravelAppState> {
 
   Future<List<PhotoImportDraft>> preparePhotoImportDrafts({String? tripId}) {
     return _photoImportService.prepareDrafts(tripId: tripId);
+  }
+
+  Future<void> createTrip({
+    required String title,
+    required String subtitle,
+    required DateTime startDate,
+    required DateTime endDate,
+    required PlaceRef heroPlace,
+    String? coverHint,
+  }) async {
+    final trip = TripSummary(
+      id: 'trip-${DateTime.now().microsecondsSinceEpoch}',
+      title: title,
+      subtitle: subtitle,
+      startDate: startDate,
+      endDate: endDate,
+      heroPlace: heroPlace,
+      coverHint: coverHint ?? subtitle,
+      memoryCount: 0,
+      photoCount: 0,
+      countryCount: 1,
+    );
+    await _store.upsertTrip(trip);
   }
 
   Future<void> createJournalEntry({

@@ -4,6 +4,7 @@ import 'package:core_domain/core_domain.dart';
 abstract class TravelLocalStore extends ChangeNotifier {
   TravelAppState get snapshot;
 
+  Future<void> upsertTrip(TripSummary trip);
   Future<void> addJournalEntry(JournalEntry entry);
   Future<void> importPhotos({
     required List<PhotoAsset> photos,

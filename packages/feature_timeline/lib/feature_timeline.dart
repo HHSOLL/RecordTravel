@@ -2,6 +2,7 @@ import 'package:core_data/core_data.dart';
 import 'package:core_domain/core_domain.dart';
 import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum _TimelineFilter { all, notes, photos }
@@ -56,6 +57,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
                     title: 'Playback should stay readable, not noisy.',
                     message:
                         'This is where day-by-day travel recall becomes useful. Keep the chronology calm and the actions close.',
+                    trailing: const AtlasOrbitalGraphic(size: 100),
                     metrics: [
                       AtlasMiniMetric(
                         label: 'Entries',

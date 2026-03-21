@@ -285,6 +285,7 @@ class SyncSnapshot {
 class AtlasHomeSnapshot {
   const AtlasHomeSnapshot({
     required this.visitedCountries,
+    required this.visitedCities,
     required this.totalTrips,
     required this.pendingUploads,
     required this.syncSnapshot,
@@ -294,6 +295,7 @@ class AtlasHomeSnapshot {
   });
 
   final int visitedCountries;
+  final int visitedCities;
   final int totalTrips;
   final int pendingUploads;
   final SyncSnapshot syncSnapshot;

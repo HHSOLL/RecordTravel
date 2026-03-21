@@ -25,6 +25,44 @@ class DriftTravelLocalStore extends ChangeNotifier implements TravelLocalStore {
   TravelAppState get snapshot => _snapshot;
 
   @override
+  Future<void> upsertTrip(TripSummary trip) async {
+    await _database.transaction(() async {
+      await _database
+          .into(_database.trips)
+          .insertOnConflictUpdate(
+            TripsCompanion.insert(
+              id: trip.id,
+              title: trip.title,
+              subtitle: trip.subtitle,
+              startDate: trip.startDate,
+              endDate: trip.endDate,
+              heroCountryCode: trip.heroPlace.countryCode,
+              heroCountryName: trip.heroPlace.countryName,
+              heroCityName: trip.heroPlace.cityName,
+              heroLatitude: Value(trip.heroPlace.latitude),
+              heroLongitude: Value(trip.heroPlace.longitude),
+              coverHint: trip.coverHint,
+              memoryCount: trip.memoryCount,
+              photoCount: trip.photoCount,
+              countryCount: trip.countryCount,
+            ),
+          );
+      await _enqueueTripSync(trip.id);
+      await _applySnapshotMessage(
+        const SyncSnapshot(
+          severity: SyncSeverity.pending,
+          bannerTitle: 'Trip saved locally',
+          bannerMessage:
+              'Your trip plan is available right away on this device and can sync later.',
+          pendingChanges: 0,
+          pendingUploads: 0,
+        ),
+      );
+    });
+    await _reloadSnapshot();
+  }
+
+  @override
   Future<void> dispose() async {
     await _database.close();
     super.dispose();
@@ -275,7 +313,7 @@ class DriftTravelLocalStore extends ChangeNotifier implements TravelLocalStore {
         _database.pendingMediaUploads,
       )..where((tbl) => tbl.id.equals(taskId))).write(
         PendingMediaUploadsCompanion(
-            status: Value(QueueDeliveryStatus.failed.name),
+          status: Value(QueueDeliveryStatus.failed.name),
           lastError: Value(error),
           updatedAt: Value(DateTime.now()),
         ),

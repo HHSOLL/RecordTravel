@@ -45,6 +45,10 @@ class _JournalHubScreenState extends ConsumerState<JournalHubScreen> {
                     'Your journal should read like a collection, not a dump.',
                 message:
                     'This screen is for re-reading, scanning, and deciding what is worth keeping visible later.',
+                trailing: const AtlasOrbitalGraphic(
+                  size: 94,
+                  glowColor: Color(0xFF67E2B7),
+                ),
                 metrics: [
                   AtlasMiniMetric(
                     label: 'Entries',
@@ -238,6 +242,18 @@ class _JournalComposerSheetState extends ConsumerState<_JournalComposerSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const AtlasHeroPanel(
+              eyebrow: 'Write',
+              title:
+                  'A memory draft should feel lightweight, not like filling out a form.',
+              message:
+                  'Capture the moment first. Place and sync can catch up later without making the writing surface feel heavy.',
+              trailing: AtlasOrbitalGraphic(
+                size: 82,
+                glowColor: Color(0xFF67E2B7),
+              ),
+            ),
+            const SizedBox(height: 16),
             const AtlasSectionHeader(
               title: 'New memory',
               subtitle: 'Drafts save locally first. Sync can catch up later.',
@@ -360,14 +376,38 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
             }
             return StatefulBuilder(
               builder: (context, setSheetState) {
+                final selectedTrip = trips.firstWhere(
+                  (trip) => trip.id == _tripId,
+                  orElse: () => trips.first,
+                );
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const AtlasSectionHeader(
-                      title: 'Confirm imported photos',
-                      subtitle:
-                          'Platform metadata is extracted natively. Place inference is shared.',
+                    AtlasHeroPanel(
+                      eyebrow: 'Photo import',
+                      title:
+                          'Import should feel curated before it feels uploaded.',
+                      message:
+                          'Native metadata extraction already happened. Now confirm trip context and inferred places before the files queue for upload.',
+                      trailing: const AtlasOrbitalGraphic(size: 82),
+                      metrics: [
+                        AtlasMiniMetric(
+                          label: 'Photos',
+                          value: '${drafts.length}',
+                          icon: Icons.photo_library_rounded,
+                        ),
+                        AtlasMiniMetric(
+                          label: 'Trip',
+                          value: selectedTrip.heroPlace.cityName,
+                          icon: Icons.luggage_rounded,
+                        ),
+                        AtlasMiniMetric(
+                          label: 'Queue state',
+                          value: 'Local first',
+                          icon: Icons.cloud_upload_rounded,
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
@@ -398,6 +438,9 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
                             decoration: BoxDecoration(
                               color: const Color(0xFF13253B),
                               borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: const Color(0xFF21405F),
+                              ),
                             ),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -423,11 +466,25 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        draft.metadata.displayName,
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.titleMedium,
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              draft.metadata.displayName,
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.titleMedium,
+                                            ),
+                                          ),
+                                          AtlasStatusPill(
+                                            label: _confidenceLabel(
+                                              draft.suggestion.confidence,
+                                            ),
+                                            color: _confidenceColor(
+                                              draft.suggestion.confidence,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
@@ -449,6 +506,15 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
                                           context,
                                         ).textTheme.bodyMedium,
                                       ),
+                                      if (draft.metadata.byteSize != null) ...[
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'File size: ${_formatBytes(draft.metadata.byteSize!)}',
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodyMedium,
+                                        ),
+                                      ],
                                     ],
                                   ),
                                 ),
@@ -459,19 +525,33 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    FilledButton.icon(
-                      onPressed: () async {
-                        await ref
-                            .read(travelAppControllerProvider.notifier)
-                            .importPhotoDrafts(
-                              tripId: _tripId!,
-                              drafts: drafts,
-                            );
-                        if (!context.mounted) return;
-                        Navigator.of(context).pop();
-                      },
-                      icon: const Icon(Icons.cloud_upload_rounded),
-                      label: Text('Save ${drafts.length} imports locally'),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: const Icon(Icons.close_rounded),
+                            label: const Text('Not now'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton.icon(
+                            onPressed: () async {
+                              await ref
+                                  .read(travelAppControllerProvider.notifier)
+                                  .importPhotoDrafts(
+                                    tripId: _tripId!,
+                                    drafts: drafts,
+                                  );
+                              if (!context.mounted) return;
+                              Navigator.of(context).pop();
+                            },
+                            icon: const Icon(Icons.cloud_upload_rounded),
+                            label: Text('Queue ${drafts.length} imports'),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 );
@@ -482,4 +562,24 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
       ),
     );
   }
+}
+
+String _confidenceLabel(double confidence) {
+  if (confidence >= 0.9) return 'High match';
+  if (confidence >= 0.7) return 'Good match';
+  return 'Check place';
+}
+
+Color _confidenceColor(double confidence) {
+  if (confidence >= 0.9) return const Color(0xFF67E2B7);
+  if (confidence >= 0.7) return const Color(0xFF8DEBFF);
+  return const Color(0xFFFFD37A);
+}
+
+String _formatBytes(int bytes) {
+  if (bytes < 1024) return '$bytes B';
+  final kb = bytes / 1024;
+  if (kb < 1024) return '${kb.toStringAsFixed(1)} KB';
+  final mb = kb / 1024;
+  return '${mb.toStringAsFixed(1)} MB';
 }
