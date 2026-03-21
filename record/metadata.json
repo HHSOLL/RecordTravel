@@ -1,0 +1,5 @@
+{
+  "name": "record",
+  "description": "A minimalist travel recording app that captures your journeys on a 3D globe and interactive timelines.",
+  "requestFramePermissions": []
+}
