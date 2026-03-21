@@ -1,8 +1,0 @@
-{
-  "version": "v1",
-  "atmosphereColor": "#6FA8FF",
-  "rimIntensity": 0.18,
-  "falloff": 2.2,
-  "outerGlowAlpha": 0.22,
-  "nightBlendEnabled": false
-}
