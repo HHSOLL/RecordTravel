@@ -1,50 +1,103 @@
-# Travel Globe Rendering PoC
+# Travel Atlas Mobile App
 
-This repository implements a rendering PoC workspace for a Flutter-based travel globe.
+This repository now contains the Flutter mobile app for Travel Atlas and the shared packages that support it.
 
 ## Workspace
 
-- `packages/globe_poc_core`
-  - Shared fixture data, camera math, interaction logic, benchmark state, validation logic, and the engine-agnostic shell.
-- `apps/candidate_a_three_js`
-  - Candidate A runner using `three_js`.
-- `apps/candidate_b_three_dart`
-  - Candidate B runner using `three_dart`.
-- `apps/candidate_c_low_level`
-  - Candidate C runner using `flutter_gl` with a custom low-level renderer path.
-- `reports/`
-  - Comparison and gate review templates for PoC results.
+- `apps/mobile_app`
+  - App shell, platform adapters, and runtime bootstrap.
+- `packages/core_domain`
+  - Shared domain models and backend profile definitions.
+- `packages/core_data`
+  - Local store, repositories, Riverpod providers, and sync boundaries.
+- `packages/core_navigation`
+  - Shared tabs and route identifiers.
+- `packages/core_ui`
+  - Theme, reusable widgets, and formatting helpers.
+- `packages/feature_atlas_home`
+  - Home globe and entry surface.
+- `packages/feature_timeline`
+  - Chronological trip and memory playback.
+- `packages/feature_journal`
+  - Journal list and compose/import sheets.
+- `packages/feature_places`
+  - Country and city detail surfaces.
+- `packages/feature_search`
+  - Unified search across trips, places, and memories.
+- `packages/feature_account`
+  - Account, session, and sync status UI.
+- `supabase/`
+  - Optional backend schema and migrations.
+- `docs/architecture/`
+  - Architecture constraints and integration notes.
 
-## Current Scope
+## Product Scope
 
-This workspace is limited to:
+The current app is built around:
 
-- Rendering PoC implementation
-- Candidate A/B/C comparison
-- Shared benchmark and validation harness
+- local-first travel history
+- trip, city, and country exploration
+- journal note capture
+- photo import with metadata-based place inference
+- optional Supabase-backed auth and sync
 
-This workspace does not include:
+This repository no longer includes the earlier rendering candidate experiments.
 
-- Final engine selection
-- Full application feature development
-- Persistence, sync, media upload, or 2D drill-down integration
+## Prerequisites
 
-## Run
+- Flutter `3.32.0`
+- Dart `3.8.0`
 
-Each candidate is intentionally isolated because `three_js` and `three_dart` have incompatible transitive dependencies and cannot be resolved in a single Flutter app.
+## Run The App
+
+This repository uses a monorepo layout, so the Flutter app itself lives in `apps/mobile_app`. That structure is normal when one app shares multiple packages.
+
+Local-first mode works without backend credentials:
 
 ```bash
-cd apps/candidate_a_three_js && flutter run
-cd apps/candidate_b_three_dart && flutter run
-cd apps/candidate_c_low_level && flutter run
+cd apps/mobile_app
+flutter pub get
+flutter run
 ```
 
-## Validation
+If you want to run from the repository root instead of changing directories:
 
-The shared shell includes:
+```bash
+make mobile-run
+make mobile-run-ios
+```
 
-- deterministic globe fixture generation
-- drag orbit and pinch zoom input
-- tap-to-country lookup using shared projection math
-- validation buttons for correctness checks
-- benchmark scenario controls
+To enable the Supabase-backed runtime, pass Dart defines:
+
+```bash
+cd apps/mobile_app
+flutter run \
+  --dart-define=SUPABASE_URL=https://YOUR_PROJECT.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=YOUR_ANON_KEY
+```
+
+If those values are missing, the app falls back to the local-first demo/runtime path.
+
+## Test
+
+Run package tests from the package directory you are working in. Common entry points:
+
+```bash
+cd apps/mobile_app && flutter test
+cd packages/core_data && flutter test
+cd packages/feature_atlas_home && flutter test
+```
+
+From the repository root:
+
+```bash
+make mobile-test
+```
+
+## Architecture Notes
+
+- Feature packages do not talk to Supabase directly.
+- Backend selection happens only in the app bootstrap layer.
+- The app should remain useful without remote auth or sync.
+
+See `docs/architecture/supabase_to_spring_guardrails.md` for the backend boundary rules.
