@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 
+import '../components/record_page_intro.dart';
 import '../i18n/record_strings.dart';
 import '../models/record_models.dart';
 import '../providers/record_provider.dart';
@@ -18,8 +19,10 @@ class RecordPlannerScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final trips = ref.watch(recordTripsProvider);
     final upcomingTrips = trips.where((trip) => trip.isUpcoming).toList()
-      ..sort((a, b) =>
-          DateTime.parse(a.startDate).compareTo(DateTime.parse(b.startDate)));
+      ..sort(
+        (a, b) =>
+            DateTime.parse(a.startDate).compareTo(DateTime.parse(b.startDate)),
+      );
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -28,16 +31,22 @@ class RecordPlannerScreen extends ConsumerWidget {
           child: CustomScrollView(
             slivers: [
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
                 sliver: SliverToBoxAdapter(
-                  child: AtlasSectionHeader(
-                    title: strings.text('planner.title'),
-                    subtitle: strings.upcomingTrips(upcomingTrips.length),
-                    trailing: AtlasStatusPill(
-                      label: strings.text('planner.planNew'),
-                      color: context.atlasPalette.accentSoft,
-                      icon: Icons.flight_takeoff_rounded,
-                    ),
+                  child: Column(
+                    children: [
+                      RecordPageIntro(
+                        eyebrow: strings.text('nav.planner'),
+                        title: strings.text('planner.title'),
+                        subtitle: strings.upcomingTrips(upcomingTrips.length),
+                      ),
+                      const SizedBox(height: 16),
+                      AtlasStatusPill(
+                        label: strings.text('planner.planNew'),
+                        color: const Color(0xFFF59E0B),
+                        icon: Icons.flight_takeoff_rounded,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -98,8 +107,9 @@ class _PlannerTripCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(26)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(26),
+              ),
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -133,8 +143,10 @@ class _PlannerTripCard extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    Icon(Icons.luggage_rounded,
-                        color: Colors.white.withValues(alpha: 0.92)),
+                    Icon(
+                      Icons.luggage_rounded,
+                      color: Colors.white.withValues(alpha: 0.92),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 18),
@@ -301,8 +313,9 @@ class _MapModal extends StatelessWidget {
           ),
           Expanded(
             child: ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(26)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(26),
+              ),
               child: GoogleMap(
                 initialCameraPosition: CameraPosition(
                   target: LatLng(initial.lat, initial.lng),
@@ -424,23 +437,22 @@ class _ScheduleModal extends StatelessWidget {
                                 color: context.atlasPalette.surfaceMuted,
                                 borderRadius: BorderRadius.circular(18),
                                 border: Border.all(
-                                    color: context.atlasPalette.outline),
+                                  color: context.atlasPalette.outline,
+                                ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     location.name,
-                                    style:
-                                        theme.textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                    ),
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.w800),
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
-                                    DateFormat('MMM d, yyyy • HH:mm').format(
-                                      DateTime.parse(location.date),
-                                    ),
+                                    DateFormat(
+                                      'MMM d, yyyy • HH:mm',
+                                    ).format(DateTime.parse(location.date)),
                                     style: theme.textTheme.bodyMedium,
                                   ),
                                 ],

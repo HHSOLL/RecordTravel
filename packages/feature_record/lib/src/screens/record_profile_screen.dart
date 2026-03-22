@@ -3,6 +3,7 @@ import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../components/record_page_intro.dart';
 import '../i18n/record_strings.dart';
 import '../providers/record_provider.dart';
 
@@ -35,11 +36,10 @@ class RecordProfileScreen extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 120),
             children: [
-              Text(
-                strings.text('profile.title'),
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+              RecordPageIntro(
+                eyebrow: strings.text('nav.profile'),
+                title: strings.text('profile.title'),
+                subtitle: user.title,
               ),
               const SizedBox(height: 18),
               AtlasPanel(

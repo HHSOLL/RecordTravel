@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../components/record_page_intro.dart';
 import '../i18n/record_strings.dart';
 import '../models/record_models.dart';
 import '../providers/record_provider.dart';
@@ -25,19 +26,21 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
     final theme = Theme.of(context);
     final trips = ref.watch(recordTripsProvider);
     final pastTrips = trips.where((trip) => !trip.isUpcoming).toList()
-      ..sort((a, b) =>
-          DateTime.parse(b.startDate).compareTo(DateTime.parse(a.startDate)));
+      ..sort(
+        (a, b) =>
+            DateTime.parse(b.startDate).compareTo(DateTime.parse(a.startDate)),
+      );
 
     final continents = <String>{
       for (final trip in pastTrips) trip.countries.first.continent,
-    }.toList()
-      ..sort();
+    }.toList()..sort();
     final filteredTrips = _selectedContinent == 'All'
         ? pastTrips
         : pastTrips
-            .where(
-                (trip) => trip.countries.first.continent == _selectedContinent)
-            .toList();
+              .where(
+                (trip) => trip.countries.first.continent == _selectedContinent,
+              )
+              .toList();
 
     final groupedTrips = <String, List<RecordTrip>>{};
     for (final trip in filteredTrips) {
@@ -51,22 +54,17 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
           child: CustomScrollView(
             slivers: [
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
                 sliver: SliverToBoxAdapter(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        strings.text('archive.title'),
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
+                      RecordPageIntro(
+                        eyebrow: strings.text('nav.archive'),
+                        title: strings.text('archive.title'),
+                        subtitle: strings.pastTrips(
+                          pastTrips.length,
+                          filteredTrips.length,
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        strings.pastTrips(
-                            pastTrips.length, filteredTrips.length),
-                        style: theme.textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 20),
                       SingleChildScrollView(
@@ -86,7 +84,8 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                                   label: continent,
                                   selected: _selectedContinent == continent,
                                   onTap: () => setState(
-                                      () => _selectedContinent = continent),
+                                    () => _selectedContinent = continent,
+                                  ),
                                 ),
                               ),
                           ],
@@ -122,7 +121,7 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                             style: theme.textTheme.labelLarge?.copyWith(
                               fontWeight: FontWeight.w800,
                               letterSpacing: 1.3,
-                              color: context.atlasPalette.accent,
+                              color: const Color(0xFFF59E0B),
                             ),
                           ),
                         ),
@@ -164,9 +163,7 @@ class _ContinentChip extends StatelessWidget {
       onSelected: (_) => onTap(),
       backgroundColor: palette.surfaceMuted,
       selectedColor: palette.accentSoft.withValues(alpha: 0.2),
-      side: BorderSide(
-        color: selected ? palette.accentSoft : palette.outline,
-      ),
+      side: BorderSide(color: selected ? palette.accentSoft : palette.outline),
       labelStyle: TextStyle(
         color: selected
             ? palette.accentSoft

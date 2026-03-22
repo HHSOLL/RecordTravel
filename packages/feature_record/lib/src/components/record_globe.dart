@@ -171,7 +171,7 @@ class _RecordGlobeState extends State<RecordGlobe>
                 Positioned.fill(
                   child: CustomPaint(
                     painter: _TexturedGlobePainter(
-                      earthImage: assets?.earthImage,
+                      assets: assets,
                       yaw: _yaw,
                       pitch: _pitch,
                       style: scene.style,
@@ -235,14 +235,21 @@ class _RecordGlobeState extends State<RecordGlobe>
   }
 
   static Future<_GlobeAssets?> _loadGlobeAssets() async {
-    try {
-      final earthImage = await _loadAssetImage(
-        'assets/globe/earth_day_albedo_v1_4096.webp',
-      );
-      return _GlobeAssets(earthImage: earthImage);
-    } catch (_) {
+    final lightEarthImage = await _tryLoadAssetImage(
+      'assets/globe/earth-blue-marble.jpg',
+    );
+    final darkEarthImage =
+        await _tryLoadAssetImage('assets/globe/earth-night.jpg') ??
+        await _tryLoadAssetImage('assets/globe/earth_day_albedo_v1_4096.webp');
+
+    if (lightEarthImage == null && darkEarthImage == null) {
       return null;
     }
+
+    return _GlobeAssets(
+      lightEarthImage: lightEarthImage ?? darkEarthImage,
+      darkEarthImage: darkEarthImage ?? lightEarthImage,
+    );
   }
 
   static Future<ui.Image> _loadAssetImage(String assetKey) async {
@@ -254,12 +261,24 @@ class _RecordGlobeState extends State<RecordGlobe>
     final frame = await codec.getNextFrame();
     return frame.image;
   }
+
+  static Future<ui.Image?> _tryLoadAssetImage(String assetKey) async {
+    try {
+      return await _loadAssetImage(assetKey);
+    } catch (_) {
+      return null;
+    }
+  }
 }
 
 class _GlobeAssets {
-  const _GlobeAssets({required this.earthImage});
+  const _GlobeAssets({
+    required this.lightEarthImage,
+    required this.darkEarthImage,
+  });
 
-  final ui.Image earthImage;
+  final ui.Image? lightEarthImage;
+  final ui.Image? darkEarthImage;
 }
 
 class _OrbitTarget {
@@ -407,13 +426,13 @@ class _AnchorMarker extends StatelessWidget {
 
 class _TexturedGlobePainter extends CustomPainter {
   const _TexturedGlobePainter({
-    required this.earthImage,
+    required this.assets,
     required this.yaw,
     required this.pitch,
     required this.style,
   });
 
-  final ui.Image? earthImage;
+  final _GlobeAssets? assets;
   final double yaw;
   final double pitch;
   final RecordGlobeStyle style;
@@ -469,7 +488,10 @@ class _TexturedGlobePainter extends CustomPainter {
     canvas.save();
     canvas.clipPath(spherePath);
 
-    final earth = earthImage;
+    final earth = switch (style) {
+      RecordGlobeStyle.storybookLight => assets?.lightEarthImage,
+      RecordGlobeStyle.orbitNight => assets?.darkEarthImage,
+    };
     if (earth != null) {
       final mesh = _SphereMesh.build(
         size: size,
@@ -477,6 +499,7 @@ class _TexturedGlobePainter extends CustomPainter {
         textureHeight: earth.height.toDouble(),
         yaw: yaw,
         pitch: pitch,
+        style: style,
       );
 
       final earthPaint = Paint()
@@ -488,7 +511,12 @@ class _TexturedGlobePainter extends CustomPainter {
           ui.TileMode.clamp,
           _identityMatrix,
         );
-      if (!isLight) {
+      if (isLight) {
+        earthPaint.colorFilter = const ColorFilter.mode(
+          Color(0xFFEAF4FF),
+          BlendMode.screen,
+        );
+      } else {
         earthPaint.colorFilter = const ColorFilter.mode(
           Color(0xFFB7D4FF),
           BlendMode.modulate,
@@ -553,7 +581,7 @@ class _TexturedGlobePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _TexturedGlobePainter oldDelegate) {
-    return oldDelegate.earthImage != earthImage ||
+    return oldDelegate.assets != assets ||
         oldDelegate.yaw != yaw ||
         oldDelegate.pitch != pitch ||
         oldDelegate.style != style;
@@ -798,9 +826,14 @@ class _SphereMesh {
     required double textureHeight,
     required double yaw,
     required double pitch,
+    required RecordGlobeStyle style,
   }) {
-    const rows = 48;
-    const columns = 48;
+    final segments = math.max(
+      style == RecordGlobeStyle.storybookLight ? 112 : 96,
+      (size.width * 0.34).round(),
+    );
+    final rows = segments;
+    final columns = segments;
     final radius = size.width / 2;
     final center = size.center(Offset.zero);
     final positions = <Offset>[];
