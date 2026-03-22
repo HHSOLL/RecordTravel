@@ -53,8 +53,7 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     final theme = Theme.of(context);
     final globeScene = ref.watch(recordGlobeSceneProvider(theme.brightness));
     final palette = context.atlasPalette;
-    final selectedCountryCode =
-        _selectedCountryCode ?? globeScene.initialCountryCode;
+    final selectedCountryCode = _selectedCountryCode;
     final upcomingCount = trips.where((trip) => trip.isUpcoming).length;
     final hasTrips = trips.isNotEmpty;
 
@@ -67,10 +66,19 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
             builder: (context, constraints) {
               final compactLayout = constraints.maxHeight < 780;
               final contentWidth = constraints.maxWidth - 40;
+              final bottomClearance = compactLayout ? 108.0 : 124.0;
+              final globeHeightBudget = math.max(
+                compactLayout ? 212.0 : 248.0,
+                constraints.maxHeight -
+                    bottomClearance -
+                    (compactLayout ? 280.0 : 328.0),
+              );
               final globeSize = hasTrips
                   ? math.min(
-                      contentWidth * (compactLayout ? 0.72 : 0.8),
-                      compactLayout ? 232.0 : 288.0,
+                      contentWidth * (compactLayout ? 0.76 : 0.84),
+                      compactLayout
+                          ? math.min(globeHeightBudget, 246.0)
+                          : math.min(globeHeightBudget, 316.0),
                     )
                   : 0.0;
 
@@ -86,9 +94,8 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                     ),
                   );
                 },
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 48),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
                   child: Column(
                     children: [
                       Row(
@@ -115,60 +122,56 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                           ),
                         ],
                       ),
-                      const SizedBox(height: 26),
-                      Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 7,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF59E0B).withValues(
-                                alpha: palette.isLight ? 0.18 : 0.22,
-                              ),
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                color: const Color(0xFFF59E0B).withValues(
-                                  alpha: 0.26,
-                                ),
-                              ),
-                            ),
-                            child: Text(
-                              user.title,
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: palette.isLight
-                                    ? const Color(0xFFB45309)
-                                    : const Color(0xFFF8D48B),
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+                      SizedBox(height: compactLayout ? 18 : 28),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(
+                            0xFFF59E0B,
+                          ).withValues(alpha: palette.isLight ? 0.18 : 0.22),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: const Color(
+                              0xFFF59E0B,
+                            ).withValues(alpha: 0.26),
                           ),
-                          const SizedBox(height: 14),
-                          Text(
-                            strings.homeTitle(user.name),
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.9,
-                            ),
-                            textAlign: TextAlign.center,
+                        ),
+                        child: Text(
+                          user.title,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: palette.isLight
+                                ? const Color(0xFFB45309)
+                                : const Color(0xFFF8D48B),
+                            fontWeight: FontWeight.w700,
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            strings.cityCountryProgress(
-                              user.totalCities,
-                              user.totalCountries,
-                            ),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                        ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: compactLayout ? 12 : 14),
+                      Text(
+                        strings.homeTitle(user.name),
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontSize: compactLayout ? 26 : 30,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1.1,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        strings.cityCountryProgress(
+                          user.totalCities,
+                          user.totalCountries,
+                        ),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontSize: compactLayout ? 14 : 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: compactLayout ? 14 : 18),
                       Wrap(
                         alignment: WrapAlignment.center,
                         spacing: 10,
@@ -186,31 +189,42 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
                       if (hasTrips)
-                        Center(
-                          child: SizedBox(
-                            width: globeSize,
-                            height: globeSize + 6,
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              top: compactLayout ? 12 : 18,
+                              bottom: bottomClearance,
+                            ),
                             child: Align(
                               alignment: Alignment.topCenter,
-                              child: RecordGlobe(
-                                size: globeSize,
-                                scene: globeScene,
-                                selectedCountryCode: selectedCountryCode,
-                                onCountrySelected: (countryCode) {
-                                  setState(() {
-                                    _selectedCountryCode = countryCode;
-                                  });
-                                },
+                              child: Transform.translate(
+                                offset: const Offset(0, -4),
+                                child: RecordGlobe(
+                                  size: globeSize,
+                                  scene: globeScene,
+                                  selectedCountryCode: selectedCountryCode,
+                                  onCountrySelected: (countryCode) {
+                                    setState(() {
+                                      _selectedCountryCode = countryCode;
+                                    });
+                                  },
+                                ),
                               ),
                             ),
                           ),
                         )
                       else
-                        AtlasEmptyState(
-                          title: strings.text('home.empty'),
-                          message: strings.text('nav.create'),
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: bottomClearance),
+                            child: Center(
+                              child: AtlasEmptyState(
+                                title: strings.text('home.empty'),
+                                message: strings.text('nav.create'),
+                              ),
+                            ),
+                          ),
                         ),
                     ],
                   ),
@@ -225,11 +239,7 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
 }
 
 class _HeaderButton extends StatelessWidget {
-  const _HeaderButton({
-    this.onPressed,
-    this.icon,
-    this.child,
-  });
+  const _HeaderButton({this.onPressed, this.icon, this.child});
 
   final VoidCallback? onPressed;
   final IconData? icon;
@@ -238,27 +248,22 @@ class _HeaderButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.atlasPalette;
-    final content = child ??
-        Icon(
-          icon,
-          size: 20,
-          color: Theme.of(context).colorScheme.onSurface,
-        );
+    final content =
+        child ??
+        Icon(icon, size: 20, color: Theme.of(context).colorScheme.onSurface);
 
     return InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(999),
       child: Ink(
-        width: 44,
-        height: 44,
+        width: 46,
+        height: 46,
         decoration: BoxDecoration(
           color: palette.surfaceGlass.withValues(
-            alpha: palette.isLight ? 0.92 : 0.64,
+            alpha: palette.isLight ? 0.84 : 0.58,
           ),
           shape: BoxShape.circle,
-          border: Border.all(
-            color: palette.outline.withValues(alpha: 0.5),
-          ),
+          border: Border.all(color: palette.outline.withValues(alpha: 0.5)),
         ),
         child: Center(child: content),
       ),
@@ -274,8 +279,9 @@ class _ProfileBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final trimmed = name.trim();
-    final initials =
-        trimmed.isEmpty ? 'R' : String.fromCharCode(trimmed.runes.first);
+    final initials = trimmed.isEmpty
+        ? 'R'
+        : String.fromCharCode(trimmed.runes.first);
     return Container(
       width: 28,
       height: 28,
@@ -287,9 +293,9 @@ class _ProfileBadge extends StatelessWidget {
       child: Text(
         initials.toUpperCase(),
         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
+          color: Colors.white,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }
@@ -317,9 +323,7 @@ class _StatCapsule extends StatelessWidget {
           alpha: palette.isLight ? 0.88 : 0.55,
         ),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: palette.outline.withValues(alpha: 0.45),
-        ),
+        border: Border.all(color: palette.outline.withValues(alpha: 0.45)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

@@ -25,9 +25,10 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell> {
     final palette = context.atlasPalette;
 
     return Scaffold(
+      extendBody: true,
       body: _buildCurrentPage(prefs),
       bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.only(left: 24, right: 24, bottom: 18),
+        minimum: const EdgeInsets.only(left: 24, right: 24, bottom: 14),
         child: DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -45,13 +46,13 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell> {
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 14, 0, 6),
+            padding: const EdgeInsets.fromLTRB(0, 10, 0, 6),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(999),
               child: BackdropFilter(
                 filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
                 child: Container(
-                  height: 68,
+                  height: 66,
                   padding: const EdgeInsets.symmetric(horizontal: 18),
                   decoration: BoxDecoration(
                     color: palette.isLight
@@ -90,8 +91,8 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell> {
                       GestureDetector(
                         onTap: _openCreateTrip,
                         child: Container(
-                          width: 48,
-                          height: 48,
+                          width: 52,
+                          height: 52,
                           decoration: BoxDecoration(
                             color: palette.isLight
                                 ? const Color(0xFFF59E0B)

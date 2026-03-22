@@ -57,20 +57,22 @@ class _RecordGlobeState extends State<RecordGlobe>
       _pitch = initialTarget.pitch;
     }
 
-    _focusCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 720),
-    )..addListener(() {
-        final value = Curves.easeInOutCubic.transform(_focusCtrl.value);
-        setState(() {
-          _yaw = _wrapAngle(_focusStartYaw + (_focusEndYaw * value));
-          _pitch = ui.lerpDouble(_focusStartPitch, _focusEndPitch, value)!;
+    _focusCtrl =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 720),
+        )..addListener(() {
+          final value = Curves.easeInOutCubic.transform(_focusCtrl.value);
+          setState(() {
+            _yaw = _wrapAngle(_focusStartYaw + (_focusEndYaw * value));
+            _pitch = ui.lerpDouble(_focusStartPitch, _focusEndPitch, value)!;
+          });
         });
-      });
 
-    _spinCtrl =
-        AnimationController(vsync: this, duration: const Duration(seconds: 72))
-          ..repeat();
+    _spinCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 72),
+    )..repeat();
     _spinCtrl.addListener(() {
       if (!_isDragging &&
           !_focusCtrl.isAnimating &&
@@ -133,8 +135,10 @@ class _RecordGlobeState extends State<RecordGlobe>
             onPanUpdate: (details) {
               setState(() {
                 _yaw = _wrapAngle(_yaw - details.delta.dx * 0.0082);
-                _pitch =
-                    (_pitch + details.delta.dy * 0.0048).clamp(-0.58, 0.58);
+                _pitch = (_pitch + details.delta.dy * 0.0048).clamp(
+                  -0.58,
+                  0.58,
+                );
               });
             },
             child: Stack(
@@ -149,15 +153,16 @@ class _RecordGlobeState extends State<RecordGlobe>
                           color: palette.isLight
                               ? const Color(0xFF9AD0FF).withValues(alpha: 0.32)
                               : const Color(0xFF1BA8FF).withValues(alpha: 0.18),
-                          blurRadius: palette.isLight ? 64 : 88,
-                          spreadRadius: 6,
+                          blurRadius: palette.isLight ? 42 : 66,
+                          spreadRadius: palette.isLight ? 2 : 4,
                         ),
                         if (!palette.isLight)
                           BoxShadow(
-                            color:
-                                const Color(0xFF8A5CF7).withValues(alpha: 0.14),
-                            blurRadius: 90,
-                            spreadRadius: 8,
+                            color: const Color(
+                              0xFF8A5CF7,
+                            ).withValues(alpha: 0.14),
+                            blurRadius: 72,
+                            spreadRadius: 5,
                           ),
                       ],
                     ),
@@ -185,13 +190,16 @@ class _RecordGlobeState extends State<RecordGlobe>
                     ),
                   ),
                 ),
-                ...projectedAnchors.where((anchor) => anchor.opacity > 0.1).map(
+                ...projectedAnchors
+                    .where((anchor) => anchor.opacity > 0.1)
+                    .map(
                       (anchor) => _AnchorMarker(
                         projectedAnchor: anchor,
                         selected:
                             selectedCountryCode == anchor.anchor.countryCode,
-                        onTap: () => widget.onCountrySelected
-                            ?.call(anchor.anchor.countryCode),
+                        onTap: () => widget.onCountrySelected?.call(
+                          anchor.anchor.countryCode,
+                        ),
                       ),
                     ),
               ],
@@ -228,8 +236,9 @@ class _RecordGlobeState extends State<RecordGlobe>
 
   static Future<_GlobeAssets?> _loadGlobeAssets() async {
     try {
-      final earthImage =
-          await _loadAssetImage('assets/globe/earth_day_albedo_v1_4096.webp');
+      final earthImage = await _loadAssetImage(
+        'assets/globe/earth_day_albedo_v1_4096.webp',
+      );
       return _GlobeAssets(earthImage: earthImage);
     } catch (_) {
       return null;
@@ -254,10 +263,7 @@ class _GlobeAssets {
 }
 
 class _OrbitTarget {
-  const _OrbitTarget({
-    required this.yaw,
-    required this.pitch,
-  });
+  const _OrbitTarget({required this.yaw, required this.pitch});
 
   final double yaw;
   final double pitch;
@@ -282,10 +288,7 @@ class _ProjectedAnchor {
 }
 
 class _ProjectedPoint {
-  const _ProjectedPoint({
-    required this.position,
-    required this.depth,
-  });
+  const _ProjectedPoint({required this.position, required this.depth});
 
   final Offset position;
   final double depth;
@@ -354,11 +357,11 @@ class _AnchorMarker extends StatelessWidget {
                           label,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style:
-                              Theme.of(context).textTheme.labelLarge?.copyWith(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
                         ),
                       ),
                     Container(
@@ -625,8 +628,8 @@ class _GlobeStoryPainter extends CustomPainter {
       final opacity = visibility <= -0.2
           ? 0.0
           : visibility <= 0
-              ? 0.05
-              : 0.12 + visibility * (isLight ? 0.14 : 0.26);
+          ? 0.05
+          : 0.12 + visibility * (isLight ? 0.14 : 0.26);
       if (opacity <= 0) continue;
 
       final midpoint = Offset.lerp(from.position, to.position, 0.5)!;
@@ -636,7 +639,7 @@ class _GlobeStoryPainter extends CustomPainter {
           : direction / direction.distance;
       final arcHeight =
           (from.position - to.position).distance * (isLight ? 0.16 : 0.22) +
-              radius * 0.06;
+          radius * 0.06;
       final control = midpoint + normalized * arcHeight;
 
       final path = Path()
@@ -648,7 +651,8 @@ class _GlobeStoryPainter extends CustomPainter {
           to.position.dy,
         );
 
-      final isSelected = selectedCountryCode != null &&
+      final isSelected =
+          selectedCountryCode != null &&
           (arc.fromCountryCode == selectedCountryCode ||
               arc.toCountryCode == selectedCountryCode);
 
@@ -741,8 +745,8 @@ _ProjectedAnchor _projectAnchor(
   final opacity = projected.depth <= -0.18
       ? 0.0
       : projected.depth <= 0
-          ? 0.08 + (projected.depth + 0.18) * 0.25
-          : 0.38 + projected.depth * 0.58;
+      ? 0.08 + (projected.depth + 0.18) * 0.25
+      : 0.38 + projected.depth * 0.58;
   final scale = 0.72 + (((projected.depth + 1) / 2).clamp(0.0, 1.0) * 0.45);
   return _ProjectedAnchor(
     anchor: anchor,
