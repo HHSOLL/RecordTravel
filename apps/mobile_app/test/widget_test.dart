@@ -6,7 +6,7 @@ import 'package:mobile_app/bootstrap/mobile_app_bootstrap.dart';
 import 'package:mobile_app/bootstrap/mobile_app_runtime.dart';
 import 'package:mobile_app/main.dart';
 import 'package:mobile_app/platform/demo_photo_ingestion_adapter.dart';
-import 'package:feature_record/src/components/record_globe.dart';
+import 'package:feature_record/src/components/record_globe_webview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -33,7 +33,7 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
-    expect(find.byType(RecordGlobe), findsOneWidget);
+    expect(find.byType(RecordGlobeWebView), findsOneWidget);
     expect(find.text('record'), findsWidgets);
     expect(find.byIcon(Icons.add_rounded), findsOneWidget);
   });

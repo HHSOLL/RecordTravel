@@ -5,7 +5,7 @@ import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../components/record_globe.dart';
+import '../components/record_globe_webview.dart';
 import '../components/record_wordmark.dart';
 import '../i18n/record_strings.dart';
 import '../providers/record_provider.dart';
@@ -141,7 +141,7 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                                       0,
                                       compactLayout ? -10 : -18,
                                     ),
-                                    child: RecordGlobe(
+                                    child: RecordGlobeWebView(
                                       size: globeSize,
                                       scene: globeScene,
                                       selectedCountryCode: selectedCountryCode,
