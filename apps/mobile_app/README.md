@@ -38,6 +38,41 @@ flutter run \
 
 Without those values the app boots into the local-first runtime.
 
+## Optional Google Maps Runtime
+
+The migrated `record` planner and trip detail screens already use `google_maps_flutter`.
+To render real Google Maps tiles, provide the same Google Maps key that the web app expected as `VITE_GOOGLE_MAPS_API_KEY`.
+
+Android:
+
+Add this line to `android/local.properties`:
+
+```properties
+GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY
+```
+
+Or export it before running:
+
+```bash
+export GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY
+flutter run
+```
+
+iOS:
+
+```bash
+cp ios/Flutter/Secrets.xcconfig.example ios/Flutter/Secrets.xcconfig
+```
+
+Then edit `ios/Flutter/Secrets.xcconfig`:
+
+```xcconfig
+GOOGLE_MAPS_API_KEY = YOUR_GOOGLE_MAPS_API_KEY
+```
+
+The current Flutter migration already supports map rendering, markers, and trip route polylines.
+Places autocomplete from the web planner has not been ported yet.
+
 ## Main Entry Files
 
 - `lib/main.dart`

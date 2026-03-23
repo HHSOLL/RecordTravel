@@ -78,6 +78,33 @@ flutter run \
 
 If those values are missing, the app falls back to the local-first demo/runtime path.
 
+## Google Maps
+
+The original `record` web app used a Google Maps key via `VITE_GOOGLE_MAPS_API_KEY`.
+The Flutter migration already contains native Google Maps surfaces in the planner and trip detail flows, but the native iOS and Android apps need the key wired separately.
+
+Android:
+
+Add this to `apps/mobile_app/android/local.properties`:
+
+```properties
+GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY
+```
+
+iOS:
+
+```bash
+cp apps/mobile_app/ios/Flutter/Secrets.xcconfig.example apps/mobile_app/ios/Flutter/Secrets.xcconfig
+```
+
+Then set:
+
+```xcconfig
+GOOGLE_MAPS_API_KEY = YOUR_GOOGLE_MAPS_API_KEY
+```
+
+Once that key is present, the migrated Flutter planner and trip detail screens can render real Google Maps tiles.
+
 ## Test
 
 Run package tests from the package directory you are working in. Common entry points:
