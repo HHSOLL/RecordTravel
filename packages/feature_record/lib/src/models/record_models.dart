@@ -93,6 +93,40 @@ class RecordTrip {
 }
 
 @immutable
+class RecordCountrySpotlight {
+  const RecordCountrySpotlight({
+    required this.code,
+    required this.name,
+    required this.continent,
+    required this.color,
+    required this.trips,
+    required this.locations,
+    required this.centerLat,
+    required this.centerLng,
+    required this.minLat,
+    required this.maxLat,
+    required this.minLng,
+    required this.maxLng,
+  });
+
+  final String code;
+  final String name;
+  final String continent;
+  final String color;
+  final List<RecordTrip> trips;
+  final List<RecordLocation> locations;
+  final double centerLat;
+  final double centerLng;
+  final double minLat;
+  final double maxLat;
+  final double minLng;
+  final double maxLng;
+
+  int get cityCount => locations.length;
+  int get tripCount => trips.length;
+}
+
+@immutable
 class RecordUserData {
   const RecordUserData({
     required this.name,

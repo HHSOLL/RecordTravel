@@ -6,19 +6,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../components/record_globe.dart';
-import '../components/record_globe_scene.dart';
 import '../components/record_wordmark.dart';
 import '../i18n/record_strings.dart';
 import '../providers/record_provider.dart';
+import 'record_country_map_screen.dart';
 
 class RecordHomeScreen extends ConsumerStatefulWidget {
   const RecordHomeScreen({
     super.key,
     required this.isDarkMode,
+    required this.onToggleTheme,
     this.onOpenProfile,
   });
 
   final bool isDarkMode;
+  final VoidCallback onToggleTheme;
   final VoidCallback? onOpenProfile;
 
   @override
@@ -29,6 +31,7 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _enterAnim;
   String? _selectedCountryCode;
+  bool _openingCountry = false;
 
   @override
   void initState() {
@@ -52,189 +55,191 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     final trips = ref.watch(recordTripsProvider);
     final theme = Theme.of(context);
     final globeScene = ref.watch(recordGlobeSceneProvider(theme.brightness));
-    final palette = context.atlasPalette;
     final selectedCountryCode = _selectedCountryCode;
-    final upcomingCount = trips.where((trip) => trip.isUpcoming).length;
     final hasTrips = trips.isNotEmpty;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: AtlasBackground(
-        child: SafeArea(
-          bottom: false,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final compactLayout = constraints.maxHeight < 780;
-              final contentWidth = constraints.maxWidth - 40;
-              final bottomClearance = compactLayout ? 108.0 : 124.0;
-              final globeHeightBudget = math.max(
-                compactLayout ? 212.0 : 248.0,
-                constraints.maxHeight -
-                    bottomClearance -
-                    (compactLayout ? 280.0 : 328.0),
-              );
-              final globeSize = hasTrips
-                  ? math.min(
-                      contentWidth * (compactLayout ? 0.76 : 0.84),
-                      compactLayout
-                          ? math.min(globeHeightBudget, 246.0)
-                          : math.min(globeHeightBudget, 316.0),
-                    )
-                  : 0.0;
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: _RecordHomeSpaceBackdrop(
+                isDark: theme.brightness == Brightness.dark,
+              ),
+            ),
+            SafeArea(
+              bottom: false,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final compactLayout = constraints.maxHeight < 780;
+                  final contentWidth = constraints.maxWidth - 40;
+                  final bottomClearance = compactLayout ? 108.0 : 124.0;
+                  final globeHeightBudget = math.max(
+                    compactLayout ? 260.0 : 312.0,
+                    constraints.maxHeight -
+                        bottomClearance -
+                        (compactLayout ? 96.0 : 112.0),
+                  );
+                  final globeSize = hasTrips
+                      ? math.min(
+                          contentWidth * (compactLayout ? 0.92 : 0.96),
+                          compactLayout
+                              ? math.min(globeHeightBudget, 340.0)
+                              : math.min(globeHeightBudget, 432.0),
+                        )
+                      : 0.0;
 
-              return AnimatedBuilder(
-                animation: _enterAnim,
-                builder: (context, child) {
-                  final value = Curves.easeOutCubic.transform(_enterAnim.value);
-                  return Transform.translate(
-                    offset: Offset(0, 18 * (1 - value)),
-                    child: Opacity(
-                      opacity: value.clamp(0.0, 1.0),
-                      child: child,
+                  return AnimatedBuilder(
+                    animation: _enterAnim,
+                    builder: (context, child) {
+                      final value = Curves.easeOutCubic.transform(
+                        _enterAnim.value,
+                      );
+                      return Transform.translate(
+                        offset: Offset(0, 18 * (1 - value)),
+                        child: Opacity(
+                          opacity: value.clamp(0.0, 1.0),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              _HeaderButton(
+                                icon: widget.isDarkMode
+                                    ? Icons.dark_mode_rounded
+                                    : Icons.light_mode_rounded,
+                                onPressed: widget.onToggleTheme,
+                              ),
+                              Expanded(
+                                child: Center(
+                                  child: Transform.translate(
+                                    offset: const Offset(-4, 0),
+                                    child: const RecordWordmark(
+                                      logoSize: 24,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              _HeaderButton(
+                                onPressed: widget.onOpenProfile,
+                                child: _ProfileBadge(name: user.name),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: compactLayout ? 12 : 20),
+                          if (hasTrips)
+                            Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  top: compactLayout ? 8 : 16,
+                                  bottom: bottomClearance,
+                                ),
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: Transform.translate(
+                                    offset: Offset(
+                                      0,
+                                      compactLayout ? -10 : -18,
+                                    ),
+                                    child: RecordGlobe(
+                                      size: globeSize,
+                                      scene: globeScene,
+                                      selectedCountryCode: selectedCountryCode,
+                                      onCountrySelected: (countryCode) {
+                                        setState(() {
+                                          _selectedCountryCode = countryCode;
+                                        });
+                                      },
+                                      onCountryOpen: _openCountryDetails,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                          else
+                            Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: bottomClearance,
+                                ),
+                                child: Center(
+                                  child: AtlasEmptyState(
+                                    title: strings.text('home.empty'),
+                                    message: strings.text('nav.create'),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   );
                 },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          _HeaderButton(
-                            icon: widget.isDarkMode
-                                ? Icons.dark_mode_rounded
-                                : Icons.light_mode_rounded,
-                          ),
-                          Expanded(
-                            child: Center(
-                              child: Transform.translate(
-                                offset: const Offset(-4, 0),
-                                child: const RecordWordmark(
-                                  logoSize: 24,
-                                  fontSize: 20,
-                                ),
-                              ),
-                            ),
-                          ),
-                          _HeaderButton(
-                            onPressed: widget.onOpenProfile,
-                            child: _ProfileBadge(name: user.name),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: compactLayout ? 18 : 28),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 7,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(
-                            0xFFF59E0B,
-                          ).withValues(alpha: palette.isLight ? 0.18 : 0.22),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                            color: const Color(
-                              0xFFF59E0B,
-                            ).withValues(alpha: 0.26),
-                          ),
-                        ),
-                        child: Text(
-                          user.title,
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: palette.isLight
-                                ? const Color(0xFFB45309)
-                                : const Color(0xFFF8D48B),
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: compactLayout ? 12 : 14),
-                      Text(
-                        strings.homeTitle(user.name),
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontSize: compactLayout ? 26 : 30,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1.1,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        strings.cityCountryProgress(
-                          user.totalCities,
-                          user.totalCountries,
-                        ),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontSize: compactLayout ? 14 : 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: compactLayout ? 14 : 18),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: [
-                          _StatCapsule(
-                            icon: Icons.map_rounded,
-                            label: strings.text('nav.archive'),
-                            value: '${user.totalTrips}',
-                          ),
-                          _StatCapsule(
-                            icon: Icons.calendar_month_rounded,
-                            label: strings.text('nav.planner'),
-                            value: '$upcomingCount',
-                          ),
-                        ],
-                      ),
-                      if (hasTrips)
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              top: compactLayout ? 12 : 18,
-                              bottom: bottomClearance,
-                            ),
-                            child: Align(
-                              alignment: Alignment.topCenter,
-                              child: Transform.translate(
-                                offset: const Offset(0, -4),
-                                child: RecordGlobe(
-                                  size: globeSize,
-                                  scene: globeScene,
-                                  selectedCountryCode: selectedCountryCode,
-                                  onCountrySelected: (countryCode) {
-                                    setState(() {
-                                      _selectedCountryCode = countryCode;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        )
-                      else
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(bottom: bottomClearance),
-                            child: Center(
-                              child: AtlasEmptyState(
-                                title: strings.text('home.empty'),
-                                message: strings.text('nav.create'),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Future<void> _openCountryDetails(String countryCode) async {
+    if (_openingCountry) {
+      return;
+    }
+
+    setState(() {
+      _openingCountry = true;
+      _selectedCountryCode = countryCode;
+    });
+    if (!mounted) {
+      return;
+    }
+
+    await Navigator.of(context).push(
+      PageRouteBuilder<void>(
+        transitionDuration: const Duration(milliseconds: 620),
+        reverseTransitionDuration: const Duration(milliseconds: 320),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            RecordCountryMapScreen(countryCode: countryCode),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final curved = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          );
+          return FadeTransition(
+            opacity: curved,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.92, end: 1.0).animate(curved),
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.04),
+                  end: Offset.zero,
+                ).animate(curved),
+                child: child,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _openingCountry = false;
+      _selectedCountryCode = null;
+    });
   }
 }
 
@@ -301,43 +306,146 @@ class _ProfileBadge extends StatelessWidget {
   }
 }
 
-class _StatCapsule extends StatelessWidget {
-  const _StatCapsule({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
+class _RecordHomeSpaceBackdrop extends StatelessWidget {
+  const _RecordHomeSpaceBackdrop({required this.isDark});
 
-  final IconData icon;
-  final String label;
-  final String value;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.atlasPalette;
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: palette.surfaceGlass.withValues(
-          alpha: palette.isLight ? 0.88 : 0.55,
-        ),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: palette.outline.withValues(alpha: 0.45)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+    return IgnorePointer(
+      child: Stack(
         children: [
-          Icon(icon, size: 16, color: palette.accent),
-          const SizedBox(width: 8),
-          Text(
-            '$label · $value',
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w700,
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: isDark
+                      ? const Alignment(-0.14, -0.82)
+                      : const Alignment(0.0, -0.95),
+                  radius: isDark ? 1.12 : 0.96,
+                  colors: isDark
+                      ? const [
+                          Color(0x2218B8D6),
+                          Color(0x140F4B7F),
+                          Color(0x00000000),
+                        ]
+                      : const [
+                          Color(0x24C8E0FF),
+                          Color(0x10E7F2FF),
+                          Color(0x00000000),
+                        ],
+                  stops: const [0, 0.52, 1],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: -120,
+            left: -40,
+            child: _SpaceNebula(
+              size: isDark ? 320 : 240,
+              color: isDark ? const Color(0x5522D3FF) : const Color(0x44C7E2FF),
+            ),
+          ),
+          Positioned(
+            right: -100,
+            bottom: 120,
+            child: _SpaceNebula(
+              size: isDark ? 360 : 260,
+              color: isDark ? const Color(0x443C2B91) : const Color(0x28FFFFFF),
+            ),
+          ),
+          if (isDark)
+            const Positioned.fill(
+              child: CustomPaint(painter: _HomeStarfieldPainter()),
+            ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: isDark
+                      ? const [
+                          Color(0x00000000),
+                          Color(0x0D030816),
+                          Color(0x38010713),
+                        ]
+                      : const [
+                          Color(0x00FFFFFF),
+                          Color(0x00FFFFFF),
+                          Color(0x14E6F1FF),
+                        ],
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+class _SpaceNebula extends StatelessWidget {
+  const _SpaceNebula({required this.size, required this.color});
+
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [color, color.withValues(alpha: 0.14), Colors.transparent],
+          stops: const [0, 0.42, 1],
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeStarfieldPainter extends CustomPainter {
+  const _HomeStarfieldPainter();
+
+  static const _stars = <({double x, double y, double radius, double alpha})>[
+    (x: 0.08, y: 0.12, radius: 1.7, alpha: 0.44),
+    (x: 0.16, y: 0.24, radius: 1.2, alpha: 0.32),
+    (x: 0.28, y: 0.08, radius: 1.6, alpha: 0.40),
+    (x: 0.46, y: 0.18, radius: 1.8, alpha: 0.42),
+    (x: 0.62, y: 0.10, radius: 1.3, alpha: 0.30),
+    (x: 0.74, y: 0.22, radius: 1.4, alpha: 0.36),
+    (x: 0.88, y: 0.14, radius: 1.9, alpha: 0.46),
+    (x: 0.91, y: 0.32, radius: 1.1, alpha: 0.28),
+    (x: 0.14, y: 0.42, radius: 1.3, alpha: 0.32),
+    (x: 0.33, y: 0.36, radius: 1.4, alpha: 0.34),
+    (x: 0.56, y: 0.44, radius: 1.5, alpha: 0.36),
+    (x: 0.80, y: 0.40, radius: 1.2, alpha: 0.30),
+    (x: 0.10, y: 0.64, radius: 1.5, alpha: 0.36),
+    (x: 0.26, y: 0.72, radius: 1.1, alpha: 0.28),
+    (x: 0.48, y: 0.66, radius: 1.6, alpha: 0.42),
+    (x: 0.67, y: 0.78, radius: 1.2, alpha: 0.30),
+    (x: 0.82, y: 0.62, radius: 1.8, alpha: 0.44),
+    (x: 0.92, y: 0.86, radius: 1.5, alpha: 0.34),
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final star in _stars) {
+      final center = Offset(size.width * star.x, size.height * star.y);
+      final glow = Paint()
+        ..color = Colors.white.withValues(alpha: star.alpha * 0.22)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+      final core = Paint()..color = Colors.white.withValues(alpha: star.alpha);
+      canvas.drawCircle(center, star.radius * 2.2, glow);
+      canvas.drawCircle(center, star.radius, core);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _HomeStarfieldPainter oldDelegate) => false;
 }

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:core_data/core_data.dart';
 import 'package:core_domain/core_domain.dart';
@@ -146,6 +148,70 @@ final recordGlobeSceneProvider =
     anchors: anchors,
     arcs: visibleArcs,
     selectableCountryCodes: anchors.map((anchor) => anchor.countryCode).toSet(),
+  );
+});
+
+final recordCountrySpotlightProvider =
+    Provider.family<RecordCountrySpotlight?, String>((ref, countryCode) {
+  final trips = ref.watch(recordTripsProvider);
+  final matchingTrips = <RecordTrip>[];
+  final matchingLocations = <RecordLocation>[];
+  RecordCountry? primaryCountry;
+
+  for (final trip in trips) {
+    final country = trip.countries.where((item) => item.code == countryCode);
+    if (country.isEmpty) {
+      continue;
+    }
+    matchingTrips.add(trip);
+    primaryCountry ??= country.first;
+    matchingLocations.addAll(
+      trip.locations.where((location) => location.countryCode == countryCode),
+    );
+  }
+
+  if (matchingTrips.isEmpty || primaryCountry == null) {
+    return null;
+  }
+
+  matchingLocations.sort((a, b) => a.date.compareTo(b.date));
+
+  final sourceLocations = matchingLocations.isEmpty
+      ? [
+          for (final trip in matchingTrips)
+            if (trip.locations.isNotEmpty) trip.locations.first,
+        ]
+      : matchingLocations;
+
+  var latSum = 0.0;
+  var lngSum = 0.0;
+  var minLat = sourceLocations.first.lat;
+  var maxLat = sourceLocations.first.lat;
+  var minLng = sourceLocations.first.lng;
+  var maxLng = sourceLocations.first.lng;
+
+  for (final location in sourceLocations) {
+    latSum += location.lat;
+    lngSum += location.lng;
+    minLat = math.min(minLat, location.lat);
+    maxLat = math.max(maxLat, location.lat);
+    minLng = math.min(minLng, location.lng);
+    maxLng = math.max(maxLng, location.lng);
+  }
+
+  return RecordCountrySpotlight(
+    code: primaryCountry.code,
+    name: primaryCountry.name,
+    continent: primaryCountry.continent,
+    color: matchingTrips.first.color,
+    trips: matchingTrips,
+    locations: sourceLocations,
+    centerLat: latSum / sourceLocations.length,
+    centerLng: lngSum / sourceLocations.length,
+    minLat: minLat,
+    maxLat: maxLat,
+    minLng: minLng,
+    maxLng: maxLng,
   );
 });
 

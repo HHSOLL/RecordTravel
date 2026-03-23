@@ -8,4 +8,5 @@ export 'src/screens/record_planner_screen.dart';
 export 'src/screens/record_archive_screen.dart';
 export 'src/screens/record_profile_screen.dart';
 export 'src/screens/record_create_trip_screen.dart';
+export 'src/screens/record_country_map_screen.dart';
 export 'src/screens/record_trip_detail_screen.dart';
