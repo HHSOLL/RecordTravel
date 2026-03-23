@@ -11,7 +11,14 @@ import '../providers/record_provider.dart';
 import 'record_trip_detail_screen.dart';
 
 class RecordPlannerScreen extends ConsumerWidget {
-  const RecordPlannerScreen({super.key});
+  const RecordPlannerScreen({
+    super.key,
+    required this.onImportGallery,
+    required this.onCreateTrip,
+  });
+
+  final VoidCallback onImportGallery;
+  final VoidCallback onCreateTrip;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,6 +30,11 @@ class RecordPlannerScreen extends ConsumerWidget {
         (a, b) =>
             DateTime.parse(a.startDate).compareTo(DateTime.parse(b.startDate)),
       );
+    final nextTrip = upcomingTrips.isEmpty ? null : upcomingTrips.first;
+    final mappedPlaces = upcomingTrips.fold<int>(
+      0,
+      (total, trip) => total + trip.locations.length,
+    );
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -41,10 +53,43 @@ class RecordPlannerScreen extends ConsumerWidget {
                         subtitle: strings.upcomingTrips(upcomingTrips.length),
                       ),
                       const SizedBox(height: 16),
-                      AtlasStatusPill(
-                        label: strings.text('planner.planNew'),
-                        color: const Color(0xFFF59E0B),
-                        icon: Icons.flight_takeoff_rounded,
+                      AtlasHeroPanel(
+                        eyebrow: strings.text('planner.nextDeparture'),
+                        title: strings.text('planner.heroTitle'),
+                        message: strings.text('planner.heroSubtitle'),
+                        trailing: const AtlasOrbitalGraphic(
+                          size: 74,
+                          glowColor: Color(0xFFF59E0B),
+                        ),
+                        metrics: [
+                          AtlasMiniMetric(
+                            label: strings.text('nav.planner'),
+                            value: '${upcomingTrips.length}',
+                            icon: Icons.luggage_rounded,
+                          ),
+                          AtlasMiniMetric(
+                            label: 'Mapped',
+                            value: '$mappedPlaces',
+                            icon: Icons.map_rounded,
+                          ),
+                          AtlasMiniMetric(
+                            label: 'Next',
+                            value: nextTrip?.countries.first.code ?? '--',
+                            icon: Icons.flight_takeoff_rounded,
+                          ),
+                        ],
+                        actions: [
+                          FilledButton.icon(
+                            onPressed: onImportGallery,
+                            icon: const Icon(Icons.photo_library_rounded),
+                            label: Text(strings.text('planner.importLibrary')),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: onCreateTrip,
+                            icon: const Icon(Icons.add_rounded),
+                            label: Text(strings.text('planner.planNew')),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -70,7 +115,10 @@ class RecordPlannerScreen extends ConsumerWidget {
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final trip = upcomingTrips[index];
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 18),
+                        padding: EdgeInsets.only(
+                          bottom: 18,
+                          top: index == 0 ? 6 : 0,
+                        ),
                         child: _PlannerTripCard(trip: trip),
                       );
                     }, childCount: upcomingTrips.length),

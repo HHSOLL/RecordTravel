@@ -13,6 +13,7 @@ class AppPreferencesController extends ChangeNotifier {
   ThemeMode get themeMode => _themeMode;
   Locale get locale => _locale;
   bool get isLoaded => _loaded;
+  bool get followsSystem => _themeMode == ThemeMode.system;
 
   Future<void> load() async {
     if (_loaded) return;
@@ -20,10 +21,6 @@ class AppPreferencesController extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       _themeMode = _themeModeFromString(prefs.getString(_themeKey));
       _locale = Locale(prefs.getString(_languageKey) ?? 'ko');
-      if (_themeMode != ThemeMode.system) {
-        _themeMode = ThemeMode.system;
-        await prefs.setString(_themeKey, ThemeMode.system.name);
-      }
     } catch (_) {
       _themeMode = ThemeMode.system;
       _locale = const Locale('ko');
@@ -39,7 +36,14 @@ class AppPreferencesController extends ChangeNotifier {
     await _persistString(_themeKey, mode.name);
   }
 
-  Future<void> toggleThemeMode() async {
+  Future<void> toggleThemeMode(Brightness effectiveBrightness) async {
+    final nextMode = effectiveBrightness == Brightness.dark
+        ? ThemeMode.light
+        : ThemeMode.dark;
+    await setThemeMode(nextMode);
+  }
+
+  Future<void> useSystemTheme() async {
     await setThemeMode(ThemeMode.system);
   }
 

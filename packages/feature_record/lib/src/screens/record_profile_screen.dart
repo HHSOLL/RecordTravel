@@ -11,21 +11,31 @@ class RecordProfileScreen extends ConsumerWidget {
   const RecordProfileScreen({
     super.key,
     required this.isDarkMode,
+    required this.themeMode,
     required this.languageCode,
+    required this.onThemeModeChanged,
     required this.onLanguageChanged,
     required this.onSignOut,
+    required this.onImportGallery,
+    required this.onRequestSync,
   });
 
   final bool isDarkMode;
+  final ThemeMode themeMode;
   final String languageCode;
+  final ValueChanged<ThemeMode> onThemeModeChanged;
   final ValueChanged<String> onLanguageChanged;
   final VoidCallback onSignOut;
+  final VoidCallback onImportGallery;
+  final VoidCallback onRequestSync;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = RecordStrings.of(context);
     final user = ref.watch(recordUserProvider);
     final session = ref.watch(sessionSnapshotProvider);
+    final sync = ref.watch(syncSnapshotProvider);
+    final photos = ref.watch(photosProvider);
     final theme = Theme.of(context);
     final palette = context.atlasPalette;
 
@@ -42,61 +52,53 @@ class RecordProfileScreen extends ConsumerWidget {
                 subtitle: user.title,
               ),
               const SizedBox(height: 18),
-              AtlasPanel(
-                child: Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 42,
-                      backgroundColor: palette.accentSoft.withValues(
-                        alpha: palette.isLight ? 0.18 : 0.2,
-                      ),
-                      child: Text(
-                        user.name.isEmpty
-                            ? 'U'
-                            : user.name.substring(0, 1).toUpperCase(),
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
+              AtlasHeroPanel(
+                eyebrow: strings.text('profile.workspaceTitle'),
+                title: user.name,
+                message: strings.text('profile.workspaceSubtitle'),
+                trailing: CircleAvatar(
+                  radius: 28,
+                  backgroundColor: palette.accentSoft.withValues(
+                    alpha: palette.isLight ? 0.18 : 0.2,
+                  ),
+                  child: Text(
+                    user.name.isEmpty
+                        ? 'U'
+                        : user.name.substring(0, 1).toUpperCase(),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      user.name,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    AtlasStatusPill(
-                      label: user.title,
-                      color: palette.accentSoft,
-                      icon: Icons.auto_awesome_rounded,
-                    ),
-                    const SizedBox(height: 20),
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        AtlasMiniMetric(
-                          label: strings.text('nav.archive'),
-                          value: '${user.totalTrips}',
-                          icon: Icons.auto_awesome_motion_rounded,
-                        ),
-                        AtlasMiniMetric(
-                          label: 'Cities',
-                          value: '${user.totalCities}',
-                          icon: Icons.location_city_rounded,
-                        ),
-                        AtlasMiniMetric(
-                          label: 'Countries',
-                          value: '${user.totalCountries}',
-                          icon: Icons.public_rounded,
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
+                metrics: [
+                  AtlasMiniMetric(
+                    label: strings.text('nav.archive'),
+                    value: '${user.totalTrips}',
+                    icon: Icons.auto_awesome_motion_rounded,
+                  ),
+                  AtlasMiniMetric(
+                    label: strings.text('profile.photos'),
+                    value: '${photos.length}',
+                    icon: Icons.photo_library_rounded,
+                  ),
+                  AtlasMiniMetric(
+                    label: strings.text('profile.pendingUploads'),
+                    value: '${sync.pendingUploads}',
+                    icon: Icons.cloud_upload_rounded,
+                  ),
+                ],
+                actions: [
+                  FilledButton.icon(
+                    onPressed: onImportGallery,
+                    icon: const Icon(Icons.photo_library_rounded),
+                    label: Text(strings.text('profile.importLibrary')),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: onRequestSync,
+                    icon: const Icon(Icons.sync_rounded),
+                    label: Text(strings.text('profile.syncNow')),
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
               _SectionCard(
@@ -107,24 +109,26 @@ class RecordProfileScreen extends ConsumerWidget {
                       icon: Icons.brightness_auto_rounded,
                       title: strings.text('profile.systemTheme'),
                       subtitle: strings.text('profile.systemThemeSubtitle'),
-                      trailing: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: palette.surfaceMuted,
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(color: palette.outline),
-                        ),
-                        child: Text(
-                          isDarkMode
-                              ? strings.text('profile.darkMode')
-                              : strings.text('profile.lightMode'),
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
+                      trailing: SegmentedButton<ThemeMode>(
+                        showSelectedIcon: false,
+                        segments: [
+                          ButtonSegment(
+                            value: ThemeMode.system,
+                            label: Text(strings.text('profile.systemShort')),
                           ),
-                        ),
+                          ButtonSegment(
+                            value: ThemeMode.light,
+                            label: Text(strings.text('profile.lightShort')),
+                          ),
+                          ButtonSegment(
+                            value: ThemeMode.dark,
+                            label: Text(strings.text('profile.darkShort')),
+                          ),
+                        ],
+                        selected: {themeMode},
+                        onSelectionChanged: (selection) {
+                          onThemeModeChanged(selection.first);
+                        },
                       ),
                     ),
                     const SizedBox(height: 18),

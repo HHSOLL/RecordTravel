@@ -42,11 +42,6 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
               )
               .toList();
 
-    final groupedTrips = <String, List<RecordTrip>>{};
-    for (final trip in filteredTrips) {
-      groupedTrips.putIfAbsent(trip.countries.first.name, () => []).add(trip);
-    }
-
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: AtlasBackground(
@@ -91,6 +86,31 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                           ],
                         ),
                       ),
+                      const SizedBox(height: 18),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          AtlasMiniMetric(
+                            label: 'Trips',
+                            value: '${filteredTrips.length}',
+                            icon: Icons.workspaces_rounded,
+                          ),
+                          AtlasMiniMetric(
+                            label: 'Countries',
+                            value:
+                                '${filteredTrips.map((trip) => trip.countries.first.code).toSet().length}',
+                            icon: Icons.public_rounded,
+                          ),
+                          AtlasMiniMetric(
+                            label: 'Continents',
+                            value:
+                                '${filteredTrips.map((trip) => trip.countries.first.continent).toSet().length}',
+                            icon: Icons.flight_rounded,
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -111,30 +131,20 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
               else
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      for (final entry in groupedTrips.entries) ...[
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8, bottom: 14),
-                          child: Text(
-                            entry.key.toUpperCase(),
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.3,
-                              color: const Color(0xFFF59E0B),
-                            ),
-                          ),
+                  sliver: SliverGrid(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      return _ArchiveTripCard(trip: filteredTrips[index]);
+                    }, childCount: filteredTrips.length),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 14,
+                          crossAxisSpacing: 14,
+                          childAspectRatio: 0.64,
                         ),
-                        for (final trip in entry.value)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 14),
-                            child: _ArchiveTripCard(trip: trip),
-                          ),
-                      ],
-                      const SizedBox(height: 120),
-                    ]),
                   ),
                 ),
+              const SliverToBoxAdapter(child: SizedBox(height: 120)),
             ],
           ),
         ),
@@ -198,75 +208,87 @@ class _ArchiveTripCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(24),
       child: AtlasPanel(
         padding: EdgeInsets.zero,
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 108,
-              height: 128,
+              height: 150,
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.horizontal(
-                  left: Radius.circular(26),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(26),
                 ),
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    tripColor.withValues(alpha: 0.95),
-                    tripColor.withValues(alpha: 0.46),
+                    tripColor.withValues(alpha: 0.96),
+                    tripColor.withValues(alpha: 0.60),
+                    tripColor.withValues(alpha: 0.30),
                   ],
                 ),
               ),
-              child: const Icon(
-                Icons.public_rounded,
-                color: Colors.white,
-                size: 34,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AtlasStatusPill(
+                    label: trip.countries.first.continent,
+                    color: Colors.white,
+                    icon: Icons.public_rounded,
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.public_rounded,
+                    color: Colors.white.withValues(alpha: 0.92),
+                    size: 30,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    trip.title,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      trip.title,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMM d, yyyy').format(endDate)}',
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    trip.description,
+                    style: theme.textTheme.bodyMedium,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Spacer(),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      AtlasStatusPill(
+                        label: trip.countries.first.name,
+                        color: tripColor,
+                        icon: Icons.flight_rounded,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '${DateFormat('MMM d, yyyy').format(startDate)} - ${DateFormat('MMM d, yyyy').format(endDate)}',
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      trip.description,
-                      style: theme.textTheme.bodyMedium,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 14),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        AtlasStatusPill(
-                          label: trip.countries.first.continent,
-                          color: tripColor,
-                          icon: Icons.flight_rounded,
-                        ),
-                        AtlasStatusPill(
-                          label: '${trip.locations.length} stops',
-                          color: context.atlasPalette.accentSoft,
-                          icon: Icons.route_rounded,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                      AtlasStatusPill(
+                        label: '${trip.locations.length} stops',
+                        color: context.atlasPalette.accentSoft,
+                        icon: Icons.route_rounded,
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],

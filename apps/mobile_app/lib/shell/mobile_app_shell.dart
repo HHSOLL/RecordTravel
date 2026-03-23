@@ -1,10 +1,12 @@
 import 'dart:ui' as ui;
 
 import 'package:core_data/core_data.dart';
+import 'package:core_domain/core_domain.dart';
 import 'package:core_navigation/core_navigation.dart';
 import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:feature_journal/feature_journal.dart';
 import 'package:feature_record/feature_record.dart';
 
 import '../app/app_preferences.dart';
@@ -147,20 +149,40 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell> {
       switch (_currentTab) {
         AppTab.home => RecordHomeScreen(
           isDarkMode: Theme.of(context).brightness == Brightness.dark,
+          onToggleTheme: () {
+            ref.read(appPreferencesProvider).toggleThemeMode(
+              Theme.of(context).brightness,
+            );
+          },
           onOpenProfile: () {
             setState(() => _currentTab = AppTab.profile);
           },
         ),
-        AppTab.planner => const RecordPlannerScreen(),
+        AppTab.planner => RecordPlannerScreen(
+          onImportGallery: () => _openPhotoImport(
+            scope: PhotoIngestionScope.library,
+          ),
+          onCreateTrip: _openCreateTrip,
+        ),
         AppTab.archive => const RecordArchiveScreen(),
         AppTab.profile => RecordProfileScreen(
           isDarkMode: Theme.of(context).brightness == Brightness.dark,
+          themeMode: prefs.themeMode,
           languageCode: prefs.locale.languageCode,
+          onThemeModeChanged: (mode) {
+            ref.read(appPreferencesProvider).setThemeMode(mode);
+          },
           onLanguageChanged: (languageCode) {
             ref.read(appPreferencesProvider).setLanguageCode(languageCode);
           },
           onSignOut: () {
             ref.read(sessionRepositoryProvider).signOut();
+          },
+          onImportGallery: () => _openPhotoImport(
+            scope: PhotoIngestionScope.library,
+          ),
+          onRequestSync: () {
+            ref.read(travelAppControllerProvider.notifier).markSyncRequested();
           },
         ),
       };
@@ -170,6 +192,12 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell> {
       context,
       MaterialPageRoute(builder: (_) => const RecordCreateTripScreen()),
     );
+  }
+
+  void _openPhotoImport({
+    PhotoIngestionScope scope = PhotoIngestionScope.selection,
+  }) {
+    showPhotoImportSheet(context, ref, scope: scope);
   }
 }
 
