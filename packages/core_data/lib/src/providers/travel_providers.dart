@@ -285,8 +285,14 @@ class TravelAppController extends Notifier<TravelAppState> {
     return _store.snapshot;
   }
 
-  Future<List<PhotoImportDraft>> preparePhotoImportDrafts({String? tripId}) {
-    return _photoImportService.prepareDrafts(tripId: tripId);
+  Future<List<PhotoImportDraft>> preparePhotoImportDrafts({
+    String? tripId,
+    PhotoIngestionScope scope = PhotoIngestionScope.selection,
+  }) {
+    return _photoImportService.prepareDraftsForScope(
+      tripId: tripId,
+      scope: scope,
+    );
   }
 
   Future<void> createTrip({

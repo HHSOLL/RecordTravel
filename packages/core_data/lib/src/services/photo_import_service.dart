@@ -18,8 +18,15 @@ class PhotoImportService {
   final PlaceInferenceService _placeInferenceService;
 
   Future<List<PhotoImportDraft>> prepareDrafts({String? tripId}) async {
+    return prepareDraftsForScope(tripId: tripId);
+  }
+
+  Future<List<PhotoImportDraft>> prepareDraftsForScope({
+    String? tripId,
+    PhotoIngestionScope scope = PhotoIngestionScope.selection,
+  }) async {
     final raw = await _adapter.pickPhotos(
-      PhotoIngestionRequest(tripId: tripId),
+      PhotoIngestionRequest(tripId: tripId, scope: scope),
     );
     final trips = _localStore.snapshot.trips;
     return raw

@@ -22,6 +22,7 @@ class PlaceRef {
 }
 
 enum MemoryType { note, photo }
+enum PhotoIngestionScope { selection, library }
 
 enum UploadState { localOnly, queued, uploading, uploaded, failed }
 
@@ -323,9 +324,13 @@ class SearchResultItem {
 
 @immutable
 class PhotoIngestionRequest {
-  const PhotoIngestionRequest({this.tripId});
+  const PhotoIngestionRequest({
+    this.tripId,
+    this.scope = PhotoIngestionScope.selection,
+  });
 
   final String? tripId;
+  final PhotoIngestionScope scope;
 }
 
 @immutable

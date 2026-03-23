@@ -185,12 +185,13 @@ Future<void> showPhotoImportSheet(
   BuildContext context,
   WidgetRef ref, {
   String? tripId,
+  PhotoIngestionScope scope = PhotoIngestionScope.selection,
 }) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (_) => _PhotoImportSheet(initialTripId: tripId),
+    builder: (_) => _PhotoImportSheet(initialTripId: tripId, scope: scope),
   );
 }
 
@@ -323,9 +324,13 @@ class _JournalComposerSheetState extends ConsumerState<_JournalComposerSheet> {
 }
 
 class _PhotoImportSheet extends ConsumerStatefulWidget {
-  const _PhotoImportSheet({this.initialTripId});
+  const _PhotoImportSheet({
+    this.initialTripId,
+    required this.scope,
+  });
 
   final String? initialTripId;
+  final PhotoIngestionScope scope;
 
   @override
   ConsumerState<_PhotoImportSheet> createState() => _PhotoImportSheetState();
@@ -341,7 +346,7 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
     _tripId = widget.initialTripId;
     _draftsFuture = ref
         .read(travelAppControllerProvider.notifier)
-        .preparePhotoImportDrafts(tripId: _tripId);
+        .preparePhotoImportDrafts(tripId: _tripId, scope: widget.scope);
   }
 
   @override
@@ -364,13 +369,17 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
               );
             }
             final drafts = snapshot.data ?? const <PhotoImportDraft>[];
+            final isLibrary = widget.scope == PhotoIngestionScope.library;
             if (drafts.isEmpty) {
-              return const SizedBox(
+              return SizedBox(
                 height: 200,
                 child: AtlasEmptyState(
-                  title: 'No photos selected',
-                  message:
-                      'The shared confirmation flow is ready. Select travel photos from the platform picker to continue.',
+                  title: isLibrary
+                      ? 'No gallery photos were available'
+                      : 'No photos selected',
+                  message: isLibrary
+                      ? 'Grant photo access and try scanning the gallery again.'
+                      : 'Select travel photos from the platform picker to continue.',
                 ),
               );
             }
@@ -380,16 +389,21 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
                   (trip) => trip.id == _tripId,
                   orElse: () => trips.first,
                 );
+                final visibleDrafts = isLibrary
+                    ? drafts.take(18).toList(growable: false)
+                    : drafts;
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AtlasHeroPanel(
-                      eyebrow: 'Photo import',
-                      title:
-                          'Import should feel curated before it feels uploaded.',
-                      message:
-                          'Native metadata extraction already happened. Now confirm trip context and inferred places before the files queue for upload.',
+                      eyebrow: isLibrary ? 'Library import' : 'Photo import',
+                      title: isLibrary
+                          ? 'Bring your gallery metadata into the record.'
+                          : 'Import should feel curated before it feels uploaded.',
+                      message: isLibrary
+                          ? 'The app scanned accessible gallery images, inferred places from metadata, and staged a batch import. Review the destination trip, then queue everything locally.'
+                          : 'Native metadata extraction already happened. Now confirm trip context and inferred places before the files queue for upload.',
                       trailing: const AtlasOrbitalGraphic(size: 82),
                       metrics: [
                         AtlasMiniMetric(
@@ -403,13 +417,24 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
                           icon: Icons.luggage_rounded,
                         ),
                         AtlasMiniMetric(
-                          label: 'Queue state',
-                          value: 'Local first',
-                          icon: Icons.cloud_upload_rounded,
+                          label: 'Source',
+                          value: isLibrary ? 'Gallery' : 'Picker',
+                          icon: isLibrary
+                              ? Icons.photo_library_rounded
+                              : Icons.add_photo_alternate_rounded,
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
+                    AtlasSectionHeader(
+                      title: isLibrary
+                          ? 'Batch destination'
+                          : 'Attach selected photos',
+                      subtitle: isLibrary
+                          ? 'All imported metadata will attach to this trip first. You can reorganize later.'
+                          : 'Confirm the trip context before these photo memories queue locally.',
+                    ),
+                    const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       value: _tripId,
                       items: trips
@@ -426,21 +451,27 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    if (isLibrary && drafts.length > visibleDrafts.length)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          'Showing ${visibleDrafts.length} of ${drafts.length} scanned items before queueing the full import.',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
                     Flexible(
                       child: ListView.separated(
                         shrinkWrap: true,
-                        itemCount: drafts.length,
+                        itemCount: visibleDrafts.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 10),
                         itemBuilder: (context, index) {
-                          final draft = drafts[index];
+                          final draft = visibleDrafts[index];
                           return Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF13253B),
+                              color: context.atlasPalette.surfaceMuted,
                               borderRadius: BorderRadius.circular(18),
-                              border: Border.all(
-                                color: const Color(0xFF21405F),
-                              ),
+                              border: Border.all(color: context.atlasPalette.outline),
                             ),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -449,7 +480,7 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
                                   width: 52,
                                   height: 52,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF0D1728),
+                                    color: context.atlasPalette.surfacePanel,
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   alignment: Alignment.center,
@@ -506,6 +537,16 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
                                           context,
                                         ).textTheme.bodyMedium,
                                       ),
+                                      if (isLibrary &&
+                                          draft.metadata.sourcePath == null) ...[
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Metadata-only asset. The original can stay in the photo library until you need it later.',
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodyMedium,
+                                        ),
+                                      ],
                                       if (draft.metadata.byteSize != null) ...[
                                         const SizedBox(height: 8),
                                         Text(
@@ -548,7 +589,11 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
                               Navigator.of(context).pop();
                             },
                             icon: const Icon(Icons.cloud_upload_rounded),
-                            label: Text('Queue ${drafts.length} imports'),
+                            label: Text(
+                              isLibrary
+                                  ? 'Queue ${drafts.length} library items'
+                                  : 'Queue ${drafts.length} imports',
+                            ),
                           ),
                         ),
                       ],

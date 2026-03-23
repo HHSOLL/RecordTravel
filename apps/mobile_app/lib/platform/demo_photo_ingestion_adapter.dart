@@ -7,7 +7,7 @@ class DemoPhotoIngestionAdapter implements PhotoIngestionPlatformAdapter {
     PhotoIngestionRequest request,
   ) async {
     await Future<void>.delayed(const Duration(milliseconds: 250));
-    return [
+    final samples = [
       ExtractedPhotoMetadata(
         id: 'draft-1',
         fileName: 'kyoto-rain.heic',
@@ -33,5 +33,35 @@ class DemoPhotoIngestionAdapter implements PhotoIngestionPlatformAdapter {
         longitude: 126.5312,
       ),
     ];
+    if (request.scope == PhotoIngestionScope.library) {
+      return [
+        ...samples,
+        ExtractedPhotoMetadata(
+          id: 'draft-3',
+          fileName: 'lisbon-tram.jpg',
+          displayName: 'Lisbon Tram Hour',
+          format: 'JPEG',
+          previewLabel: 'LI',
+          takenAt: DateTime(2025, 9, 3, 10, 7),
+          sourcePath: '/demo/lisbon-tram.jpg',
+          byteSize: 1700000,
+          latitude: 38.7223,
+          longitude: -9.1393,
+        ),
+        ExtractedPhotoMetadata(
+          id: 'draft-4',
+          fileName: 'porto-river.jpg',
+          displayName: 'Porto River Blue',
+          format: 'JPEG',
+          previewLabel: 'PO',
+          takenAt: DateTime(2025, 9, 5, 19, 3),
+          sourcePath: '/demo/porto-river.jpg',
+          byteSize: 1560000,
+          latitude: 41.1579,
+          longitude: -8.6291,
+        ),
+      ];
+    }
+    return samples;
   }
 }
