@@ -105,6 +105,18 @@ GOOGLE_MAPS_API_KEY = YOUR_GOOGLE_MAPS_API_KEY
 
 Once that key is present, the migrated Flutter planner and trip detail screens can render real Google Maps tiles.
 
+## Embedded Globe
+
+The mobile home globe is now packaged from the original `record` web renderer and loaded locally inside a Flutter `WebView`. The embedded bundle lives under `apps/mobile_app/assets/web_globe/`.
+
+For iOS debug and simulator builds, the app currently falls back to the native Flutter globe while the embedded `WKWebView` WebGL path is stabilized. Release/device builds keep the bundled web renderer enabled.
+
+If you change the globe source in `record/src/embed/`, rebuild the mobile bundle from the repository root:
+
+```bash
+./scripts/build_record_globe_embed.sh
+```
+
 ## Test
 
 Run package tests from the package directory you are working in. Common entry points:
