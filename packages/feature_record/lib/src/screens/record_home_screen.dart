@@ -14,13 +14,9 @@ import 'record_country_map_screen.dart';
 class RecordHomeScreen extends ConsumerStatefulWidget {
   const RecordHomeScreen({
     super.key,
-    required this.isDarkMode,
-    required this.onToggleTheme,
     this.onOpenProfile,
   });
 
-  final bool isDarkMode;
-  final VoidCallback onToggleTheme;
   final VoidCallback? onOpenProfile;
 
   @override
@@ -110,11 +106,8 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                         children: [
                           Row(
                             children: [
-                              _HeaderButton(
-                                icon: widget.isDarkMode
-                                    ? Icons.dark_mode_rounded
-                                    : Icons.light_mode_rounded,
-                                onPressed: widget.onToggleTheme,
+                              const _HeaderButton(
+                                icon: Icons.dark_mode_rounded,
                               ),
                               Expanded(
                                 child: Center(

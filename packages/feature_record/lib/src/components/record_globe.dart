@@ -116,6 +116,7 @@ class _RecordGlobeState extends State<RecordGlobe>
     final selectedCountryCode = widget.selectedCountryCode;
     final effectiveSelectedCountryCode =
         selectedCountryCode ?? scene.initialCountryCode;
+    final isInteractive = _isDragging || _focusCtrl.isAnimating;
     final visitCounts = {
       for (final anchor in scene.anchors)
         anchor.countryCode: anchor.markerCount,
@@ -150,6 +151,7 @@ class _RecordGlobeState extends State<RecordGlobe>
                   visitCounts: visitCounts,
                   selectedCountryCode: effectiveSelectedCountryCode,
                   isLight: palette.isLight,
+                  polygonStride: isInteractive ? 3 : 1,
                 );
           final selectedCountry = _resolveSelectedCountry(
             effectiveSelectedCountryCode,
@@ -193,45 +195,54 @@ class _RecordGlobeState extends State<RecordGlobe>
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: _TexturedGlobePainter(
-                      assets: assets,
-                      yaw: _yaw,
-                      pitch: _pitch,
-                      style: scene.style,
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: _GlobeStoryPainter(
-                      scene: scene,
-                      projectedAnchors: projectedAnchors,
-                      selectedCountryCode: effectiveSelectedCountryCode,
-                      yaw: _yaw,
-                      pitch: _pitch,
-                      isLight: palette.isLight,
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: CustomPaint(
-                      painter: _CountryOverlayPainter(
-                        countries: projectedCountries,
-                        isLight: palette.isLight,
+                RepaintBoundary(
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned.fill(
+                        child: CustomPaint(
+                          painter: _TexturedGlobePainter(
+                            assets: assets,
+                            yaw: _yaw,
+                            pitch: _pitch,
+                            style: scene.style,
+                            isInteractive: isInteractive,
+                          ),
+                        ),
                       ),
-                    ),
+                      Positioned.fill(
+                        child: CustomPaint(
+                          painter: _GlobeStoryPainter(
+                            scene: scene,
+                            projectedAnchors: projectedAnchors,
+                            selectedCountryCode: effectiveSelectedCountryCode,
+                            yaw: _yaw,
+                            pitch: _pitch,
+                            isLight: palette.isLight,
+                          ),
+                        ),
+                      ),
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: CustomPaint(
+                            painter: _CountryOverlayPainter(
+                              countries: projectedCountries,
+                              isLight: palette.isLight,
+                              isInteractive: isInteractive,
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (selectedCountry != null)
+                        _SelectedCountryPin(
+                          projectedCountry: selectedCountry,
+                          onTap: () => widget.onCountryOpen?.call(
+                            selectedCountry.country.code,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                if (selectedCountry != null)
-                  _SelectedCountryPin(
-                    projectedCountry: selectedCountry,
-                    onTap: () => widget.onCountryOpen?.call(
-                      selectedCountry.country.code,
-                    ),
-                  ),
               ],
             ),
           );
@@ -735,12 +746,14 @@ class _TexturedGlobePainter extends CustomPainter {
     required this.yaw,
     required this.pitch,
     required this.style,
+    required this.isInteractive,
   });
 
   final _GlobeAssets? assets;
   final double yaw;
   final double pitch;
   final RecordGlobeStyle style;
+  final bool isInteractive;
 
   static final Float64List _identityMatrix = Float64List.fromList([
     1,
@@ -777,11 +790,18 @@ class _TexturedGlobePainter extends CustomPainter {
 
     final outerGlow = Paint()
       ..color = (isLight ? const Color(0xFF9FD5FF) : const Color(0xFF2B8BFF))
-          .withValues(alpha: isLight ? 0.12 : 0.10)
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, isLight ? 18 : 22);
+          .withValues(
+            alpha: isInteractive
+                ? (isLight ? 0.06 : 0.05)
+                : (isLight ? 0.12 : 0.10),
+          )
+      ..maskFilter = MaskFilter.blur(
+        BlurStyle.normal,
+        isInteractive ? 10 : (isLight ? 18 : 22),
+      );
     canvas.drawCircle(center, radius + (isLight ? 2.5 : 3.0), outerGlow);
 
-    if (!isLight) {
+    if (!isLight && !isInteractive) {
       final purpleGlow = Paint()
         ..color = const Color(0xFF7E5CF7).withValues(alpha: 0.05)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 26);
@@ -824,11 +844,14 @@ class _TexturedGlobePainter extends CustomPainter {
         yaw: yaw,
         pitch: pitch,
         style: style,
+        isInteractive: isInteractive,
       );
 
       final earthPaint = Paint()
         ..isAntiAlias = true
-        ..filterQuality = FilterQuality.low
+        ..filterQuality = isInteractive
+            ? FilterQuality.none
+            : FilterQuality.low
         ..color = Colors.white.withValues(alpha: isLight ? 0.88 : 0.82)
         ..shader = ui.ImageShader(
           earth,
@@ -839,61 +862,67 @@ class _TexturedGlobePainter extends CustomPainter {
       canvas.drawVertices(mesh, ui.BlendMode.srcOver, earthPaint);
     }
 
-    final atmosphere = Paint()
-      ..shader = RadialGradient(
-        center: const Alignment(-0.12, -0.18),
-        radius: 1.02,
-        colors: isLight
-            ? const [Color(0x0CF7FBFF), Color(0x10E6F4FF), Color(0x124776A4)]
-            : const [Color(0x04000000), Color(0x06004173), Color(0x18040C1D)],
-        stops: const [0, 0.74, 1],
-      ).createShader(rect);
-    canvas.drawCircle(center, radius, atmosphere);
+    if (!isInteractive) {
+      final atmosphere = Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(-0.12, -0.18),
+          radius: 1.02,
+          colors: isLight
+              ? const [Color(0x0CF7FBFF), Color(0x10E6F4FF), Color(0x124776A4)]
+              : const [
+                  Color(0x04000000),
+                  Color(0x06004173),
+                  Color(0x18040C1D),
+                ],
+          stops: const [0, 0.74, 1],
+        ).createShader(rect);
+      canvas.drawCircle(center, radius, atmosphere);
 
-    final glaze = Paint()
-      ..shader = RadialGradient(
-        center: const Alignment(-0.18, -0.20),
-        radius: 1.0,
-        colors: isLight
-            ? [
-                const Color(0x22FFFFFF),
-                const Color(0x14F3F9FF),
-                const Color(0x10CDE3D1),
-                const Color(0x00FFFFFF),
-              ]
-            : [
-                const Color(0x0E00B4FF),
-                const Color(0x0C004C8F),
-                const Color(0x0A8A5CF7),
-                const Color(0x00000000),
-              ],
-      ).createShader(rect);
-    canvas.drawRect(rect, glaze);
+      final glaze = Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(-0.18, -0.20),
+          radius: 1.0,
+          colors: isLight
+              ? [
+                  const Color(0x22FFFFFF),
+                  const Color(0x14F3F9FF),
+                  const Color(0x10CDE3D1),
+                  const Color(0x00FFFFFF),
+                ]
+              : [
+                  const Color(0x0E00B4FF),
+                  const Color(0x0C004C8F),
+                  const Color(0x0A8A5CF7),
+                  const Color(0x00000000),
+                ],
+        ).createShader(rect);
+      canvas.drawRect(rect, glaze);
 
-    final lighting = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.centerLeft,
-        end: Alignment.centerRight,
-        colors: [
-          Colors.white.withValues(alpha: isLight ? 0.06 : 0.05),
-          Colors.transparent,
-          isLight ? const Color(0x0C165386) : const Color(0x50000915),
-        ],
-        stops: const [0, 0.38, 1],
-      ).createShader(rect);
-    canvas.drawRect(rect, lighting);
+      final lighting = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            Colors.white.withValues(alpha: isLight ? 0.06 : 0.05),
+            Colors.transparent,
+            isLight ? const Color(0x0C165386) : const Color(0x50000915),
+          ],
+          stops: const [0, 0.38, 1],
+        ).createShader(rect);
+      canvas.drawRect(rect, lighting);
 
-    final specular = Paint()
-      ..shader = RadialGradient(
-        center: const Alignment(-0.34, -0.28),
-        radius: 0.46,
-        colors: [
-          Colors.white.withValues(alpha: isLight ? 0.08 : 0.08),
-          Colors.white.withValues(alpha: isLight ? 0.03 : 0.03),
-          Colors.transparent,
-        ],
-      ).createShader(rect);
-    canvas.drawCircle(center, radius, specular);
+      final specular = Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(-0.34, -0.28),
+          radius: 0.46,
+          colors: [
+            Colors.white.withValues(alpha: isLight ? 0.08 : 0.08),
+            Colors.white.withValues(alpha: isLight ? 0.03 : 0.03),
+            Colors.transparent,
+          ],
+        ).createShader(rect);
+      canvas.drawCircle(center, radius, specular);
+    }
 
     final edgeFeather = Paint()
       ..shader = RadialGradient(
@@ -923,7 +952,8 @@ class _TexturedGlobePainter extends CustomPainter {
     return oldDelegate.assets != assets ||
         oldDelegate.yaw != yaw ||
         oldDelegate.pitch != pitch ||
-        oldDelegate.style != style;
+        oldDelegate.style != style ||
+        oldDelegate.isInteractive != isInteractive;
   }
 }
 
@@ -999,10 +1029,12 @@ class _CountryOverlayPainter extends CustomPainter {
   const _CountryOverlayPainter({
     required this.countries,
     required this.isLight,
+    required this.isInteractive,
   });
 
   final List<_ProjectedCountry> countries;
   final bool isLight;
+  final bool isInteractive;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1026,12 +1058,18 @@ class _CountryOverlayPainter extends CustomPainter {
         );
       final glow = Paint()
         ..style = PaintingStyle.fill
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10)
         ..color = country.fillColor.withValues(
           alpha: country.isSelected
-              ? (isLight ? 0.20 : 0.18)
-              : (isLight ? 0.10 : 0.08),
+              ? (isInteractive
+                    ? (isLight ? 0.12 : 0.10)
+                    : (isLight ? 0.20 : 0.18))
+              : (isInteractive
+                    ? (isLight ? 0.05 : 0.04)
+                    : (isLight ? 0.10 : 0.08)),
         );
+      if (!isInteractive) {
+        glow.maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+      }
 
       for (final path in country.paths) {
         final bounds = path.getBounds();
@@ -1049,7 +1087,9 @@ class _CountryOverlayPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _CountryOverlayPainter oldDelegate) {
-    return oldDelegate.countries != countries || oldDelegate.isLight != isLight;
+    return oldDelegate.countries != countries ||
+        oldDelegate.isLight != isLight ||
+        oldDelegate.isInteractive != isInteractive;
   }
 }
 
@@ -1062,6 +1102,7 @@ List<_ProjectedCountry> _projectCountries(
   required String? selectedCountryCode,
   required bool isLight,
   bool includeUnvisitedPaths = false,
+  int polygonStride = 1,
 }) {
   final maxVisits = visitCounts.values.isEmpty
       ? 1
@@ -1088,7 +1129,14 @@ List<_ProjectedCountry> _projectCountries(
     final paths = <Path>[];
     for (final polygon in country.polygons) {
       final projectedPoints = <_ProjectedPoint>[];
-      for (final point in polygon) {
+      final sampledPolygon = polygonStride <= 1 || polygon.length <= 12
+          ? polygon
+          : [
+              for (var index = 0; index < polygon.length; index += polygonStride)
+                polygon[index],
+              if ((polygon.length - 1) % polygonStride != 0) polygon.last,
+            ];
+      for (final point in sampledPolygon) {
         projectedPoints.add(
           _projectLatLng(
             point.latitude,
@@ -1107,7 +1155,7 @@ List<_ProjectedCountry> _projectCountries(
       }
       paths.addAll(
         _buildCountryPaths(
-          polygon,
+          sampledPolygon,
           projectedPoints,
           size,
           skipAntiMeridianPolygons: !includeUnvisitedPaths,
@@ -1329,10 +1377,13 @@ class _SphereMesh {
     required double yaw,
     required double pitch,
     required RecordGlobeStyle style,
+    required bool isInteractive,
   }) {
     final segments = math.max(
-      style == RecordGlobeStyle.storybookLight ? 104 : 100,
-      (size.width * 0.28).round(),
+      style == RecordGlobeStyle.storybookLight
+          ? (isInteractive ? 58 : 84)
+          : (isInteractive ? 60 : 88),
+      (size.width * (isInteractive ? 0.16 : 0.22)).round(),
     );
     final rows = segments;
     final columns = segments;

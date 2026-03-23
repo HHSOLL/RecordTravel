@@ -10,20 +10,14 @@ import '../providers/record_provider.dart';
 class RecordProfileScreen extends ConsumerWidget {
   const RecordProfileScreen({
     super.key,
-    required this.isDarkMode,
-    required this.themeMode,
     required this.languageCode,
-    required this.onThemeModeChanged,
     required this.onLanguageChanged,
     required this.onSignOut,
     required this.onImportGallery,
     required this.onRequestSync,
   });
 
-  final bool isDarkMode;
-  final ThemeMode themeMode;
   final String languageCode;
-  final ValueChanged<ThemeMode> onThemeModeChanged;
   final ValueChanged<String> onLanguageChanged;
   final VoidCallback onSignOut;
   final VoidCallback onImportGallery;
@@ -106,30 +100,9 @@ class RecordProfileScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     _PreferenceRow(
-                      icon: Icons.brightness_auto_rounded,
-                      title: strings.text('profile.systemTheme'),
+                      icon: Icons.dark_mode_rounded,
+                      title: strings.text('profile.darkMode'),
                       subtitle: strings.text('profile.systemThemeSubtitle'),
-                      trailing: SegmentedButton<ThemeMode>(
-                        showSelectedIcon: false,
-                        segments: [
-                          ButtonSegment(
-                            value: ThemeMode.system,
-                            label: Text(strings.text('profile.systemShort')),
-                          ),
-                          ButtonSegment(
-                            value: ThemeMode.light,
-                            label: Text(strings.text('profile.lightShort')),
-                          ),
-                          ButtonSegment(
-                            value: ThemeMode.dark,
-                            label: Text(strings.text('profile.darkShort')),
-                          ),
-                        ],
-                        selected: {themeMode},
-                        onSelectionChanged: (selection) {
-                          onThemeModeChanged(selection.first);
-                        },
-                      ),
                     ),
                     const SizedBox(height: 18),
                     Align(

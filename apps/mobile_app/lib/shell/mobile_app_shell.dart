@@ -148,12 +148,6 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell> {
   Widget _buildCurrentPage(AppPreferencesController prefs) =>
       switch (_currentTab) {
         AppTab.home => RecordHomeScreen(
-          isDarkMode: Theme.of(context).brightness == Brightness.dark,
-          onToggleTheme: () {
-            ref.read(appPreferencesProvider).toggleThemeMode(
-              Theme.of(context).brightness,
-            );
-          },
           onOpenProfile: () {
             setState(() => _currentTab = AppTab.profile);
           },
@@ -166,12 +160,7 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell> {
         ),
         AppTab.archive => const RecordArchiveScreen(),
         AppTab.profile => RecordProfileScreen(
-          isDarkMode: Theme.of(context).brightness == Brightness.dark,
-          themeMode: prefs.themeMode,
           languageCode: prefs.locale.languageCode,
-          onThemeModeChanged: (mode) {
-            ref.read(appPreferencesProvider).setThemeMode(mode);
-          },
           onLanguageChanged: (languageCode) {
             ref.read(appPreferencesProvider).setLanguageCode(languageCode);
           },

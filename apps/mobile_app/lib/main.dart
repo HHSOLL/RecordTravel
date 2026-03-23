@@ -30,7 +30,7 @@ class TravelAtlasApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AtlasTheme.buildTheme(brightness: Brightness.light),
       darkTheme: AtlasTheme.buildTheme(brightness: Brightness.dark),
-      themeMode: prefs.themeMode,
+      themeMode: prefs.effectiveThemeMode,
       locale: prefs.locale,
       supportedLocales: const [Locale('ko'), Locale('en')],
       localizationsDelegates: const [

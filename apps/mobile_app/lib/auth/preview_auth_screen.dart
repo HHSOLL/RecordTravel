@@ -37,7 +37,6 @@ class _PreviewAuthScreenState extends ConsumerState<PreviewAuthScreen> {
     final theme = Theme.of(context);
     final palette = context.atlasPalette;
     final isKorean = Localizations.localeOf(context).languageCode == 'ko';
-    final effectiveBrightness = theme.brightness;
 
     return Scaffold(
       body: AtlasBackground(
@@ -85,61 +84,6 @@ class _PreviewAuthScreenState extends ConsumerState<PreviewAuthScreen> {
                                 .read(appPreferencesProvider)
                                 .setLanguageCode(selection.first);
                           },
-                        ),
-                        PopupMenuButton<ThemeMode>(
-                          tooltip: isKorean ? '테마 모드' : 'Theme mode',
-                          initialValue: prefs.themeMode,
-                          onSelected: (mode) {
-                            ref.read(appPreferencesProvider).setThemeMode(mode);
-                          },
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: ThemeMode.system,
-                              child: Text(isKorean ? '시스템' : 'System'),
-                            ),
-                            PopupMenuItem(
-                              value: ThemeMode.light,
-                              child: Text(isKorean ? '라이트' : 'Light'),
-                            ),
-                            PopupMenuItem(
-                              value: ThemeMode.dark,
-                              child: Text(isKorean ? '다크' : 'Dark'),
-                            ),
-                          ],
-                          child: Container(
-                            height: 40,
-                            padding: const EdgeInsets.symmetric(horizontal: 14),
-                            decoration: BoxDecoration(
-                              color: palette.surfaceGlass.withValues(
-                                alpha: palette.isLight ? 0.82 : 0.62,
-                              ),
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                color: palette.outline.withValues(alpha: 0.22),
-                              ),
-                            ),
-                            alignment: Alignment.center,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  effectiveBrightness == Brightness.dark
-                                      ? Icons.dark_mode_rounded
-                                      : Icons.light_mode_rounded,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  prefs.followsSystem
-                                      ? (isKorean ? '시스템' : 'System')
-                                      : effectiveBrightness == Brightness.dark
-                                      ? (isKorean ? '다크' : 'Dark')
-                                      : (isKorean ? '라이트' : 'Light'),
-                                  style: theme.textTheme.labelLarge,
-                                ),
-                              ],
-                            ),
-                          ),
                         ),
                       ],
                     );
