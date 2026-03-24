@@ -52,6 +52,30 @@ Rules:
 
 All three tabs read the same projection object. No tab owns a separate data model.
 
+### Planned-only semantics
+
+Planned trips with no recorded journal entries still project into the same graph.
+The semantics are fixed per tab:
+
+- `Map`: render planned stops and dashed planned routes from synthetic planned locations
+- `Timeline`: render a planned segment event for each planned-only trip shell
+- `Album`: render a planned cover card when no recorded photo-backed moments exist
+
+Past empty shells do not count as visited countries and do not generate country
+projections.
+
+### Globe picking contract
+
+The 3D globe uses country-surface picking instead of marker hit-testing:
+
+1. Tap screen position
+2. Raycast against the earth sphere
+3. Read UV coordinates from the sphere hit
+4. Resolve the country code through the offline lookup grid
+5. Treat ocean pixels as empty-space taps
+
+That contract keeps wide country surfaces selectable without enlarging marker hitboxes.
+
 ## Design constraints
 
 - 3D home interaction stays on the native Flutter renderer path.

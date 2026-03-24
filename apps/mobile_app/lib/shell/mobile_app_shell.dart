@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:core_data/core_data.dart';
@@ -18,8 +19,41 @@ class MobileAppShell extends ConsumerStatefulWidget {
   ConsumerState<MobileAppShell> createState() => _MobileAppShellState();
 }
 
-class _MobileAppShellState extends ConsumerState<MobileAppShell> {
+class _MobileAppShellState extends ConsumerState<MobileAppShell>
+    with WidgetsBindingObserver {
   AppTab _currentTab = AppTab.home;
+  Timer? _recordTimeRefreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _recordTimeRefreshTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) => _refreshRecordTime(),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _refreshRecordTime();
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      _refreshRecordTime();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _recordTimeRefreshTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -153,9 +187,8 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell> {
           },
         ),
         AppTab.planner => RecordPlannerScreen(
-          onImportGallery: () => _openPhotoImport(
-            scope: PhotoIngestionScope.library,
-          ),
+          onImportGallery: () =>
+              _openPhotoImport(scope: PhotoIngestionScope.library),
           onCreateTrip: _openCreateTrip,
         ),
         AppTab.archive => const RecordArchiveScreen(),
@@ -167,9 +200,8 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell> {
           onSignOut: () {
             ref.read(sessionRepositoryProvider).signOut();
           },
-          onImportGallery: () => _openPhotoImport(
-            scope: PhotoIngestionScope.library,
-          ),
+          onImportGallery: () =>
+              _openPhotoImport(scope: PhotoIngestionScope.library),
           onRequestSync: () {
             ref.read(travelAppControllerProvider.notifier).markSyncRequested();
           },
@@ -187,6 +219,10 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell> {
     PhotoIngestionScope scope = PhotoIngestionScope.selection,
   }) {
     showPhotoImportSheet(context, ref, scope: scope);
+  }
+
+  void _refreshRecordTime() {
+    ref.read(recordCurrentTimeProvider.notifier).state = DateTime.now();
   }
 }
 

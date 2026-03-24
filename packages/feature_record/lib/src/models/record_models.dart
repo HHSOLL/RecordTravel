@@ -25,6 +25,7 @@ class RecordLocation {
     required this.date,
     required this.photos,
     this.isPlanned = false,
+    this.isSynthetic = false,
   });
 
   final String id;
@@ -36,6 +37,7 @@ class RecordLocation {
   final String date;
   final List<String> photos;
   final bool isPlanned;
+  final bool isSynthetic;
 }
 
 @immutable
@@ -70,6 +72,13 @@ class RecordTrip {
       0, (count, location) => count + location.photos.length);
 
   int get stopCount => locations.length;
+  bool get hasRecordedLocations =>
+      locations.any((location) => !location.isSynthetic);
+  bool get isPlannedShell =>
+      isUpcoming &&
+      locations.length == 1 &&
+      locations.first.isSynthetic &&
+      locations.first.isPlanned;
 
   RecordTrip copyWith({
     String? title,

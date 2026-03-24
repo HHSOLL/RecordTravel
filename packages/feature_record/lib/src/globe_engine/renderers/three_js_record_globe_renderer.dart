@@ -8,9 +8,11 @@ import '../../globe/domain/entities/record_globe_country.dart';
 import '../../globe/domain/entities/record_globe_scene_spec.dart';
 import '../controllers/camera_controller.dart';
 import '../controllers/gesture_controller.dart';
+import '../picking/record_country_lookup_grid.dart';
 import '../record_globe_camera_state.dart';
 import '../record_globe_engine.dart';
 import '../record_globe_engine_config.dart';
+import 'record_globe_country_render_signature.dart';
 
 class ThreeJsRecordGlobeRenderer extends RecordGlobeEngine {
   const ThreeJsRecordGlobeRenderer();
@@ -66,6 +68,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
   late three.Scene _scene;
   late three.PerspectiveCamera _camera;
   late three.Group _globeRoot;
+  three.Mesh? _earthMesh;
   RecordGlobeCameraState _cameraState = const RecordGlobeCameraState(
     yaw: 0.3,
     pitch: -0.18,
@@ -73,6 +76,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
   );
   three.Texture? _baseTexture;
   three.Texture? _borderTexture;
+  RecordCountryLookupGrid? _countryLookupGrid;
 
   bool _setupComplete = false;
   bool _gestureActive = false;
@@ -105,8 +109,10 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     final previousScene = oldWidget.config.scene;
     final nextScene = widget.config.scene;
     final styleChanged = oldWidget.config.style != widget.config.style;
-    final countriesChanged =
-        !_hasSameCountries(previousScene?.countries, nextScene?.countries);
+    final countriesChanged = !hasSameCountryRenderState(
+      previousScene?.countries,
+      nextScene?.countries,
+    );
 
     if (styleChanged || countriesChanged) {
       _rebuildSceneObjects(nextScene);
@@ -196,6 +202,10 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
 
     _baseTexture = baseTexture;
     _borderTexture = borderTexture;
+    _countryLookupGrid = await RecordCountryLookupGrid.load(
+      gridAsset: scene.assetSet.countryLookupGridAsset,
+      paletteAsset: scene.assetSet.countryLookupPaletteAsset,
+    );
 
     if (baseTexture != null) {
       baseTexture.needsUpdate = true;
@@ -213,6 +223,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       three.SphereGeometry(_globeRadius, _earthSegments, _earthSegments),
       earthMaterial,
     );
+    _earthMesh = earthMesh;
     _globeRoot.add(earthMesh);
 
     final borderMaterial = three.MeshPhongMaterial.fromMap({
@@ -268,6 +279,8 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
 
   void _clearSceneObjects() {
     _markersByCountry.clear();
+    _earthMesh = null;
+    _countryLookupGrid = null;
     _disposeTextures();
     if (!_setupComplete && _globeRoot.children.isEmpty) {
       return;
@@ -346,29 +359,6 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     );
     mesh.userData['countryCode'] = country.code;
     return _MarkerHandle(country: country, mesh: mesh);
-  }
-
-  bool _hasSameCountries(
-    List<RecordGlobeCountry>? previous,
-    List<RecordGlobeCountry>? next,
-  ) {
-    if (identical(previous, next)) {
-      return true;
-    }
-    if (previous == null || next == null || previous.length != next.length) {
-      return false;
-    }
-    for (var index = 0; index < previous.length; index += 1) {
-      final prev = previous[index];
-      final current = next[index];
-      if (prev.code != current.code ||
-          prev.visitCount != current.visitCount ||
-          prev.anchorLatitude != current.anchorLatitude ||
-          prev.anchorLongitude != current.anchorLongitude) {
-        return false;
-      }
-    }
-    return true;
   }
 
   void _tick(double dt) {
@@ -599,7 +589,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
   }
 
   void _handleTapUp(TapUpDetails details) {
-    if (!_setupComplete || _markersByCountry.isEmpty) {
+    if (!_setupComplete || _earthMesh == null || _countryLookupGrid == null) {
       return;
     }
 
@@ -615,18 +605,29 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     );
 
     _raycaster.setFromCamera(ndc, _camera);
-    final hits = _raycaster.intersectObjects(
-      _markersByCountry.values.map((marker) => marker.mesh).toList(),
-    );
+    final hits = _raycaster.intersectObject(_earthMesh!);
 
     if (hits.isEmpty) {
       widget.onCountrySelected?.call(null);
       return;
     }
 
-    final object = hits.first.object;
-    final countryCode = object?.userData['countryCode'] as String?;
+    final hit = hits.first;
+    final uv = hit.uv;
+    String? countryCode;
+    if (uv != null) {
+      countryCode = _countryLookupGrid!.countryCodeForUv(uv.x, uv.y);
+    } else if (hit.point != null) {
+      final localPoint = _earthMesh!.worldToLocal(hit.point!.clone());
+      countryCode = RecordCountrySurfacePicker(
+        lookupGrid: _countryLookupGrid!,
+      ).countryCodeForLocalPoint(
+        vm.Vector3(localPoint.x, localPoint.y, localPoint.z),
+      );
+    }
+
     if (countryCode == null) {
+      widget.onCountrySelected?.call(null);
       return;
     }
 

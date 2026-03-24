@@ -20,6 +20,7 @@ class RecordTimelineMoment {
     required this.summary,
     required this.photoLabels,
     required this.isPlanned,
+    required this.isSynthetic,
   });
 
   final String id;
@@ -31,6 +32,7 @@ class RecordTimelineMoment {
   final String summary;
   final List<String> photoLabels;
   final bool isPlanned;
+  final bool isSynthetic;
 }
 
 @immutable
@@ -56,6 +58,7 @@ class RecordAlbumMoment {
     required this.photoCount,
     required this.summary,
     required this.isPlanned,
+    required this.isSynthetic,
   });
 
   final String id;
@@ -67,6 +70,7 @@ class RecordAlbumMoment {
   final int photoCount;
   final String summary;
   final bool isPlanned;
+  final bool isSynthetic;
 }
 
 @immutable

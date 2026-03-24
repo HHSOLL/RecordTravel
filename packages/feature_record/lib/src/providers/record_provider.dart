@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:core_data/core_data.dart';
 import 'package:core_domain/core_domain.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../domain/build_record_travel_graph.dart';
 import '../domain/record_travel_graph.dart';
@@ -25,7 +26,8 @@ final recordTripsProvider = Provider<List<RecordTrip>>((ref) {
   return ref.watch(recordTravelGraphProvider).trips;
 });
 
-final recordCurrentTimeProvider = Provider<DateTime>((ref) => DateTime.now());
+final recordCurrentTimeProvider =
+    StateProvider<DateTime>((ref) => DateTime.now());
 
 final recordTravelGraphProvider = Provider<RecordTravelGraph>((ref) {
   return buildRecordTravelGraph(
@@ -55,6 +57,8 @@ final recordGlobeSceneSpecProvider =
           : 'assets/globe/earth_storybook_dark.png',
       borderOverlayTextureAsset:
           'assets/globe/earth_borders_overlay_v1_4096.png',
+      countryLookupGridAsset: 'assets/globe/country_lookup_v1.bin',
+      countryLookupPaletteAsset: 'assets/globe/country_lookup_v1_palette.json',
     ),
     initialCountryCode: initialCountryCode,
   );

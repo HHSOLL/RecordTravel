@@ -78,6 +78,7 @@ RecordTravelGraph buildRecordTravelGraph({
         summary: entry.body,
         photoLabels: photoLabels,
         isPlanned: trip.isUpcoming,
+        isSynthetic: false,
       ),
     );
   }
@@ -107,20 +108,24 @@ RecordTrip _mapTrip({
   final sortedEntries = [...entries]
     ..sort((a, b) => a.recordedAt.compareTo(b.recordedAt));
   final countries = _countriesForTrip(trip, sortedEntries);
+  final isUpcoming = trip.startDate.isAfter(now);
   final locations = sortedEntries.isEmpty
-      ? [
-          RecordLocation(
-            id: 'hero-${trip.id}',
-            name: trip.heroPlace.cityName,
-            countryCode: trip.heroPlace.countryCode,
-            countryName: trip.heroPlace.countryName,
-            lat: trip.heroPlace.latitude ?? 37.5665,
-            lng: trip.heroPlace.longitude ?? 126.9780,
-            date: trip.startDate.toIso8601String(),
-            photos: const [],
-            isPlanned: trip.startDate.isAfter(now),
-          ),
-        ]
+      ? (isUpcoming
+          ? [
+              RecordLocation(
+                id: 'hero-${trip.id}',
+                name: trip.heroPlace.cityName,
+                countryCode: trip.heroPlace.countryCode,
+                countryName: trip.heroPlace.countryName,
+                lat: trip.heroPlace.latitude ?? 37.5665,
+                lng: trip.heroPlace.longitude ?? 126.9780,
+                date: trip.startDate.toIso8601String(),
+                photos: const [],
+                isPlanned: true,
+                isSynthetic: true,
+              ),
+            ]
+          : const <RecordLocation>[])
       : sortedEntries.map((entry) {
           final relatedPhotoLabels = <String>[
             for (final photoId in entry.photoAssetIds)
@@ -135,7 +140,8 @@ RecordTrip _mapTrip({
             lng: entry.place.longitude ?? trip.heroPlace.longitude ?? 126.9780,
             date: entry.recordedAt.toIso8601String(),
             photos: relatedPhotoLabels,
-            isPlanned: trip.startDate.isAfter(now),
+            isPlanned: isUpcoming,
+            isSynthetic: false,
           );
         }).toList(growable: false);
 
@@ -147,7 +153,7 @@ RecordTrip _mapTrip({
     endDate: trip.endDate.toIso8601String(),
     description: trip.subtitle.isNotEmpty ? trip.subtitle : trip.coverHint,
     coverImage: trip.coverHint,
-    isUpcoming: trip.startDate.isAfter(now),
+    isUpcoming: isUpcoming,
     locations: locations,
     color: _colorForCountry(countries.first.code),
     companions: const [],
@@ -264,20 +270,43 @@ class _CountryProjectionDraft {
       );
     final sortedLocations = [..._locations]
       ..sort((a, b) => a.date.compareTo(b.date));
-    final sortedMoments = [..._moments]
+
+    final plannedShellTrips = sortedTrips
+        .where(
+          (trip) =>
+              trip.isPlannedShell &&
+              trip.countries.any((country) => country.code == code),
+        )
+        .toList(growable: false);
+    final shellMoments = [
+      for (final trip in plannedShellTrips)
+        RecordTimelineMoment(
+          id: 'planned-shell-${trip.id}-$code',
+          tripId: trip.id,
+          tripTitle: trip.title,
+          locationName: trip.locations.first.name,
+          happenedAt: DateTime.parse(trip.startDate),
+          title: trip.title,
+          summary: trip.description,
+          photoLabels: const [],
+          isPlanned: true,
+          isSynthetic: true,
+        ),
+    ];
+    final allMoments = [..._moments, ...shellMoments]
       ..sort((a, b) => b.happenedAt.compareTo(a.happenedAt));
 
-    final visitCount =
-        sortedLocations.where((location) => !location.isPlanned).length;
+    final visitCount = sortedLocations
+        .where((location) => !location.isPlanned && !location.isSynthetic)
+        .length;
     final plannedStopCount =
         sortedLocations.where((location) => location.isPlanned).length;
-    final photoCount = sortedMoments.fold<int>(
+    final photoCount = allMoments.fold<int>(
       0,
       (count, moment) => count + moment.photoLabels.length,
     );
-    final noteCount = sortedMoments
-        .where((moment) => moment.summary.trim().isNotEmpty)
-        .length;
+    final noteCount =
+        allMoments.where((moment) => moment.summary.trim().isNotEmpty).length;
     final hasUpcomingTrip = sortedTrips.any((trip) => trip.isUpcoming);
     final recentThreshold = now.subtract(const Duration(days: 90));
     final hasRecentVisit = sortedLocations.any((location) {
@@ -301,7 +330,7 @@ class _CountryProjectionDraft {
     final activityLevel = _activityLevel(activityScore);
 
     final timelineGroups = <DateTime, List<RecordTimelineMoment>>{};
-    for (final moment in sortedMoments) {
+    for (final moment in allMoments) {
       final key = DateTime(
         moment.happenedAt.year,
         moment.happenedAt.month,
@@ -322,7 +351,7 @@ class _CountryProjectionDraft {
         .toList(growable: false)
       ..sort((a, b) => b.date.compareTo(a.date));
 
-    final albumMoments = sortedMoments
+    final recordedAlbumMoments = allMoments
         .where((moment) => moment.photoLabels.isNotEmpty)
         .map(
           (moment) => RecordAlbumMoment(
@@ -335,9 +364,27 @@ class _CountryProjectionDraft {
             photoCount: moment.photoLabels.length,
             summary: moment.summary,
             isPlanned: moment.isPlanned,
+            isSynthetic: moment.isSynthetic,
           ),
         )
         .toList(growable: false);
+    final albumMoments = recordedAlbumMoments.isNotEmpty
+        ? recordedAlbumMoments
+        : [
+            for (final trip in plannedShellTrips)
+              RecordAlbumMoment(
+                id: 'planned-cover-${trip.id}-$code',
+                tripId: trip.id,
+                tripTitle: trip.title,
+                locationName: trip.locations.first.name,
+                happenedAt: DateTime.parse(trip.startDate),
+                primaryPhotoLabel: trip.coverImage,
+                photoCount: 0,
+                summary: trip.description,
+                isPlanned: true,
+                isSynthetic: true,
+              ),
+          ];
 
     final signal = visitCount > 0
         ? RecordCountrySignal.visited

@@ -32,6 +32,8 @@ void main() {
           assetSet: RecordGlobeAssetSet(
             baseEarthTextureAsset: 'earth_light.png',
             borderOverlayTextureAsset: 'earth_borders.png',
+            countryLookupGridAsset: 'country_lookup.bin',
+            countryLookupPaletteAsset: 'country_lookup.json',
           ),
         ),
       );
@@ -89,6 +91,8 @@ void main() {
           assetSet: RecordGlobeAssetSet(
             baseEarthTextureAsset: 'earth_dark.png',
             borderOverlayTextureAsset: 'earth_borders.png',
+            countryLookupGridAsset: 'country_lookup.bin',
+            countryLookupPaletteAsset: 'country_lookup.json',
           ),
           initialCountryCode: 'FR',
         ),

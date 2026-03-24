@@ -136,8 +136,10 @@ void main() {
       expect(france.plannedStopCount, 1);
       expect(france.cityCount, 3);
       expect(france.albumMoments, hasLength(1));
-      expect(france.timelineDays, hasLength(2));
-      expect(france.timelineDays.first.moments.first.title, 'Dinner in Lyon');
+      expect(france.timelineDays, hasLength(3));
+      expect(france.timelineDays.first.moments.first.isPlanned, isTrue);
+      expect(france.timelineDays.first.moments.first.isSynthetic, isTrue);
+      expect(france.timelineDays[1].moments.first.title, 'Dinner in Lyon');
       expect(france.hasUpcomingTrip, isTrue);
 
       expect(australia, isNotNull);
@@ -151,6 +153,82 @@ void main() {
         (country) => country.code == 'AU',
       );
       expect(plannedGlobeCountry.hasUpcomingTrip, isTrue);
+    });
+
+    test(
+        'creates planned-only timeline and album projections for upcoming shell trips',
+        () {
+      final now = DateTime(2026, 3, 24, 12);
+      final graph = buildRecordTravelGraph(
+        trips: [
+          TripSummary(
+            id: 'trip-sydney',
+            title: 'Sydney Sketch',
+            subtitle: 'Upcoming plan only',
+            startDate: DateTime(2026, 5, 2),
+            endDate: DateTime(2026, 5, 9),
+            heroPlace: const PlaceRef(
+              countryCode: 'AU',
+              countryName: 'Australia',
+              cityName: 'Sydney',
+              latitude: -33.8688,
+              longitude: 151.2093,
+            ),
+            coverHint: 'Opera house',
+            memoryCount: 0,
+            photoCount: 0,
+            countryCount: 1,
+          ),
+        ],
+        entries: const [],
+        photos: const [],
+        now: now,
+      );
+
+      final australia = graph.countriesByCode['AU'];
+      expect(australia, isNotNull);
+      expect(australia!.signal, RecordCountrySignal.planned);
+      expect(australia.visitCount, 0);
+      expect(australia.plannedStopCount, 1);
+      expect(australia.timelineDays, hasLength(1));
+      expect(australia.timelineDays.single.moments.single.isPlanned, isTrue);
+      expect(australia.timelineDays.single.moments.single.isSynthetic, isTrue);
+      expect(australia.albumMoments, hasLength(1));
+      expect(australia.albumMoments.single.isPlanned, isTrue);
+      expect(australia.albumMoments.single.isSynthetic, isTrue);
+      expect(australia.albumMoments.single.primaryPhotoLabel, 'Opera house');
+    });
+
+    test('does not count empty past trips as visited countries', () {
+      final now = DateTime(2026, 3, 24, 12);
+      final graph = buildRecordTravelGraph(
+        trips: [
+          TripSummary(
+            id: 'trip-empty',
+            title: 'Empty shell',
+            subtitle: 'No entries were added',
+            startDate: DateTime(2026, 1, 2),
+            endDate: DateTime(2026, 1, 6),
+            heroPlace: const PlaceRef(
+              countryCode: 'CA',
+              countryName: 'Canada',
+              cityName: 'Montreal',
+              latitude: 45.5017,
+              longitude: -73.5673,
+            ),
+            coverHint: 'Snow streets',
+            memoryCount: 0,
+            photoCount: 0,
+            countryCount: 1,
+          ),
+        ],
+        entries: const [],
+        photos: const [],
+        now: now,
+      );
+
+      expect(graph.trips.single.locations, isEmpty);
+      expect(graph.countriesByCode['CA'], isNull);
     });
   });
 }
