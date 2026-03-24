@@ -1,6 +1,7 @@
 export 'src/components/record_logo.dart';
-export 'src/components/record_globe_scene.dart';
 export 'src/components/record_wordmark.dart';
+export 'src/globe/globe.dart';
+export 'src/globe_engine/globe_engine.dart';
 export 'src/models/record_models.dart';
 export 'src/providers/record_provider.dart';
 export 'src/screens/record_home_screen.dart';

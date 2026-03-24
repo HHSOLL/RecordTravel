@@ -1,11 +1,14 @@
 import 'dart:math' as math;
 
-import 'package:core_data/core_data.dart';
 import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../components/record_globe_webview.dart';
+import '../globe/globe.dart';
+import '../globe_engine/record_globe_engine.dart';
+import '../globe_engine/record_globe_engine_controller.dart';
+import '../globe_engine/record_globe_engine_state.dart';
+import '../globe_engine/renderers/three_js_record_globe_renderer.dart';
 import '../components/record_wordmark.dart';
 import '../i18n/record_strings.dart';
 import '../providers/record_provider.dart';
@@ -26,8 +29,12 @@ class RecordHomeScreen extends ConsumerStatefulWidget {
 class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _enterAnim;
-  String? _selectedCountryCode;
+  late final RecordGlobeViewModel _globeViewModel;
+  late final RecordGlobeEngineController _globeEngineController;
+  final RecordGlobeEngine _globeEngine = const ThreeJsRecordGlobeRenderer();
+
   bool _openingCountry = false;
+  String? _lastSceneSignature;
 
   @override
   void initState() {
@@ -36,11 +43,19 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..forward();
+    _globeViewModel = RecordGlobeViewModel();
+    _globeEngineController = RecordGlobeEngineController(
+      initialState: RecordGlobeEngineState.initial().copyWith(
+        camera: const RecordGlobeCameraState(yaw: 0.3, pitch: -0.18, zoom: 1),
+      ),
+    );
   }
 
   @override
   void dispose() {
     _enterAnim.dispose();
+    _globeViewModel.dispose();
+    _globeEngineController.dispose();
     super.dispose();
   }
 
@@ -50,9 +65,18 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     final user = ref.watch(recordUserProvider);
     final trips = ref.watch(recordTripsProvider);
     final theme = Theme.of(context);
-    final globeScene = ref.watch(recordGlobeSceneProvider(theme.brightness));
-    final selectedCountryCode = _selectedCountryCode;
+    final globeScene = ref.watch(recordGlobeSceneSpecProvider(theme.brightness));
+    _syncGlobeScene(globeScene);
+    final selectedCountryCode = _globeViewModel.state.selectedCountryCode;
+    final selectedSpotlight = selectedCountryCode == null
+        ? null
+        : ref.watch(recordCountrySpotlightProvider(selectedCountryCode));
     final hasTrips = trips.isNotEmpty;
+    final isSheetVisible =
+        hasTrips &&
+        selectedSpotlight != null &&
+        _globeViewModel.state.isSheetOpen &&
+        !_openingCountry;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -70,7 +94,9 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                 builder: (context, constraints) {
                   final compactLayout = constraints.maxHeight < 780;
                   final contentWidth = constraints.maxWidth - 40;
-                  final bottomClearance = compactLayout ? 108.0 : 124.0;
+                  final bottomClearance = compactLayout
+                      ? (isSheetVisible ? 224.0 : 108.0)
+                      : (isSheetVisible ? 244.0 : 124.0);
                   final globeHeightBudget = math.max(
                     compactLayout ? 260.0 : 312.0,
                     constraints.maxHeight -
@@ -141,16 +167,33 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                                       0,
                                       compactLayout ? -10 : -18,
                                     ),
-                                    child: RecordGlobeWebView(
+                                    child: RecordGlobeViewport(
+                                      engine: _globeEngine,
+                                      engineController: _globeEngineController,
+                                      viewModel: _globeViewModel,
                                       size: globeSize,
-                                      scene: globeScene,
-                                      selectedCountryCode: selectedCountryCode,
+                                      loadingBuilder: (context) => const Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                        ),
+                                      ),
+                                      errorBuilder: (context, message) => Center(
+                                        child: Text(
+                                          message,
+                                          style: theme.textTheme.bodyMedium,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
                                       onCountrySelected: (countryCode) {
                                         setState(() {
-                                          _selectedCountryCode = countryCode;
+                                          if (countryCode == null) {
+                                            _globeViewModel.closeSheet();
+                                          } else {
+                                            _globeViewModel.openSheet();
+                                          }
                                         });
                                       },
-                                      onCountryOpen: _openCountryDetails,
+                                      onCountryFocused: (_) => setState(() {}),
                                     ),
                                   ),
                                 ),
@@ -177,6 +220,32 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                 },
               ),
             ),
+            if (isSheetVisible)
+              Positioned(
+                left: 20,
+                right: 20,
+                bottom: _compactBottomPadding(context),
+                child: SafeArea(
+                  top: false,
+                  child: Builder(
+                    builder: (context) {
+                      final spotlight = selectedSpotlight;
+                      return RecordCountryBottomSheet(
+                        spotlight: spotlight,
+                        strings: strings,
+                        onOpen: () => _openCountryDetails(spotlight.code),
+                        onClose: () {
+                          setState(() {
+                            _globeViewModel.selectCountry(null);
+                            _globeViewModel.focusCountry(null);
+                            _globeViewModel.closeSheet();
+                          });
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -190,7 +259,9 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
 
     setState(() {
       _openingCountry = true;
-      _selectedCountryCode = countryCode;
+      _globeViewModel.selectCountry(countryCode);
+      _globeViewModel.focusCountry(countryCode);
+      _globeViewModel.openSheet();
     });
     if (!mounted) {
       return;
@@ -231,8 +302,49 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
 
     setState(() {
       _openingCountry = false;
-      _selectedCountryCode = null;
+      _globeViewModel.selectCountry(null);
+      _globeViewModel.focusCountry(null);
+      _globeViewModel.closeSheet();
     });
+  }
+
+  void _syncGlobeScene(RecordGlobeSceneSpec sceneSpec) {
+    final signature = [
+      sceneSpec.style.name,
+      sceneSpec.initialCountryCode ?? '',
+      for (final country in sceneSpec.countries)
+        '${country.code}:${country.visitCount}:${country.anchorLatitude.toStringAsFixed(3)}:${country.anchorLongitude.toStringAsFixed(3)}',
+    ].join('|');
+
+    if (_lastSceneSignature == signature) {
+      return;
+    }
+    _lastSceneSignature = signature;
+
+    final selectedCountryCode =
+        _globeViewModel.state.selectedCountryCode ?? sceneSpec.initialCountryCode;
+    final focusedCountryCode =
+        _globeViewModel.state.focusedCountryCode ?? selectedCountryCode;
+
+    _globeViewModel.setScene(
+      _globeViewModel.state.copyWith(
+        isLoading: false,
+        isReady: true,
+        errorMessage: null,
+        isSheetOpen: selectedCountryCode != null,
+        selectedCountryCode: selectedCountryCode,
+        focusedCountryCode: focusedCountryCode,
+        sceneSpec: sceneSpec.copyWith(
+          selectedCountryCode: selectedCountryCode,
+          focusedCountryCode: focusedCountryCode,
+        ),
+      ),
+    );
+  }
+
+  double _compactBottomPadding(BuildContext context) {
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    return bottomInset > 0 ? 90 : 84;
   }
 }
 

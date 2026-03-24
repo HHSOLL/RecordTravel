@@ -5,7 +5,10 @@ import 'package:core_data/core_data.dart';
 import 'package:core_domain/core_domain.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../components/record_globe_scene.dart';
+import '../globe/domain/entities/record_globe_asset_set.dart';
+import '../globe/domain/entities/record_globe_country.dart';
+import '../globe/domain/entities/record_globe_scene_spec.dart';
+import '../globe_engine/record_globe_engine_config.dart';
 import '../models/record_models.dart';
 
 final recordUserProvider = Provider<RecordUserData>((ref) {
@@ -84,14 +87,12 @@ final recordTripsProvider = Provider<List<RecordTrip>>((ref) {
   return mapped;
 });
 
-final recordGlobeSceneProvider =
-    Provider.family<RecordGlobeScene, Brightness>((ref, brightness) {
+final recordGlobeSceneSpecProvider =
+    Provider.family<RecordGlobeSceneSpec, Brightness>((ref, brightness) {
   final trips = ref.watch(recordTripsProvider);
   final anchorDrafts = <String, _AnchorDraft>{};
-  final arcs = <RecordGlobeArc>[];
 
   for (final trip in trips) {
-    RecordLocation? previousLocation;
     for (final location in trip.locations) {
       final country = trip.countries.firstWhere(
         (candidate) =>
@@ -103,51 +104,39 @@ final recordGlobeSceneProvider =
         () => _AnchorDraft(
           countryCode: country.code,
           countryName: country.name,
-          colorHex: trip.color,
           isUpcoming: trip.isUpcoming,
         ),
       );
       draft.addLocation(location, isUpcoming: trip.isUpcoming);
-
-      if (previousLocation != null) {
-        final fromCountry = _countryForLocation(trip, previousLocation);
-        final toCountry = _countryForLocation(trip, location);
-        if (fromCountry.code != toCountry.code) {
-          arcs.add(
-            RecordGlobeArc(
-              id: '${trip.id}:${previousLocation.id}:${location.id}',
-              fromCountryCode: fromCountry.code,
-              toCountryCode: toCountry.code,
-              fromLatitude: previousLocation.lat,
-              fromLongitude: previousLocation.lng,
-              toLatitude: location.lat,
-              toLongitude: location.lng,
-              color: _parseHexColor(trip.color),
-              weight: trip.isUpcoming ? 0.72 : 1.0,
-              isUpcoming: trip.isUpcoming,
-            ),
-          );
-        }
-      }
-      previousLocation = location;
     }
   }
 
-  final anchors = anchorDrafts.values
+  final countries = anchorDrafts.values
       .map((draft) => draft.build())
       .toList(growable: false)
-    ..sort((a, b) => b.emphasis.compareTo(a.emphasis));
+    ..sort((a, b) => b.visitCount.compareTo(a.visitCount));
 
-  final visibleArcs = arcs.take(18).toList(growable: false);
+  final style = brightness == Brightness.light
+      ? RecordGlobeStyle.light
+      : RecordGlobeStyle.dark;
+  final initialCountryCode = countries.isEmpty ? null : countries.first.code;
 
-  return RecordGlobeScene(
-    style: brightness == Brightness.light
-        ? RecordGlobeStyle.storybookLight
-        : RecordGlobeStyle.orbitNight,
-    initialCountryCode: anchors.isEmpty ? null : anchors.first.countryCode,
-    anchors: anchors,
-    arcs: visibleArcs,
-    selectableCountryCodes: anchors.map((anchor) => anchor.countryCode).toSet(),
+  return RecordGlobeSceneSpec(
+    style: style,
+    countries: countries,
+    assetSet: RecordGlobeAssetSet(
+      rendererKind: RecordGlobeRendererKind.threeJs,
+      baseEarthTextureAsset: style == RecordGlobeStyle.light
+          ? 'assets/globe/earth_storybook_light.png'
+          : 'assets/globe/earth_storybook_dark.png',
+      countryIdTextureAsset: 'assets/globe/record_country_shapes.json',
+      borderOverlayTextureAsset: 'assets/globe/earth_borders_overlay_v1_4096.png',
+      countryMetadataAsset: 'assets/globe/record_country_shapes.json',
+      usesHighResolutionTextures: false,
+    ),
+    initialCountryCode: initialCountryCode,
+    selectedCountryCode: initialCountryCode,
+    focusedCountryCode: initialCountryCode,
   );
 });
 
@@ -301,13 +290,6 @@ String _colorForCountry(String countryCode) {
   }
 }
 
-RecordCountry _countryForLocation(RecordTrip trip, RecordLocation location) {
-  for (final country in trip.countries) {
-    if (country.code == location.countryCode) return country;
-  }
-  return trip.countries.first;
-}
-
 String _countryCodeForLocation(RecordTrip trip, RecordLocation location) {
   for (final country in trip.countries) {
     if (country.code == location.countryCode) {
@@ -317,23 +299,15 @@ String _countryCodeForLocation(RecordTrip trip, RecordLocation location) {
   return trip.countries.first.code;
 }
 
-Color _parseHexColor(String input) {
-  final normalized = input.replaceAll('#', '');
-  final expanded = normalized.length == 6 ? 'FF$normalized' : normalized;
-  return Color(int.parse(expanded, radix: 16));
-}
-
 class _AnchorDraft {
   _AnchorDraft({
     required this.countryCode,
     required this.countryName,
-    required this.colorHex,
     required this.isUpcoming,
   });
 
   final String countryCode;
   final String countryName;
-  final String colorHex;
   bool isUpcoming;
 
   int markerCount = 0;
@@ -350,18 +324,15 @@ class _AnchorDraft {
     this.isUpcoming = this.isUpcoming || isUpcoming;
   }
 
-  RecordGlobeAnchor build() {
-    final emphasisBase = markerCount.clamp(1, 6).toDouble();
-    final emphasis = (emphasisBase / 6).clamp(0.2, 1.0);
-    return RecordGlobeAnchor(
-      countryCode: countryCode,
-      countryName: countryName,
-      latitude: latitudeSum / markerCount,
-      longitude: longitudeSum / markerCount,
-      markerCount: markerCount,
-      emphasis: emphasis,
-      color: _parseHexColor(colorHex),
-      isUpcoming: isUpcoming,
+  RecordGlobeCountry build() {
+    return RecordGlobeCountry(
+      code: countryCode,
+      name: countryName,
+      anchorLatitude: latitudeSum / markerCount,
+      anchorLongitude: longitudeSum / markerCount,
+      continent: _continentFor(countryCode),
+      visitCount: markerCount,
+      isSelectable: true,
     );
   }
 }
