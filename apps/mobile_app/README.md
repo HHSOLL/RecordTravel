@@ -73,17 +73,13 @@ GOOGLE_MAPS_API_KEY = YOUR_GOOGLE_MAPS_API_KEY
 The current Flutter migration already supports map rendering, markers, and trip route polylines.
 Places autocomplete from the web planner has not been ported yet.
 
-## WebGL Globe
+## Native Globe
 
-The home globe now runs the original `record` web renderer inside `webview_flutter`, using a bundled local web app built from `record/src/embed`.
+The home globe is rendered natively inside Flutter through the `three_js` stack
+provided by `feature_record`.
 
-For iOS debug and simulator builds, the app currently falls back to the native Flutter globe while the embedded `WKWebView` WebGL path is stabilized. Release/device builds continue to use the bundled web renderer.
-
-When you change the embedded globe source, rebuild and copy the bundle into Flutter assets from the repository root:
-
-```bash
-./scripts/build_record_globe_embed.sh
-```
+There is no `WebView` globe bundle in the mobile runtime anymore. Globe state
+and rendering live under the new `globe` and `globe_engine` modules.
 
 ## Main Entry Files
 

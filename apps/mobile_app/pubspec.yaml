@@ -50,8 +50,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/web_globe/
-    - assets/web_globe/assets/
     - assets/globe/earth_storybook_light.png
     - assets/globe/earth_storybook_dark.png
     - assets/globe/record_country_shapes.json
