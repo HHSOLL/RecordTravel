@@ -89,12 +89,12 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     final globeViewModel = _globeViewModel;
     final globeState = globeViewModel.state;
     final selectedCountryCode = globeState.selectedCountryCode;
-    final selectedSpotlight = selectedCountryCode == null
+    final selectedProjection = selectedCountryCode == null
         ? null
-        : ref.watch(recordCountrySpotlightProvider(selectedCountryCode));
+        : ref.watch(recordCountryProjectionProvider(selectedCountryCode));
     final hasTrips = trips.isNotEmpty;
     final isSheetVisible = hasTrips &&
-        selectedSpotlight != null &&
+        selectedProjection != null &&
         globeState.isSheetOpen &&
         !_openingCountry;
 
@@ -201,8 +201,25 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                                           globeViewModel.clearSelection();
                                           return;
                                         }
-                                        globeViewModel
-                                            .activateCountry(countryCode);
+                                        switch (globeViewModel.tapCountry(
+                                          countryCode,
+                                        )) {
+                                          case RecordGlobeTapAction
+                                                .previewCountry:
+                                            globeViewModel.pinFocusedCountry();
+                                            break;
+                                          case RecordGlobeTapAction
+                                                .enterCountry:
+                                            _openCountryDetails(
+                                              globeViewModel,
+                                              countryCode,
+                                            );
+                                            break;
+                                          case RecordGlobeTapAction
+                                                .clearSelection:
+                                            globeViewModel.clearSelection();
+                                            break;
+                                        }
                                       },
                                     ),
                                   ),
@@ -239,7 +256,7 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                   top: false,
                   child: Builder(
                     builder: (context) {
-                      final spotlight = selectedSpotlight;
+                      final spotlight = selectedProjection;
                       return RecordCountryBottomSheet(
                         spotlight: spotlight,
                         strings: strings,
@@ -272,7 +289,7 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     setState(() {
       _openingCountry = true;
     });
-    globeViewModel.activateCountry(countryCode);
+    globeViewModel.markCountryEntered(countryCode);
     if (!mounted) {
       return;
     }

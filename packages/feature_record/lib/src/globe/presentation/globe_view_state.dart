@@ -4,6 +4,19 @@ import '../domain/entities/record_globe_scene_spec.dart';
 
 const _unsetRecordGlobeValue = Object();
 
+enum RecordGlobeInteractionPhase {
+  idle,
+  countryFocused,
+  countryPinned,
+  countryEntered,
+}
+
+enum RecordGlobeTapAction {
+  previewCountry,
+  enterCountry,
+  clearSelection,
+}
+
 @immutable
 class RecordGlobeViewState {
   const RecordGlobeViewState({
@@ -11,12 +24,14 @@ class RecordGlobeViewState {
     this.selectedCountryCode,
     this.focusedCountryCode,
     this.isSheetOpen = false,
+    this.phase = RecordGlobeInteractionPhase.idle,
   });
 
   final RecordGlobeSceneSpec? sceneSpec;
   final String? selectedCountryCode;
   final String? focusedCountryCode;
   final bool isSheetOpen;
+  final RecordGlobeInteractionPhase phase;
 
   factory RecordGlobeViewState.initial() {
     return const RecordGlobeViewState();
@@ -27,6 +42,7 @@ class RecordGlobeViewState {
     Object? selectedCountryCode = _unsetRecordGlobeValue,
     Object? focusedCountryCode = _unsetRecordGlobeValue,
     bool? isSheetOpen,
+    RecordGlobeInteractionPhase? phase,
   }) {
     return RecordGlobeViewState(
       sceneSpec: identical(sceneSpec, _unsetRecordGlobeValue)
@@ -45,6 +61,7 @@ class RecordGlobeViewState {
           ? this.focusedCountryCode
           : focusedCountryCode as String?,
       isSheetOpen: isSheetOpen ?? this.isSheetOpen,
+      phase: phase ?? this.phase,
     );
   }
 }

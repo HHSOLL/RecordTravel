@@ -1,8 +1,8 @@
 import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../../domain/record_travel_graph.dart';
 import '../../../i18n/record_strings.dart';
-import '../../../models/record_models.dart';
 
 class RecordCountryBottomSheet extends StatelessWidget {
   const RecordCountryBottomSheet({
@@ -13,13 +13,13 @@ class RecordCountryBottomSheet extends StatelessWidget {
     required this.onClose,
   });
 
-  final RecordCountrySpotlight spotlight;
+  final RecordCountryProjection spotlight;
   final RecordStrings strings;
   final VoidCallback onOpen;
   final VoidCallback onClose;
 
   Color get _accentColor {
-    final normalized = spotlight.color.replaceAll('#', '');
+    final normalized = spotlight.accentColor.replaceAll('#', '');
     return Color(int.parse('FF$normalized', radix: 16));
   }
 
@@ -70,7 +70,9 @@ class RecordCountryBottomSheet extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            strings.text('home.helper'),
+            strings.isKorean
+                ? '한 번 더 탭하거나 아래 버튼으로 국가 상세 projection으로 들어갑니다.'
+                : 'Tap once more or use the button below to enter this country projection.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
             ),
@@ -82,12 +84,19 @@ class RecordCountryBottomSheet extends StatelessWidget {
             children: [
               _MetricPill(
                 icon: Icons.route_rounded,
-                label: strings.timelineEntries(spotlight.cityCount),
+                label: strings.timelineEntries(spotlight.visitCount),
                 color: _accentColor,
               ),
               _MetricPill(
                 icon: Icons.luggage_rounded,
                 label: strings.profileTrips(spotlight.tripCount),
+                color: _accentColor,
+              ),
+              _MetricPill(
+                icon: Icons.auto_graph_rounded,
+                label: strings.isKorean
+                    ? '활동 점수 ${spotlight.activityScore.toStringAsFixed(1)}'
+                    : 'Activity ${spotlight.activityScore.toStringAsFixed(1)}',
                 color: _accentColor,
               ),
             ],
@@ -136,8 +145,8 @@ class _MetricPill extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+                  fontWeight: FontWeight.w700,
+                ),
           ),
         ],
       ),

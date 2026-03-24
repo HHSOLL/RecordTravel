@@ -1,5 +1,6 @@
 export 'src/components/record_logo.dart';
 export 'src/components/record_wordmark.dart';
+export 'src/domain/record_travel_graph.dart';
 export 'src/globe/globe.dart';
 export 'src/globe_engine/globe_engine.dart';
 export 'src/models/record_models.dart';

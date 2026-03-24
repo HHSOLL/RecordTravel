@@ -313,14 +313,27 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       country.anchorLatitude,
       country.anchorLongitude,
     );
-    final radius =
-        (0.028 + (country.visitCount.clamp(1, 6) - 1) * 0.004).toDouble();
+    final radius = (0.028 + country.activityLevel * 0.01).toDouble();
+    final baseColor = switch (country.signal) {
+      RecordGlobeCountrySignal.planned => 0xfbbf24,
+      RecordGlobeCountrySignal.visited => 0x0f172a,
+      RecordGlobeCountrySignal.neutral => 0x64748b,
+    };
+    final emissiveColor = switch (country.signal) {
+      RecordGlobeCountrySignal.planned => 0xfde68a,
+      RecordGlobeCountrySignal.visited =>
+        country.hasRecentVisit ? 0x93c5fd : 0xffffff,
+      RecordGlobeCountrySignal.neutral => 0xcbd5e1,
+    };
     final material = three.MeshPhongMaterial.fromMap({
-      'color': style == RecordGlobeStyle.dark ? 0xf8fafc : 0x0f172a,
-      'emissive': style == RecordGlobeStyle.dark ? 0x60a5fa : 0xffffff,
-      'emissiveIntensity': style == RecordGlobeStyle.dark ? 0.22 : 0.08,
+      'color': style == RecordGlobeStyle.dark ? 0xf8fafc : baseColor,
+      'emissive': style == RecordGlobeStyle.dark ? 0x60a5fa : emissiveColor,
+      'emissiveIntensity': style == RecordGlobeStyle.dark
+          ? (country.hasRecentVisit ? 0.34 : 0.22)
+          : (country.hasRecentVisit ? 0.18 : 0.08),
       'transparent': true,
-      'opacity': 0.96,
+      'opacity':
+          country.signal == RecordGlobeCountrySignal.planned ? 0.82 : 0.96,
     });
     final mesh = three.Mesh(
       three.SphereGeometry(radius, _markerSegments, _markerSegments),
@@ -332,7 +345,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       point.z * _markerAltitude,
     );
     mesh.userData['countryCode'] = country.code;
-    return _MarkerHandle(mesh: mesh);
+    return _MarkerHandle(country: country, mesh: mesh);
   }
 
   bool _hasSameCountries(
@@ -479,25 +492,43 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     final style = widget.config.style;
     for (final entry in _markersByCountry.entries) {
       final marker = entry.value;
+      final country = marker.country;
       final material = marker.mesh.material as three.MeshPhongMaterial;
       final isSelected = entry.key == selectedCountryCode;
+      final unselectedColor = switch (country.signal) {
+        RecordGlobeCountrySignal.planned => 0xf59e0b,
+        RecordGlobeCountrySignal.visited =>
+          (style == RecordGlobeStyle.dark ? 0xf8fafc : 0x0f172a),
+        RecordGlobeCountrySignal.neutral => 0x94a3b8,
+      };
+      final unselectedEmissive = switch (country.signal) {
+        RecordGlobeCountrySignal.planned => 0xfcd34d,
+        RecordGlobeCountrySignal.visited => (style == RecordGlobeStyle.dark
+            ? 0x60a5fa
+            : (country.hasRecentVisit ? 0x93c5fd : 0xffffff)),
+        RecordGlobeCountrySignal.neutral => 0xe2e8f0,
+      };
       material.color.setFrom(
         three.Color.fromHex32(
           isSelected
               ? (style == RecordGlobeStyle.dark ? 0xf59e0b : 0x2563eb)
-              : (style == RecordGlobeStyle.dark ? 0xf8fafc : 0x0f172a),
+              : unselectedColor,
         ),
       );
       material.emissive?.setFrom(
         three.Color.fromHex32(
           isSelected
               ? (style == RecordGlobeStyle.dark ? 0xfdba74 : 0xbfdbfe)
-              : (style == RecordGlobeStyle.dark ? 0x60a5fa : 0xffffff),
+              : unselectedEmissive,
         ),
       );
       material.emissiveIntensity = isSelected
           ? (style == RecordGlobeStyle.dark ? 0.7 : 0.28)
-          : (style == RecordGlobeStyle.dark ? 0.22 : 0.08);
+          : (style == RecordGlobeStyle.dark
+              ? (country.hasRecentVisit ? 0.34 : 0.22)
+              : (country.hasRecentVisit ? 0.18 : 0.08));
+      material.opacity =
+          country.signal == RecordGlobeCountrySignal.planned ? 0.82 : 0.96;
       material.needsUpdate = true;
 
       final scale = isSelected ? 1.55 : 1.0;
@@ -589,6 +620,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     );
 
     if (hits.isEmpty) {
+      widget.onCountrySelected?.call(null);
       return;
     }
 
@@ -655,8 +687,10 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
 
 class _MarkerHandle {
   const _MarkerHandle({
+    required this.country,
     required this.mesh,
   });
 
+  final RecordGlobeCountry country;
   final three.Mesh mesh;
 }

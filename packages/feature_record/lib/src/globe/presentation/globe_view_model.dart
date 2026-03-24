@@ -23,16 +23,15 @@ class RecordGlobeViewModel extends ChangeNotifier {
 
   void syncScene(RecordGlobeSceneSpec sceneSpec) {
     final selectedCountryCode = _resolveCountryCode(
-      requested: _state.selectedCountryCode,
-      fallback: sceneSpec.initialCountryCode,
+      requested: _state.selectedCountryCode ?? sceneSpec.selectedCountryCode,
+      fallback: null,
       sceneSpec: sceneSpec,
     );
     final focusedCountryCode = _resolveCountryCode(
-      requested: _state.focusedCountryCode,
-      fallback: selectedCountryCode,
+      requested: _state.focusedCountryCode ?? sceneSpec.focusedCountryCode,
+      fallback: selectedCountryCode ?? sceneSpec.initialCountryCode,
       sceneSpec: sceneSpec,
     );
-    final isInitialSync = _state.sceneSpec == null;
 
     _state = _state.copyWith(
       sceneSpec: sceneSpec.copyWith(
@@ -41,8 +40,12 @@ class RecordGlobeViewModel extends ChangeNotifier {
       ),
       selectedCountryCode: selectedCountryCode,
       focusedCountryCode: focusedCountryCode,
-      isSheetOpen:
-          selectedCountryCode != null && (isInitialSync || _state.isSheetOpen),
+      isSheetOpen: selectedCountryCode != null && _state.isSheetOpen,
+      phase: selectedCountryCode == null
+          ? RecordGlobeInteractionPhase.idle
+          : (_state.isSheetOpen
+              ? RecordGlobeInteractionPhase.countryPinned
+              : RecordGlobeInteractionPhase.countryFocused),
     );
     notifyListeners();
   }
@@ -63,7 +66,16 @@ class RecordGlobeViewModel extends ChangeNotifier {
     return fallback;
   }
 
-  void activateCountry(String countryCode) {
+  RecordGlobeTapAction tapCountry(String countryCode) {
+    if (_state.selectedCountryCode == countryCode &&
+        _state.phase == RecordGlobeInteractionPhase.countryPinned) {
+      _state = _state.copyWith(
+        phase: RecordGlobeInteractionPhase.countryEntered,
+      );
+      notifyListeners();
+      return RecordGlobeTapAction.enterCountry;
+    }
+
     final selectedState = _selectCountryUseCase(
       _state,
       selectedCountryCode: countryCode,
@@ -71,7 +83,43 @@ class RecordGlobeViewModel extends ChangeNotifier {
     _state = _focusCountryUseCase(
       selectedState,
       focusedCountryCode: countryCode,
-    ).copyWith(isSheetOpen: true);
+    ).copyWith(
+      isSheetOpen: false,
+      phase: RecordGlobeInteractionPhase.countryFocused,
+    );
+    notifyListeners();
+    return RecordGlobeTapAction.previewCountry;
+  }
+
+  void pinFocusedCountry() {
+    if (_state.selectedCountryCode == null) {
+      return;
+    }
+    _state = _state.copyWith(
+      isSheetOpen: true,
+      phase: RecordGlobeInteractionPhase.countryPinned,
+    );
+    notifyListeners();
+  }
+
+  void markCountryEntered(String countryCode) {
+    if (_state.selectedCountryCode != countryCode) {
+      final selectedState = _selectCountryUseCase(
+        _state,
+        selectedCountryCode: countryCode,
+      );
+      _state = _focusCountryUseCase(
+        selectedState,
+        focusedCountryCode: countryCode,
+      ).copyWith(
+        isSheetOpen: true,
+        phase: RecordGlobeInteractionPhase.countryEntered,
+      );
+      notifyListeners();
+      return;
+    }
+
+    _state = _state.copyWith(phase: RecordGlobeInteractionPhase.countryEntered);
     notifyListeners();
   }
 
@@ -83,7 +131,10 @@ class RecordGlobeViewModel extends ChangeNotifier {
     _state = _focusCountryUseCase(
       clearedSelection,
       focusedCountryCode: null,
-    ).copyWith(isSheetOpen: false);
+    ).copyWith(
+      isSheetOpen: false,
+      phase: RecordGlobeInteractionPhase.idle,
+    );
     notifyListeners();
   }
 }

@@ -24,6 +24,7 @@ class RecordLocation {
     required this.lng,
     required this.date,
     required this.photos,
+    this.isPlanned = false,
   });
 
   final String id;
@@ -34,6 +35,7 @@ class RecordLocation {
   final double lng;
   final String date;
   final List<String> photos;
+  final bool isPlanned;
 }
 
 @immutable
@@ -64,6 +66,11 @@ class RecordTrip {
   final String color;
   final List<String> companions;
 
+  int get photoCount => locations.fold<int>(
+      0, (count, location) => count + location.photos.length);
+
+  int get stopCount => locations.length;
+
   RecordTrip copyWith({
     String? title,
     List<RecordCountry>? countries,
@@ -90,40 +97,6 @@ class RecordTrip {
       companions: companions ?? this.companions,
     );
   }
-}
-
-@immutable
-class RecordCountrySpotlight {
-  const RecordCountrySpotlight({
-    required this.code,
-    required this.name,
-    required this.continent,
-    required this.color,
-    required this.trips,
-    required this.locations,
-    required this.centerLat,
-    required this.centerLng,
-    required this.minLat,
-    required this.maxLat,
-    required this.minLng,
-    required this.maxLng,
-  });
-
-  final String code;
-  final String name;
-  final String continent;
-  final String color;
-  final List<RecordTrip> trips;
-  final List<RecordLocation> locations;
-  final double centerLat;
-  final double centerLng;
-  final double minLat;
-  final double maxLat;
-  final double minLng;
-  final double maxLng;
-
-  int get cityCount => locations.length;
-  int get tripCount => trips.length;
 }
 
 @immutable
