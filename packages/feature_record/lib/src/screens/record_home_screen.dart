@@ -6,13 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../globe/globe.dart';
 import '../globe_engine/record_globe_engine.dart';
-import '../globe_engine/record_globe_engine_controller.dart';
-import '../globe_engine/record_globe_engine_state.dart';
 import '../globe_engine/renderers/three_js_record_globe_renderer.dart';
 import '../components/record_wordmark.dart';
 import '../i18n/record_strings.dart';
 import '../providers/record_provider.dart';
-import 'record_country_map_screen.dart';
+import 'record_country_detail_screen.dart';
 
 class RecordHomeScreen extends ConsumerStatefulWidget {
   const RecordHomeScreen({
@@ -30,11 +28,11 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _enterAnim;
   late final RecordGlobeViewModel _globeViewModel;
-  late final RecordGlobeEngineController _globeEngineController;
   final RecordGlobeEngine _globeEngine = const ThreeJsRecordGlobeRenderer();
 
+  ProviderSubscription<RecordGlobeSceneSpec>? _globeSceneSubscription;
+  Brightness? _sceneBrightness;
   bool _openingCountry = false;
-  String? _lastSceneSignature;
 
   @override
   void initState() {
@@ -43,19 +41,42 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..forward();
-    _globeViewModel = RecordGlobeViewModel();
-    _globeEngineController = RecordGlobeEngineController(
-      initialState: RecordGlobeEngineState.initial().copyWith(
-        camera: const RecordGlobeCameraState(yaw: 0.3, pitch: -0.18, zoom: 1),
-      ),
+    _globeViewModel = RecordGlobeViewModel()
+      ..addListener(_handleGlobeStateChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final brightness = Theme.of(context).brightness;
+    if (_sceneBrightness == brightness) {
+      return;
+    }
+
+    _sceneBrightness = brightness;
+    _globeSceneSubscription?.close();
+
+    final provider = recordGlobeSceneSpecProvider(brightness);
+    _globeViewModel.syncScene(ref.read(provider));
+    _globeSceneSubscription = ref.listenManual<RecordGlobeSceneSpec>(
+      provider,
+      (_, next) => _globeViewModel.syncScene(next),
     );
+  }
+
+  void _handleGlobeStateChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
     _enterAnim.dispose();
-    _globeViewModel.dispose();
-    _globeEngineController.dispose();
+    _globeSceneSubscription?.close();
+    _globeViewModel
+      ..removeListener(_handleGlobeStateChanged)
+      ..dispose();
     super.dispose();
   }
 
@@ -65,17 +86,16 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     final user = ref.watch(recordUserProvider);
     final trips = ref.watch(recordTripsProvider);
     final theme = Theme.of(context);
-    final globeScene = ref.watch(recordGlobeSceneSpecProvider(theme.brightness));
-    _syncGlobeScene(globeScene);
-    final selectedCountryCode = _globeViewModel.state.selectedCountryCode;
+    final globeViewModel = _globeViewModel;
+    final globeState = globeViewModel.state;
+    final selectedCountryCode = globeState.selectedCountryCode;
     final selectedSpotlight = selectedCountryCode == null
         ? null
         : ref.watch(recordCountrySpotlightProvider(selectedCountryCode));
     final hasTrips = trips.isNotEmpty;
-    final isSheetVisible =
-        hasTrips &&
+    final isSheetVisible = hasTrips &&
         selectedSpotlight != null &&
-        _globeViewModel.state.isSheetOpen &&
+        globeState.isSheetOpen &&
         !_openingCountry;
 
     return Scaffold(
@@ -169,31 +189,21 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                                     ),
                                     child: RecordGlobeViewport(
                                       engine: _globeEngine,
-                                      engineController: _globeEngineController,
-                                      viewModel: _globeViewModel,
+                                      state: globeState,
                                       size: globeSize,
                                       loadingBuilder: (context) => const Center(
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2.5,
                                         ),
                                       ),
-                                      errorBuilder: (context, message) => Center(
-                                        child: Text(
-                                          message,
-                                          style: theme.textTheme.bodyMedium,
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
                                       onCountrySelected: (countryCode) {
-                                        setState(() {
-                                          if (countryCode == null) {
-                                            _globeViewModel.closeSheet();
-                                          } else {
-                                            _globeViewModel.openSheet();
-                                          }
-                                        });
+                                        if (countryCode == null) {
+                                          globeViewModel.clearSelection();
+                                          return;
+                                        }
+                                        globeViewModel
+                                            .activateCountry(countryCode);
                                       },
-                                      onCountryFocused: (_) => setState(() {}),
                                     ),
                                   ),
                                 ),
@@ -233,13 +243,12 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                       return RecordCountryBottomSheet(
                         spotlight: spotlight,
                         strings: strings,
-                        onOpen: () => _openCountryDetails(spotlight.code),
+                        onOpen: () => _openCountryDetails(
+                          globeViewModel,
+                          spotlight.code,
+                        ),
                         onClose: () {
-                          setState(() {
-                            _globeViewModel.selectCountry(null);
-                            _globeViewModel.focusCountry(null);
-                            _globeViewModel.closeSheet();
-                          });
+                          globeViewModel.clearSelection();
                         },
                       );
                     },
@@ -252,17 +261,18 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     );
   }
 
-  Future<void> _openCountryDetails(String countryCode) async {
+  Future<void> _openCountryDetails(
+    RecordGlobeViewModel globeViewModel,
+    String countryCode,
+  ) async {
     if (_openingCountry) {
       return;
     }
 
     setState(() {
       _openingCountry = true;
-      _globeViewModel.selectCountry(countryCode);
-      _globeViewModel.focusCountry(countryCode);
-      _globeViewModel.openSheet();
     });
+    globeViewModel.activateCountry(countryCode);
     if (!mounted) {
       return;
     }
@@ -272,7 +282,7 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
         transitionDuration: const Duration(milliseconds: 620),
         reverseTransitionDuration: const Duration(milliseconds: 320),
         pageBuilder: (context, animation, secondaryAnimation) =>
-            RecordCountryMapScreen(countryCode: countryCode),
+            RecordCountryDetailScreen(countryCode: countryCode),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           final curved = CurvedAnimation(
             parent: animation,
@@ -302,44 +312,8 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
 
     setState(() {
       _openingCountry = false;
-      _globeViewModel.selectCountry(null);
-      _globeViewModel.focusCountry(null);
-      _globeViewModel.closeSheet();
     });
-  }
-
-  void _syncGlobeScene(RecordGlobeSceneSpec sceneSpec) {
-    final signature = [
-      sceneSpec.style.name,
-      sceneSpec.initialCountryCode ?? '',
-      for (final country in sceneSpec.countries)
-        '${country.code}:${country.visitCount}:${country.anchorLatitude.toStringAsFixed(3)}:${country.anchorLongitude.toStringAsFixed(3)}',
-    ].join('|');
-
-    if (_lastSceneSignature == signature) {
-      return;
-    }
-    _lastSceneSignature = signature;
-
-    final selectedCountryCode =
-        _globeViewModel.state.selectedCountryCode ?? sceneSpec.initialCountryCode;
-    final focusedCountryCode =
-        _globeViewModel.state.focusedCountryCode ?? selectedCountryCode;
-
-    _globeViewModel.setScene(
-      _globeViewModel.state.copyWith(
-        isLoading: false,
-        isReady: true,
-        errorMessage: null,
-        isSheetOpen: selectedCountryCode != null,
-        selectedCountryCode: selectedCountryCode,
-        focusedCountryCode: focusedCountryCode,
-        sceneSpec: sceneSpec.copyWith(
-          selectedCountryCode: selectedCountryCode,
-          focusedCountryCode: focusedCountryCode,
-        ),
-      ),
-    );
+    globeViewModel.clearSelection();
   }
 
   double _compactBottomPadding(BuildContext context) {
@@ -358,8 +332,7 @@ class _HeaderButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.atlasPalette;
-    final content =
-        child ??
+    final content = child ??
         Icon(icon, size: 20, color: Theme.of(context).colorScheme.onSurface);
 
     return InkWell(
@@ -389,9 +362,8 @@ class _ProfileBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final trimmed = name.trim();
-    final initials = trimmed.isEmpty
-        ? 'R'
-        : String.fromCharCode(trimmed.runes.first);
+    final initials =
+        trimmed.isEmpty ? 'R' : String.fromCharCode(trimmed.runes.first);
     return Container(
       width: 28,
       height: 28,
@@ -403,9 +375,9 @@ class _ProfileBadge extends StatelessWidget {
       child: Text(
         initials.toUpperCase(),
         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w800,
-        ),
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
       ),
     );
   }

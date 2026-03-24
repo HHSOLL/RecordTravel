@@ -7,42 +7,31 @@ const _unsetRecordGlobeValue = Object();
 @immutable
 class RecordGlobeViewState {
   const RecordGlobeViewState({
-    required this.isLoading,
     this.sceneSpec,
     this.selectedCountryCode,
     this.focusedCountryCode,
-    this.searchQuery = '',
     this.isSheetOpen = false,
-    this.isReady = false,
-    this.errorMessage,
   });
 
-  final bool isLoading;
   final RecordGlobeSceneSpec? sceneSpec;
   final String? selectedCountryCode;
   final String? focusedCountryCode;
-  final String searchQuery;
   final bool isSheetOpen;
-  final bool isReady;
-  final String? errorMessage;
 
   factory RecordGlobeViewState.initial() {
-    return const RecordGlobeViewState(isLoading: true);
+    return const RecordGlobeViewState();
   }
 
   RecordGlobeViewState copyWith({
-    bool? isLoading,
-    RecordGlobeSceneSpec? sceneSpec,
+    Object? sceneSpec = _unsetRecordGlobeValue,
     Object? selectedCountryCode = _unsetRecordGlobeValue,
     Object? focusedCountryCode = _unsetRecordGlobeValue,
-    String? searchQuery,
     bool? isSheetOpen,
-    bool? isReady,
-    Object? errorMessage = _unsetRecordGlobeValue,
   }) {
     return RecordGlobeViewState(
-      isLoading: isLoading ?? this.isLoading,
-      sceneSpec: sceneSpec ?? this.sceneSpec,
+      sceneSpec: identical(sceneSpec, _unsetRecordGlobeValue)
+          ? this.sceneSpec
+          : sceneSpec as RecordGlobeSceneSpec?,
       selectedCountryCode: identical(
         selectedCountryCode,
         _unsetRecordGlobeValue,
@@ -55,12 +44,7 @@ class RecordGlobeViewState {
       )
           ? this.focusedCountryCode
           : focusedCountryCode as String?,
-      searchQuery: searchQuery ?? this.searchQuery,
       isSheetOpen: isSheetOpen ?? this.isSheetOpen,
-      isReady: isReady ?? this.isReady,
-      errorMessage: identical(errorMessage, _unsetRecordGlobeValue)
-          ? this.errorMessage
-          : errorMessage as String?,
     );
   }
 }

@@ -52,9 +52,5 @@ flutter:
   assets:
     - assets/globe/earth_storybook_light.png
     - assets/globe/earth_storybook_dark.png
-    - assets/globe/record_country_shapes.json
-    - assets/globe/earth-blue-marble.jpg
-    - assets/globe/earth-night.jpg
-    - assets/globe/earth-topology.png
     - assets/globe/earth_day_albedo_v1_4096.webp
     - assets/globe/earth_borders_overlay_v1_4096.png

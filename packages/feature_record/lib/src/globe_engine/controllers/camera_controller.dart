@@ -1,4 +1,4 @@
-import '../record_globe_engine_state.dart';
+import '../record_globe_camera_state.dart';
 
 class RecordGlobeCameraController {
   const RecordGlobeCameraController();
@@ -28,8 +28,9 @@ class RecordGlobeCameraController {
     return camera.copyWith(
       yaw: _wrapAngle(camera.yaw + deltaYaw),
       pitch: _clampPitch(camera.pitch + deltaPitch),
-      targetYaw: camera.targetYaw,
-      targetPitch: camera.targetPitch,
+      targetYaw: null,
+      targetPitch: null,
+      targetZoom: null,
     );
   }
 
@@ -40,7 +41,10 @@ class RecordGlobeCameraController {
     double maxZoom = 2.2,
   }) {
     final nextZoom = (camera.zoom + deltaZoom).clamp(minZoom, maxZoom);
-    return camera.copyWith(zoom: nextZoom.toDouble(), targetZoom: nextZoom.toDouble());
+    return camera.copyWith(
+      zoom: nextZoom.toDouble(),
+      targetZoom: null,
+    );
   }
 
   RecordGlobeCameraState focusOn(

@@ -8,34 +8,25 @@ import '../../globe/domain/entities/record_globe_country.dart';
 import '../../globe/domain/entities/record_globe_scene_spec.dart';
 import '../controllers/camera_controller.dart';
 import '../controllers/gesture_controller.dart';
+import '../record_globe_camera_state.dart';
 import '../record_globe_engine.dart';
 import '../record_globe_engine_config.dart';
-import '../record_globe_engine_controller.dart';
-import '../record_globe_engine_state.dart';
 
 class ThreeJsRecordGlobeRenderer extends RecordGlobeEngine {
   const ThreeJsRecordGlobeRenderer();
 
   @override
-  RecordGlobeRendererKind get rendererKind => RecordGlobeRendererKind.threeJs;
-
-  @override
   Widget buildStage(
     BuildContext context, {
     required RecordGlobeEngineConfig config,
-    required RecordGlobeEngineController controller,
-    required RecordGlobeEngineState state,
     ValueChanged<String?>? onCountrySelected,
-    ValueChanged<String?>? onCountryFocused,
   }) {
     return _ThreeJsRecordGlobeStage(
       key: ValueKey(
         '${config.style.name}:${config.scene?.countries.length ?? 0}',
       ),
       config: config,
-      controller: controller,
       onCountrySelected: onCountrySelected,
-      onCountryFocused: onCountryFocused,
     );
   }
 }
@@ -44,15 +35,11 @@ class _ThreeJsRecordGlobeStage extends StatefulWidget {
   const _ThreeJsRecordGlobeStage({
     super.key,
     required this.config,
-    required this.controller,
     this.onCountrySelected,
-    this.onCountryFocused,
   });
 
   final RecordGlobeEngineConfig config;
-  final RecordGlobeEngineController controller;
   final ValueChanged<String?>? onCountrySelected;
-  final ValueChanged<String?>? onCountryFocused;
 
   @override
   State<_ThreeJsRecordGlobeStage> createState() =>
@@ -63,19 +50,29 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
   static const double _globeRadius = 1;
   static const double _markerAltitude = 1.022;
   static const double _baseCameraDistance = 3.1;
+  static const int _earthSegments = 64;
+  static const int _markerSegments = 16;
 
   final RecordGlobeCameraController _cameraController =
       const RecordGlobeCameraController();
   final RecordGlobeGestureController _gestureController =
       const RecordGlobeGestureController();
   final three.Raycaster _raycaster = three.Raycaster();
-  final Map<String, _MarkerHandle> _markersByCountry = <String, _MarkerHandle>{};
+  final Map<String, _MarkerHandle> _markersByCountry =
+      <String, _MarkerHandle>{};
 
   late final three.ThreeJS _threeJs;
 
   late three.Scene _scene;
   late three.PerspectiveCamera _camera;
   late three.Group _globeRoot;
+  RecordGlobeCameraState _cameraState = const RecordGlobeCameraState(
+    yaw: 0.3,
+    pitch: -0.18,
+    zoom: 1,
+  );
+  three.Texture? _baseTexture;
+  three.Texture? _borderTexture;
 
   bool _setupComplete = false;
   bool _gestureActive = false;
@@ -127,6 +124,11 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
 
   @override
   void dispose() {
+    if (_setupComplete) {
+      _clearSceneObjects();
+    } else {
+      _disposeTextures();
+    }
     try {
       _threeJs.dispose();
     } catch (_) {
@@ -146,7 +148,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     _camera.position.setValues(
       0,
       0,
-      _cameraDistanceForZoom(widget.controller.state.camera.zoom),
+      _cameraDistanceForZoom(_cameraState.zoom),
     );
 
     _scene = three.Scene();
@@ -172,7 +174,6 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
 
   void _handleSetupComplete() {
     _setupComplete = true;
-    widget.controller.setReady(true);
     if (mounted) {
       setState(() {});
     }
@@ -193,6 +194,9 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       scene.assetSet.borderOverlayTextureAsset,
     );
 
+    _baseTexture = baseTexture;
+    _borderTexture = borderTexture;
+
     if (baseTexture != null) {
       baseTexture.needsUpdate = true;
     }
@@ -206,7 +210,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       'specular': scene.style == RecordGlobeStyle.dark ? 0x09111f : 0xd8dee9,
     });
     final earthMesh = three.Mesh(
-      three.SphereGeometry(_globeRadius, 72, 72),
+      three.SphereGeometry(_globeRadius, _earthSegments, _earthSegments),
       earthMaterial,
     );
     _globeRoot.add(earthMesh);
@@ -219,7 +223,11 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       'shininess': 0.0,
     });
     final borderMesh = three.Mesh(
-      three.SphereGeometry(_globeRadius * 1.002, 72, 72),
+      three.SphereGeometry(
+        _globeRadius * 1.002,
+        _earthSegments,
+        _earthSegments,
+      ),
       borderMaterial,
     );
     _globeRoot.add(borderMesh);
@@ -232,7 +240,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       'shininess': 0.0,
     });
     final atmosphereMesh = three.Mesh(
-      three.SphereGeometry(_globeRadius * 1.08, 48, 48),
+      three.SphereGeometry(_globeRadius * 1.08, 48, 32),
       atmosphereMaterial,
     );
     _globeRoot.add(atmosphereMesh);
@@ -243,14 +251,13 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       _globeRoot.add(marker.mesh);
     }
 
-    final focusCountryCode =
-        scene.focusedCountryCode ??
+    final focusCountryCode = scene.focusedCountryCode ??
         scene.selectedCountryCode ??
         scene.initialCountryCode;
     if (focusCountryCode != null) {
       _focusOnCountry(focusCountryCode, animate: false);
     } else {
-      _applyCameraState(widget.controller.state.camera);
+      _applyCameraState(_cameraState);
     }
     _applyMarkerSelection(scene.selectedCountryCode);
 
@@ -261,12 +268,41 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
 
   void _clearSceneObjects() {
     _markersByCountry.clear();
+    _disposeTextures();
     if (!_setupComplete && _globeRoot.children.isEmpty) {
       return;
     }
-    while (_globeRoot.children.isNotEmpty) {
-      _globeRoot.remove(_globeRoot.children.last);
+    final children = List<three.Object3D>.from(_globeRoot.children);
+    for (final child in children) {
+      _globeRoot.remove(child);
+      _disposeObject(child);
     }
+  }
+
+  void _disposeObject(three.Object3D object) {
+    for (final child in List<three.Object3D>.from(object.children)) {
+      object.remove(child);
+      _disposeObject(child);
+    }
+
+    final dynamic renderObject = object;
+    renderObject.geometry?.dispose();
+
+    final material = renderObject.material;
+    if (material is List) {
+      for (final entry in material) {
+        entry.dispose();
+      }
+      return;
+    }
+    material?.dispose();
+  }
+
+  void _disposeTextures() {
+    _baseTexture?.dispose();
+    _borderTexture?.dispose();
+    _baseTexture = null;
+    _borderTexture = null;
   }
 
   _MarkerHandle _buildMarker(
@@ -277,8 +313,8 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       country.anchorLatitude,
       country.anchorLongitude,
     );
-    final radius = (0.028 + (country.visitCount.clamp(1, 6) - 1) * 0.004)
-        .toDouble();
+    final radius =
+        (0.028 + (country.visitCount.clamp(1, 6) - 1) * 0.004).toDouble();
     final material = three.MeshPhongMaterial.fromMap({
       'color': style == RecordGlobeStyle.dark ? 0xf8fafc : 0x0f172a,
       'emissive': style == RecordGlobeStyle.dark ? 0x60a5fa : 0xffffff,
@@ -287,7 +323,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       'opacity': 0.96,
     });
     final mesh = three.Mesh(
-      three.SphereGeometry(radius, 20, 20),
+      three.SphereGeometry(radius, _markerSegments, _markerSegments),
       material,
     );
     mesh.position.setValues(
@@ -296,7 +332,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       point.z * _markerAltitude,
     );
     mesh.userData['countryCode'] = country.code;
-    return _MarkerHandle(country: country, mesh: mesh);
+    return _MarkerHandle(mesh: mesh);
   }
 
   bool _hasSameCountries(
@@ -327,13 +363,14 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       return;
     }
 
-    final aspect = _threeJs.height == 0 ? 1.0 : _threeJs.width / _threeJs.height;
+    final aspect =
+        _threeJs.height == 0 ? 1.0 : _threeJs.width / _threeJs.height;
     if (_camera.aspect != aspect) {
       _camera.aspect = aspect;
       _camera.updateProjectionMatrix();
     }
 
-    var camera = widget.controller.state.camera;
+    var camera = _cameraState;
     if (!_gestureActive) {
       camera = _settleCamera(camera, dt);
     }
@@ -345,7 +382,11 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       camera = camera.copyWith(yaw: _wrapAngle(camera.yaw - dt * 0.18));
     }
 
-    widget.controller.setCamera(camera);
+    _setCamera(camera);
+  }
+
+  void _setCamera(RecordGlobeCameraState camera) {
+    _cameraState = camera;
     _applyCameraState(camera);
   }
 
@@ -416,7 +457,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       -1.45,
       1.45,
     );
-    final current = widget.controller.state.camera;
+    final current = _cameraState;
     final focused = animate
         ? _cameraController.focusOn(
             current,
@@ -431,8 +472,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
             targetPitch: null,
             targetZoom: null,
           );
-    widget.controller.setCamera(focused);
-    _applyCameraState(focused);
+    _setCamera(focused);
   }
 
   void _applyMarkerSelection(String? selectedCountryCode) {
@@ -491,16 +531,15 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
 
   void _handleScaleStart(ScaleStartDetails details) {
     _gestureActive = true;
-    _gestureStartZoom = widget.controller.state.camera.zoom;
+    _gestureStartZoom = _cameraState.zoom;
     _lastFocalPoint = details.focalPoint;
   }
 
   void _handleScaleUpdate(ScaleUpdateDetails details) {
-    var camera = widget.controller.state.camera;
+    var camera = _cameraState;
     if (details.pointerCount > 1 || (details.scale - 1).abs() > 0.015) {
-      final desiredZoom = (_gestureStartZoom * details.scale)
-          .clamp(0.75, 2.2)
-          .toDouble();
+      final desiredZoom =
+          (_gestureStartZoom * details.scale).clamp(0.75, 2.2).toDouble();
       final deltaZoom = desiredZoom - camera.zoom;
       camera = _cameraController.zoomBy(camera, deltaZoom: deltaZoom);
     } else {
@@ -512,8 +551,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       );
       _lastFocalPoint = details.focalPoint;
     }
-    widget.controller.setCamera(camera);
-    _applyCameraState(camera);
+    _setCamera(camera);
   }
 
   void _handleScaleEnd(ScaleEndDetails details) {
@@ -521,11 +559,11 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     final velocity = details.velocity.pixelsPerSecond;
     if (velocity.distanceSquared > 0) {
       final camera = _gestureController.fling(
-        widget.controller.state.camera,
+        _cameraState,
         velocityX: velocity.dx,
         velocityY: velocity.dy,
       );
-      widget.controller.setCamera(camera);
+      _cameraState = camera;
     }
   }
 
@@ -560,9 +598,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       return;
     }
 
-    widget.controller.selectCountry(countryCode);
     widget.onCountrySelected?.call(countryCode);
-    widget.onCountryFocused?.call(countryCode);
     _focusOnCountry(countryCode, animate: true);
   }
 
@@ -619,10 +655,8 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
 
 class _MarkerHandle {
   const _MarkerHandle({
-    required this.country,
     required this.mesh,
   });
 
-  final RecordGlobeCountry country;
   final three.Mesh mesh;
 }

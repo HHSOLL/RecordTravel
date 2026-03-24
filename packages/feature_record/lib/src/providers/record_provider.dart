@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../globe/domain/entities/record_globe_asset_set.dart';
 import '../globe/domain/entities/record_globe_country.dart';
 import '../globe/domain/entities/record_globe_scene_spec.dart';
-import '../globe_engine/record_globe_engine_config.dart';
 import '../models/record_models.dart';
 
 final recordUserProvider = Provider<RecordUserData>((ref) {
@@ -125,14 +124,11 @@ final recordGlobeSceneSpecProvider =
     style: style,
     countries: countries,
     assetSet: RecordGlobeAssetSet(
-      rendererKind: RecordGlobeRendererKind.threeJs,
       baseEarthTextureAsset: style == RecordGlobeStyle.light
           ? 'assets/globe/earth_storybook_light.png'
           : 'assets/globe/earth_storybook_dark.png',
-      countryIdTextureAsset: 'assets/globe/record_country_shapes.json',
-      borderOverlayTextureAsset: 'assets/globe/earth_borders_overlay_v1_4096.png',
-      countryMetadataAsset: 'assets/globe/record_country_shapes.json',
-      usesHighResolutionTextures: false,
+      borderOverlayTextureAsset:
+          'assets/globe/earth_borders_overlay_v1_4096.png',
     ),
     initialCountryCode: initialCountryCode,
     selectedCountryCode: initialCountryCode,
