@@ -15,10 +15,16 @@ import 'record_country_detail_screen.dart';
 class RecordHomeScreen extends ConsumerStatefulWidget {
   const RecordHomeScreen({
     super.key,
+    this.forceGlobeFallback = false,
+    this.isGlobeAvailabilityPending = false,
     this.onOpenProfile,
+    this.onRetryGlobe3D,
   });
 
+  final bool forceGlobeFallback;
+  final bool isGlobeAvailabilityPending;
   final VoidCallback? onOpenProfile;
+  final VoidCallback? onRetryGlobe3D;
 
   @override
   ConsumerState<RecordHomeScreen> createState() => _RecordHomeScreenState();
@@ -97,6 +103,9 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
         selectedProjection != null &&
         globeState.isSheetOpen &&
         !_openingCountry;
+    final showGlobeAvailabilityPending =
+        hasTrips && widget.isGlobeAvailabilityPending;
+    final showGlobeFallback = hasTrips && widget.forceGlobeFallback;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -187,41 +196,70 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                                       0,
                                       compactLayout ? -10 : -18,
                                     ),
-                                    child: RecordGlobeViewport(
-                                      engine: _globeEngine,
-                                      state: globeState,
-                                      size: globeSize,
-                                      loadingBuilder: (context) => const Center(
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2.5,
-                                        ),
-                                      ),
-                                      onCountrySelected: (countryCode) {
-                                        if (countryCode == null) {
-                                          globeViewModel.clearSelection();
-                                          return;
-                                        }
-                                        switch (globeViewModel.tapCountry(
-                                          countryCode,
-                                        )) {
-                                          case RecordGlobeTapAction
-                                                .previewCountry:
-                                            globeViewModel.pinFocusedCountry();
-                                            break;
-                                          case RecordGlobeTapAction
-                                                .enterCountry:
-                                            _openCountryDetails(
-                                              globeViewModel,
-                                              countryCode,
-                                            );
-                                            break;
-                                          case RecordGlobeTapAction
-                                                .clearSelection:
-                                            globeViewModel.clearSelection();
-                                            break;
-                                        }
-                                      },
-                                    ),
+                                    child: showGlobeAvailabilityPending
+                                        ? _RecordHomeGlobeAvailabilityCard(
+                                            strings: strings,
+                                            globeSize: globeSize,
+                                          )
+                                        : showGlobeFallback
+                                        ? _RecordHomeGlobeFallback(
+                                            strings: strings,
+                                            isDark:
+                                                theme.brightness ==
+                                                Brightness.dark,
+                                            countries:
+                                                globeState.sceneSpec?.countries ??
+                                                const [],
+                                            globeSize: globeSize,
+                                            onOpenCountry: (countryCode) {
+                                              _openCountryDetails(
+                                                globeViewModel,
+                                                countryCode,
+                                              );
+                                            },
+                                            onRetry3D: widget.onRetryGlobe3D,
+                                          )
+                                        : RecordGlobeViewport(
+                                            engine: _globeEngine,
+                                            state: globeState,
+                                            size: globeSize,
+                                            loadingBuilder:
+                                                (context) => const Center(
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        strokeWidth: 2.5,
+                                                      ),
+                                                ),
+                                            onCountrySelected: (countryCode) {
+                                              if (countryCode == null) {
+                                                globeViewModel.clearSelection();
+                                                return;
+                                              }
+                                              switch (
+                                                globeViewModel.tapCountry(
+                                                  countryCode,
+                                                )
+                                              ) {
+                                                case RecordGlobeTapAction
+                                                      .previewCountry:
+                                                  globeViewModel
+                                                      .pinFocusedCountry();
+                                                  break;
+                                                case RecordGlobeTapAction
+                                                      .enterCountry:
+                                                  _openCountryDetails(
+                                                    globeViewModel,
+                                                    countryCode,
+                                                  );
+                                                  break;
+                                                case RecordGlobeTapAction
+                                                      .clearSelection:
+                                                  globeViewModel
+                                                      .clearSelection();
+                                                  break;
+                                              }
+                                            },
+                                          ),
                                   ),
                                 ),
                               ),
@@ -336,6 +374,178 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
   double _compactBottomPadding(BuildContext context) {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     return bottomInset > 0 ? 90 : 84;
+  }
+}
+
+class _RecordHomeGlobeFallback extends StatelessWidget {
+  const _RecordHomeGlobeFallback({
+    required this.strings,
+    required this.isDark,
+    required this.countries,
+    required this.globeSize,
+    required this.onOpenCountry,
+    this.onRetry3D,
+  });
+
+  final RecordStrings strings;
+  final bool isDark;
+  final List<RecordGlobeCountry> countries;
+  final double globeSize;
+  final ValueChanged<String> onOpenCountry;
+  final VoidCallback? onRetry3D;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.atlasPalette;
+    final quickCountries = countries.take(6).toList(growable: false);
+    final previewSize = math.min(globeSize * 0.62, 224.0);
+    final previewAsset = isDark
+        ? 'assets/globe/earth_storybook_dark.png'
+        : 'assets/globe/earth_storybook_light.png';
+
+    return SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 460),
+        child: AtlasPanel(
+          key: const Key('record-home-globe-fallback'),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipOval(
+                child: Container(
+                  width: previewSize,
+                  height: previewSize,
+                  color: palette.surfaceMuted,
+                  child: Image.asset(
+                    previewAsset,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              palette.surfaceMuted,
+                              palette.surfaceGlass,
+                            ],
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.public_rounded,
+                          size: math.max(56, previewSize * 0.28),
+                          color: palette.accentSoft,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                strings.text('home.globeUnavailableTitle'),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                strings.text('home.globeUnavailableSubtitle'),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              if (quickCountries.isNotEmpty) ...[
+                const SizedBox(height: 18),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    strings.text('home.quickCountries'),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    for (final country in quickCountries)
+                      ActionChip(
+                        avatar: const Icon(Icons.map_rounded, size: 18),
+                        label: Text(country.name),
+                        onPressed: () => onOpenCountry(country.code),
+                      ),
+                  ],
+                ),
+              ],
+              if (onRetry3D != null) ...[
+                const SizedBox(height: 18),
+                OutlinedButton.icon(
+                  key: const Key('record-home-retry-3d'),
+                  onPressed: onRetry3D,
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: Text(strings.text('home.retry3d')),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RecordHomeGlobeAvailabilityCard extends StatelessWidget {
+  const _RecordHomeGlobeAvailabilityCard({
+    required this.strings,
+    required this.globeSize,
+  });
+
+  final RecordStrings strings;
+  final double globeSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final previewSize = math.min(globeSize * 0.56, 208.0);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 420),
+      child: AtlasPanel(
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: previewSize,
+              height: previewSize,
+              child: const Center(
+                child: SizedBox(
+                  width: 34,
+                  height: 34,
+                  child: CircularProgressIndicator(strokeWidth: 2.6),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              strings.text('home.globeAvailabilityCheckingTitle'),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              strings.text('home.globeAvailabilityCheckingSubtitle'),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

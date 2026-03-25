@@ -11,6 +11,7 @@ import 'package:feature_journal/feature_journal.dart';
 import 'package:feature_record/feature_record.dart';
 
 import '../app/app_preferences.dart';
+import 'globe_runtime_capability.dart';
 
 class MobileAppShell extends ConsumerStatefulWidget {
   const MobileAppShell({super.key});
@@ -59,10 +60,25 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell>
   Widget build(BuildContext context) {
     final prefs = ref.watch(appPreferencesProvider);
     final palette = context.atlasPalette;
+    final globe3dAvailability = ref.watch(globe3dAvailabilityProvider);
+    final availability = switch (globe3dAvailability) {
+      AsyncData(:final value) => value,
+      _ => null,
+    };
+    final isGlobeAvailabilityPending = availability == null;
+    final forceGlobeFallback = switch (availability) {
+      Globe3dAvailability.unsupported => true,
+      Globe3dAvailability.supported => false,
+      Globe3dAvailability.checking || null => false,
+    };
 
     return Scaffold(
       extendBody: true,
-      body: _buildCurrentPage(prefs),
+      body: _buildCurrentPage(
+        prefs,
+        forceGlobeFallback: forceGlobeFallback,
+        isGlobeAvailabilityPending: isGlobeAvailabilityPending,
+      ),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.only(left: 24, right: 24, bottom: 14),
         child: DecoratedBox(
@@ -179,9 +195,16 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell>
     );
   }
 
-  Widget _buildCurrentPage(AppPreferencesController prefs) =>
+  Widget _buildCurrentPage(
+    AppPreferencesController prefs, {
+    required bool forceGlobeFallback,
+    required bool isGlobeAvailabilityPending,
+  }) =>
       switch (_currentTab) {
         AppTab.home => RecordHomeScreen(
+          forceGlobeFallback: forceGlobeFallback,
+          isGlobeAvailabilityPending: isGlobeAvailabilityPending,
+          onRetryGlobe3D: () => ref.invalidate(globe3dAvailabilityProvider),
           onOpenProfile: () {
             setState(() => _currentTab = AppTab.profile);
           },

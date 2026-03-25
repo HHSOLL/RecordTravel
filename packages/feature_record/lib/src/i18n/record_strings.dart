@@ -56,6 +56,14 @@ class RecordStrings {
       'home.metricMemories': '기록',
       'home.metricCities': '도시',
       'home.metricLatest': '최근',
+      'home.globeUnavailableTitle': '3D 지구본을 불러오지 못했습니다.',
+      'home.globeUnavailableSubtitle':
+          '이 기기에서는 안정적인 미리보기 경로로 전환했습니다. 아래 국가 버튼으로 2D 상세를 바로 열 수 있습니다.',
+      'home.globeAvailabilityCheckingTitle': '3D 보기 가능 여부를 확인하는 중입니다.',
+      'home.globeAvailabilityCheckingSubtitle':
+          '기기를 확인하는 동안 홈 화면을 준비하고 있습니다.',
+      'home.retry3d': '3D 다시 시도',
+      'home.quickCountries': '빠른 국가 열기',
       'planner.title': '플래너',
       'planner.noUpcoming': '예정된 여행이 없습니다.',
       'planner.planNew': '새 여행 계획하기',
@@ -146,6 +154,14 @@ class RecordStrings {
       'home.metricMemories': 'Memories',
       'home.metricCities': 'Cities',
       'home.metricLatest': 'Latest',
+      'home.globeUnavailableTitle': '3D globe is unavailable right now.',
+      'home.globeUnavailableSubtitle':
+          'The app switched to a stable fallback preview. Use the quick country buttons below to open the 2D detail view.',
+      'home.globeAvailabilityCheckingTitle': 'Checking 3D globe support.',
+      'home.globeAvailabilityCheckingSubtitle':
+          'The home view is preparing while the device capability is verified.',
+      'home.retry3d': 'Retry 3D view',
+      'home.quickCountries': 'Quick countries',
       'planner.title': 'Planner',
       'planner.noUpcoming': 'No upcoming trips yet.',
       'planner.planNew': 'Plan a new trip',

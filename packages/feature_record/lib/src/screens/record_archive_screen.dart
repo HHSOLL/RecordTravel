@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../components/record_page_intro.dart';
 import '../i18n/record_strings.dart';
 import '../models/record_models.dart';
 import '../providers/record_provider.dart';
@@ -53,13 +52,54 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                 sliver: SliverToBoxAdapter(
                   child: Column(
                     children: [
-                      RecordPageIntro(
-                        eyebrow: strings.text('nav.archive'),
-                        title: strings.text('archive.title'),
-                        subtitle: strings.pastTrips(
-                          pastTrips.length,
-                          filteredTrips.length,
-                        ),
+                      Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(
+                                0xFFF59E0B,
+                              ).withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: const Color(
+                                  0xFFF59E0B,
+                                ).withValues(alpha: 0.24),
+                              ),
+                            ),
+                            child: Text(
+                              strings.text('nav.archive'),
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: const Color(0xFFF8D48B),
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            strings.text('archive.title'),
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -1,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            strings.pastTrips(
+                              pastTrips.length,
+                              filteredTrips.length,
+                            ),
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 20),
                       SingleChildScrollView(
@@ -136,11 +176,11 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                       return _ArchiveTripCard(trip: filteredTrips[index]);
                     }, childCount: filteredTrips.length),
                     gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 320,
                           mainAxisSpacing: 14,
                           crossAxisSpacing: 14,
-                          childAspectRatio: 0.64,
+                          childAspectRatio: 0.92,
                         ),
                   ),
                 ),
@@ -212,7 +252,7 @@ class _ArchiveTripCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: 150,
+              height: 162,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.vertical(
@@ -231,7 +271,7 @@ class _ArchiveTripCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AtlasStatusPill(
+                  _ArchiveInfoPill(
                     label: trip.countries.first.continent,
                     color: Colors.white,
                     icon: Icons.public_rounded,
@@ -255,43 +295,97 @@ class _ArchiveTripCard extends StatelessWidget {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMM d, yyyy').format(endDate)}',
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    trip.description,
-                    style: theme.textTheme.bodyMedium,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const Spacer(),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      AtlasStatusPill(
-                        label: trip.countries.first.name,
-                        color: tripColor,
-                        icon: Icons.flight_rounded,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMM d, yyyy').format(endDate)}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
-                      AtlasStatusPill(
-                        label: '${trip.locations.length} stops',
-                        color: context.atlasPalette.accentSoft,
-                        icon: Icons.route_rounded,
-                      ),
-                    ],
-                  ),
-                ],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      trip.description,
+                      style: theme.textTheme.bodyMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        _ArchiveInfoPill(
+                          label: trip.countries.first.name,
+                          color: tripColor,
+                          icon: Icons.flight_rounded,
+                        ),
+                        _ArchiveInfoPill(
+                          label: '${trip.locations.length} stops',
+                          color: context.atlasPalette.accentSoft,
+                          icon: Icons.route_rounded,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ArchiveInfoPill extends StatelessWidget {
+  const _ArchiveInfoPill({
+    required this.label,
+    required this.color,
+    this.icon,
+  });
+
+  final String label;
+  final Color color;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: color.withValues(alpha: 0.26)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 12, color: color),
+                const SizedBox(width: 4),
+              ],
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ],
+          ),
         ),
       ),
     );

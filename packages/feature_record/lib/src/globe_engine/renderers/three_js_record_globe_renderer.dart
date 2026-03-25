@@ -91,9 +91,8 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       setup: _setupScene,
       settings: three.Settings(
         renderOptions: const {
-          'antialias': true,
-          'alpha': true,
-          'samples': 4,
+          'antialias': false,
+          'alpha': false,
         },
       ),
     );
