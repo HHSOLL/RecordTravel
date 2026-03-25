@@ -373,23 +373,36 @@ class PlaceSuggestion {
   final String reason;
 }
 
+enum PhotoImportReviewState {
+  autoResolved,
+  needsPlaceReview,
+  needsTimeReview,
+  duplicateCandidate,
+}
+
 @immutable
 class PhotoImportDraft {
   const PhotoImportDraft({
     required this.metadata,
     required this.suggestion,
     required this.selectedPlace,
+    required this.reviewState,
   });
 
   final ExtractedPhotoMetadata metadata;
   final PlaceSuggestion suggestion;
   final PlaceRef selectedPlace;
+  final PhotoImportReviewState reviewState;
 
-  PhotoImportDraft copyWith({PlaceRef? selectedPlace}) {
+  PhotoImportDraft copyWith({
+    PlaceRef? selectedPlace,
+    PhotoImportReviewState? reviewState,
+  }) {
     return PhotoImportDraft(
       metadata: metadata,
       suggestion: suggestion,
       selectedPlace: selectedPlace ?? this.selectedPlace,
+      reviewState: reviewState ?? this.reviewState,
     );
   }
 }

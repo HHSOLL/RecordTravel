@@ -343,15 +343,50 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
   @override
   void initState() {
     super.initState();
-    _tripId = widget.initialTripId;
-    _draftsFuture = ref
+    final trips = ref.read(tripsProvider);
+    _tripId = widget.initialTripId ?? (trips.isEmpty ? null : trips.first.id);
+    _draftsFuture = _loadDrafts();
+  }
+
+  Future<List<PhotoImportDraft>> _loadDrafts() {
+    return ref
         .read(travelAppControllerProvider.notifier)
         .preparePhotoImportDrafts(tripId: _tripId, scope: widget.scope);
+  }
+
+  void _handleTripChanged(String? value) {
+    if (value == null || value == _tripId) {
+      return;
+    }
+    setState(() {
+      _tripId = value;
+      _draftsFuture = _loadDrafts();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final trips = ref.watch(tripsProvider);
+    if (trips.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: const AtlasPanel(
+          padding: EdgeInsets.fromLTRB(20, 20, 20, 24),
+          child: SizedBox(
+            height: 200,
+            child: Center(
+              child: AtlasEmptyState(
+                title: 'Create a trip first',
+                message:
+                    'Photo import needs a destination trip so auto-placement can stay coherent.',
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     _tripId ??= trips.first.id;
     return Padding(
       padding: EdgeInsets.only(
@@ -389,9 +424,12 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
                   (trip) => trip.id == _tripId,
                   orElse: () => trips.first,
                 );
-                final visibleDrafts = isLibrary
-                    ? drafts.take(18).toList(growable: false)
-                    : drafts;
+                final review = _buildPhotoImportReviewProjection(drafts);
+                final importableDrafts = review.autoResolved;
+                final readyPreview = isLibrary
+                    ? review.autoResolved.take(3).toList(growable: false)
+                    : review.autoResolved;
+                final unresolvedCount = drafts.length - importableDrafts.length;
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -399,40 +437,38 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
                     AtlasHeroPanel(
                       eyebrow: isLibrary ? 'Library import' : 'Photo import',
                       title: isLibrary
-                          ? 'Bring your gallery metadata into the record.'
-                          : 'Import should feel curated before it feels uploaded.',
+                          ? 'Scan first, auto-place second, review only what is uncertain.'
+                          : 'Bring in the ready moments first and inspect the uncertain ones separately.',
                       message: isLibrary
-                          ? 'The app scanned accessible gallery images, inferred places from metadata, and staged a batch import. Review the destination trip, then queue everything locally.'
-                          : 'Native metadata extraction already happened. Now confirm trip context and inferred places before the files queue for upload.',
+                          ? 'Gallery metadata already ran through place inference. This sheet now separates ready imports from the photos that still need a human decision.'
+                          : 'Native metadata extraction is done. Confirm the destination trip, then queue the photos that already have a confident place match.',
                       trailing: const AtlasOrbitalGraphic(size: 82),
                       metrics: [
                         AtlasMiniMetric(
-                          label: 'Photos',
+                          label: 'Scanned',
                           value: '${drafts.length}',
                           icon: Icons.photo_library_rounded,
                         ),
                         AtlasMiniMetric(
-                          label: 'Trip',
-                          value: selectedTrip.heroPlace.cityName,
-                          icon: Icons.luggage_rounded,
+                          label: 'Ready',
+                          value: '${review.autoResolved.length}',
+                          icon: Icons.auto_awesome_rounded,
                         ),
                         AtlasMiniMetric(
-                          label: 'Source',
-                          value: isLibrary ? 'Gallery' : 'Picker',
-                          icon: isLibrary
-                              ? Icons.photo_library_rounded
-                              : Icons.add_photo_alternate_rounded,
+                          label: 'Review',
+                          value: '${review.needsReviewCount}',
+                          icon: Icons.fact_check_rounded,
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     AtlasSectionHeader(
                       title: isLibrary
-                          ? 'Batch destination'
-                          : 'Attach selected photos',
+                          ? 'Import destination'
+                          : 'Destination trip',
                       subtitle: isLibrary
-                          ? 'All imported metadata will attach to this trip first. You can reorganize later.'
-                          : 'Confirm the trip context before these photo memories queue locally.',
+                          ? 'Auto-resolved photos will attach here. Review items stay separate until you confirm them.'
+                          : 'Ready photos queue into this trip. Uncertain items stay in review instead of being force-attached.',
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
@@ -445,127 +481,125 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
                             ),
                           )
                           .toList(),
-                      onChanged: (value) => setState(() => _tripId = value),
+                      onChanged: _handleTripChanged,
                       decoration: const InputDecoration(
                         labelText: 'Attach to trip',
                       ),
                     ),
                     const SizedBox(height: 16),
-                    if (isLibrary && drafts.length > visibleDrafts.length)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Text(
-                          'Showing ${visibleDrafts.length} of ${drafts.length} scanned items before queueing the full import.',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ),
                     Flexible(
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        itemCount: visibleDrafts.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 10),
-                        itemBuilder: (context, index) {
-                          final draft = visibleDrafts[index];
-                          return Container(
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: context.atlasPalette.surfaceMuted,
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: context.atlasPalette.outline),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _PhotoImportSummaryCard(
+                              tripTitle: selectedTrip.title,
+                              projection: review,
                             ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: 52,
-                                  height: 52,
-                                  decoration: BoxDecoration(
-                                    color: context.atlasPalette.surfacePanel,
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    draft.metadata.previewLabel,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.labelLarge,
-                                  ),
+                            if (readyPreview.isNotEmpty) ...[
+                              const SizedBox(height: 16),
+                              const AtlasSectionHeader(
+                                title: 'Auto placement',
+                                subtitle:
+                                    'These photos already have a confident place match and can queue immediately.',
+                              ),
+                              const SizedBox(height: 12),
+                              for (final draft in readyPreview) ...[
+                                _PhotoImportDraftCard(
+                                  draft: draft,
+                                  statusLabel: 'Ready',
+                                  statusColor: const Color(0xFF67E2B7),
+                                  helperText:
+                                      'Will attach to ${draft.selectedPlace.fullLabel}',
+                                  supplementalText: draft.suggestion.reason,
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              draft.metadata.displayName,
-                                              style: Theme.of(
-                                                context,
-                                              ).textTheme.titleMedium,
-                                            ),
-                                          ),
-                                          AtlasStatusPill(
-                                            label: _confidenceLabel(
-                                              draft.suggestion.confidence,
-                                            ),
-                                            color: _confidenceColor(
-                                              draft.suggestion.confidence,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        '${draft.metadata.format} • ${formatLongDate(draft.metadata.takenAt)}',
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodyMedium,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        'Suggested place: ${draft.selectedPlace.fullLabel}',
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.labelLarge,
-                                      ),
-                                      Text(
-                                        draft.suggestion.reason,
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodyMedium,
-                                      ),
-                                      if (isLibrary &&
-                                          draft.metadata.sourcePath == null) ...[
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          'Metadata-only asset. The original can stay in the photo library until you need it later.',
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodyMedium,
-                                        ),
-                                      ],
-                                      if (draft.metadata.byteSize != null) ...[
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          'File size: ${_formatBytes(draft.metadata.byteSize!)}',
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodyMedium,
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
+                                const SizedBox(height: 10),
                               ],
-                            ),
-                          );
-                        },
+                              if (review.autoResolved.length > readyPreview.length)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text(
+                                    '${review.autoResolved.length - readyPreview.length} more ready items will follow the same auto-placement rule.',
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ),
+                            ],
+                            if (review.needsPlaceReview.isNotEmpty) ...[
+                              const SizedBox(height: 18),
+                              const AtlasSectionHeader(
+                                title: 'Needs place review',
+                                subtitle:
+                                    'These photos are missing reliable location metadata or the match is too weak to auto-attach safely.',
+                              ),
+                              const SizedBox(height: 12),
+                              for (final draft in review.needsPlaceReview) ...[
+                                _PhotoImportDraftCard(
+                                  draft: draft,
+                                  statusLabel: 'Check place',
+                                  statusColor: const Color(0xFFFFD37A),
+                                  helperText:
+                                      'Suggested fallback: ${draft.selectedPlace.fullLabel}',
+                                  supplementalText: draft.suggestion.reason,
+                                ),
+                                const SizedBox(height: 10),
+                              ],
+                            ],
+                            if (review.needsTimeReview.isNotEmpty) ...[
+                              const SizedBox(height: 18),
+                              const AtlasSectionHeader(
+                                title: 'Needs time review',
+                                subtitle:
+                                    'These photos need a timeline decision before they can land in the trip.',
+                              ),
+                              const SizedBox(height: 12),
+                              for (final draft in review.needsTimeReview) ...[
+                                _PhotoImportDraftCard(
+                                  draft: draft,
+                                  statusLabel: 'Check time',
+                                  statusColor: const Color(0xFF8DEBFF),
+                                  helperText: formatLongDate(
+                                    draft.metadata.takenAt,
+                                  ),
+                                  supplementalText:
+                                      'Time review is required before auto-placement.',
+                                ),
+                                const SizedBox(height: 10),
+                              ],
+                            ],
+                            if (review.duplicateCandidates.isNotEmpty) ...[
+                              const SizedBox(height: 18),
+                              const AtlasSectionHeader(
+                                title: 'Possible duplicates',
+                                subtitle:
+                                    'These look similar to photos already attached to your travel graph.',
+                              ),
+                              const SizedBox(height: 12),
+                              for (final draft in review.duplicateCandidates) ...[
+                                _PhotoImportDraftCard(
+                                  draft: draft,
+                                  statusLabel: 'Duplicate?',
+                                  statusColor: const Color(0xFFFFA6A6),
+                                  helperText: draft.selectedPlace.fullLabel,
+                                  supplementalText:
+                                      'Check before you queue this item again.',
+                                ),
+                                const SizedBox(height: 10),
+                              ],
+                            ],
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
+                    if (unresolvedCount > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Text(
+                          '$unresolvedCount item${unresolvedCount == 1 ? '' : 's'} still need review and will stay out of this import batch.',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
                     Row(
                       children: [
                         Expanded(
@@ -578,21 +612,25 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: FilledButton.icon(
-                            onPressed: () async {
+                            onPressed: importableDrafts.isEmpty
+                                ? null
+                                : () async {
                               await ref
                                   .read(travelAppControllerProvider.notifier)
                                   .importPhotoDrafts(
                                     tripId: _tripId!,
-                                    drafts: drafts,
+                                    drafts: importableDrafts,
                                   );
                               if (!context.mounted) return;
                               Navigator.of(context).pop();
                             },
                             icon: const Icon(Icons.cloud_upload_rounded),
                             label: Text(
-                              isLibrary
-                                  ? 'Queue ${drafts.length} library items'
-                                  : 'Queue ${drafts.length} imports',
+                              importableDrafts.isEmpty
+                                  ? 'Review required'
+                                  : isLibrary
+                                  ? 'Queue ${importableDrafts.length} ready items'
+                                  : 'Queue ${importableDrafts.length} ready photos',
                             ),
                           ),
                         ),
@@ -609,22 +647,255 @@ class _PhotoImportSheetState extends ConsumerState<_PhotoImportSheet> {
   }
 }
 
-String _confidenceLabel(double confidence) {
-  if (confidence >= 0.9) return 'High match';
-  if (confidence >= 0.7) return 'Good match';
-  return 'Check place';
-}
-
-Color _confidenceColor(double confidence) {
-  if (confidence >= 0.9) return const Color(0xFF67E2B7);
-  if (confidence >= 0.7) return const Color(0xFF8DEBFF);
-  return const Color(0xFFFFD37A);
-}
-
 String _formatBytes(int bytes) {
   if (bytes < 1024) return '$bytes B';
   final kb = bytes / 1024;
   if (kb < 1024) return '${kb.toStringAsFixed(1)} KB';
   final mb = kb / 1024;
   return '${mb.toStringAsFixed(1)} MB';
+}
+
+class _PhotoImportReviewProjection {
+  const _PhotoImportReviewProjection({
+    required this.autoResolved,
+    required this.needsPlaceReview,
+    required this.needsTimeReview,
+    required this.duplicateCandidates,
+  });
+
+  final List<PhotoImportDraft> autoResolved;
+  final List<PhotoImportDraft> needsPlaceReview;
+  final List<PhotoImportDraft> needsTimeReview;
+  final List<PhotoImportDraft> duplicateCandidates;
+
+  int get needsReviewCount =>
+      needsPlaceReview.length +
+      needsTimeReview.length +
+      duplicateCandidates.length;
+}
+
+_PhotoImportReviewProjection _buildPhotoImportReviewProjection(
+  List<PhotoImportDraft> drafts,
+) {
+  final autoResolved = <PhotoImportDraft>[];
+  final needsPlaceReview = <PhotoImportDraft>[];
+  final needsTimeReview = <PhotoImportDraft>[];
+  final duplicateCandidates = <PhotoImportDraft>[];
+
+  for (final draft in drafts) {
+    switch (draft.reviewState) {
+      case PhotoImportReviewState.autoResolved:
+        autoResolved.add(draft);
+      case PhotoImportReviewState.needsPlaceReview:
+        needsPlaceReview.add(draft);
+      case PhotoImportReviewState.needsTimeReview:
+        needsTimeReview.add(draft);
+      case PhotoImportReviewState.duplicateCandidate:
+        duplicateCandidates.add(draft);
+    }
+  }
+
+  return _PhotoImportReviewProjection(
+    autoResolved: autoResolved,
+    needsPlaceReview: needsPlaceReview,
+    needsTimeReview: needsTimeReview,
+    duplicateCandidates: duplicateCandidates,
+  );
+}
+
+class _PhotoImportSummaryCard extends StatelessWidget {
+  const _PhotoImportSummaryCard({
+    required this.tripTitle,
+    required this.projection,
+  });
+
+  final String tripTitle;
+  final _PhotoImportReviewProjection projection;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.atlasPalette;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: palette.surfaceMuted,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: palette.outline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Scan summary',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 10),
+          _PhotoImportSummaryLine(
+            icon: Icons.luggage_rounded,
+            text:
+                '${projection.autoResolved.length} item${projection.autoResolved.length == 1 ? '' : 's'} are ready to land in $tripTitle.',
+            color: const Color(0xFF67E2B7),
+          ),
+          if (projection.needsPlaceReview.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _PhotoImportSummaryLine(
+              icon: Icons.place_rounded,
+              text:
+                  '${projection.needsPlaceReview.length} item${projection.needsPlaceReview.length == 1 ? '' : 's'} need place confirmation.',
+              color: const Color(0xFFFFD37A),
+            ),
+          ],
+          if (projection.needsTimeReview.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _PhotoImportSummaryLine(
+              icon: Icons.schedule_rounded,
+              text:
+                  '${projection.needsTimeReview.length} item${projection.needsTimeReview.length == 1 ? '' : 's'} need time review.',
+              color: const Color(0xFF8DEBFF),
+            ),
+          ],
+          if (projection.duplicateCandidates.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _PhotoImportSummaryLine(
+              icon: Icons.copy_rounded,
+              text:
+                  '${projection.duplicateCandidates.length} item${projection.duplicateCandidates.length == 1 ? '' : 's'} look like duplicates.',
+              color: const Color(0xFFFFA6A6),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _PhotoImportSummaryLine extends StatelessWidget {
+  const _PhotoImportSummaryLine({
+    required this.icon,
+    required this.text,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PhotoImportDraftCard extends StatelessWidget {
+  const _PhotoImportDraftCard({
+    required this.draft,
+    required this.statusLabel,
+    required this.statusColor,
+    required this.helperText,
+    required this.supplementalText,
+  });
+
+  final PhotoImportDraft draft;
+  final String statusLabel;
+  final Color statusColor;
+  final String helperText;
+  final String supplementalText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: context.atlasPalette.surfaceMuted,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: context.atlasPalette.outline),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: context.atlasPalette.surfacePanel,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              draft.metadata.previewLabel,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        draft.metadata.displayName,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    AtlasStatusPill(label: statusLabel, color: statusColor),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${draft.metadata.format} • ${formatLongDate(draft.metadata.takenAt)}',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  helperText,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  supplementalText,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                if (draft.metadata.sourcePath == null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Metadata-only asset. The original can remain in the photo library until you need it.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+                if (draft.metadata.byteSize != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'File size: ${_formatBytes(draft.metadata.byteSize!)}',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

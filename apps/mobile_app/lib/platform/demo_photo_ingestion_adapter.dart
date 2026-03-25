@@ -60,6 +60,16 @@ class DemoPhotoIngestionAdapter implements PhotoIngestionPlatformAdapter {
           latitude: 41.1579,
           longitude: -8.6291,
         ),
+        ExtractedPhotoMetadata(
+          id: 'draft-5',
+          fileName: 'osaka-night.jpg',
+          displayName: 'Osaka Night Crossing',
+          format: 'JPEG',
+          previewLabel: 'OS',
+          takenAt: DateTime(2025, 4, 19, 21, 14),
+          sourcePath: null,
+          byteSize: 1640000,
+        ),
       ];
     }
     return samples;
