@@ -71,7 +71,21 @@ post_install do |installer|
 
   if File.exist?(frameworks_script)
     script = File.read(frameworks_script)
-    patched = <<~SH
+    patched = <<~'SH'
+      if [ -r "${BUILT_PRODUCTS_DIR}/$1" ]; then
+        local source="${BUILT_PRODUCTS_DIR}/$1"
+      elif [ -r "${BUILT_PRODUCTS_DIR}/$(basename "$1")" ]; then
+        local source="${BUILT_PRODUCTS_DIR}/$(basename "$1")"
+      elif [ -r "$1" ]; then
+        local source="$1"
+      elif [ -n "${PODS_CONFIGURATION_BUILD_DIR:-}" ]; then
+        local pod_framework_dir="$(basename "$(dirname "$1")")"
+        local pod_framework_path="${PODS_CONFIGURATION_BUILD_DIR}/${pod_framework_dir}/$(basename "$1")"
+        if [ -r "${pod_framework_path}" ]; then
+          local source="${pod_framework_path}"
+        fi
+      fi
+
         local destination="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
 
         if [ -z "${source:-}" ]; then
@@ -83,7 +97,7 @@ post_install do |installer|
     SH
 
     script.sub!(
-      /  local destination="\$\{TARGET_BUILD_DIR\}\/\$\{FRAMEWORKS_FOLDER_PATH\}"\n\n  if \[ -L "\$\{source\}" \]; then\n/,
+      /  if \[ -r "\$\{BUILT_PRODUCTS_DIR\}\/\$1" \]; then\n    local source="\$\{BUILT_PRODUCTS_DIR\}\/\$1"\n  elif \[ -r "\$\{BUILT_PRODUCTS_DIR\}\/\$\(basename "\$1"\)" \]; then\n    local source="\$\{BUILT_PRODUCTS_DIR\}\/\$\(basename "\$1"\)"\n  elif \[ -r "\$1" \]; then\n    local source="\$1"\n  fi\n\n  local destination="\$\{TARGET_BUILD_DIR\}\/\$\{FRAMEWORKS_FOLDER_PATH\}"\n\n  if \[ -L "\$\{source\}" \]; then\n/m,
       patched
     )
 
