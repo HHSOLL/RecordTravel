@@ -4,6 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'mobile_app_runtime.dart';
 
+final mobileAppRuntimeProvider = Provider<MobileAppRuntime>(
+  (ref) => throw UnimplementedError(
+    'mobileAppRuntimeProvider must be overridden by the app bootstrap.',
+  ),
+);
+
 class MobileAppBootstrap extends StatelessWidget {
   const MobileAppBootstrap({
     super.key,
@@ -18,6 +24,7 @@ class MobileAppBootstrap extends StatelessWidget {
   Widget build(BuildContext context) {
     return ProviderScope(
       overrides: [
+        mobileAppRuntimeProvider.overrideWithValue(runtime),
         backendProfileProvider.overrideWithValue(runtime.backendProfile),
         sessionRepositoryProvider.overrideWith(
           (ref) => runtime.sessionRepository,

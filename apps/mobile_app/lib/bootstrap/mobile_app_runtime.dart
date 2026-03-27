@@ -9,6 +9,7 @@ class MobileAppRuntime {
     required this.remoteSyncGateway,
     required this.travelRemoteDataSource,
     required this.photoIngestionAdapter,
+    this.startupWarningMessage,
   });
 
   final BackendProfile backendProfile;
@@ -17,4 +18,7 @@ class MobileAppRuntime {
   final RemoteSyncGateway remoteSyncGateway;
   final TravelRemoteDataSource travelRemoteDataSource;
   final PhotoIngestionPlatformAdapter photoIngestionAdapter;
+  final String? startupWarningMessage;
+
+  bool get hasStartupWarning => startupWarningMessage != null;
 }

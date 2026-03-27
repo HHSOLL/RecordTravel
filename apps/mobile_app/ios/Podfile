@@ -41,5 +41,52 @@ post_install do |installer|
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
     end
+
+    # Some plugin podspecs can incorrectly place privacy manifests in the
+    # Sources build phase, which breaks device builds before Pods_Runner links.
+    next unless target.respond_to?(:source_build_phase)
+
+    source_phase = target.source_build_phase
+    next unless source_phase
+
+    source_phase.files
+      .select do |build_file|
+        file_ref = build_file.file_ref
+        next false unless file_ref
+
+        file_ref.path&.end_with?('.xcprivacy')
+      end
+      .each do |build_file|
+        source_phase.remove_build_file(build_file)
+      end
+  end
+
+  frameworks_script = File.join(
+    __dir__,
+    'Pods',
+    'Target Support Files',
+    'Pods-Runner',
+    'Pods-Runner-frameworks.sh'
+  )
+
+  if File.exist?(frameworks_script)
+    script = File.read(frameworks_script)
+    patched = <<~SH
+        local destination="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
+
+        if [ -z "${source:-}" ]; then
+          echo "warning: [CP] Unable to find framework source for $1"
+          return
+        fi
+
+        if [ -L "${source}" ]; then
+    SH
+
+    script.sub!(
+      /  local destination="\$\{TARGET_BUILD_DIR\}\/\$\{FRAMEWORKS_FOLDER_PATH\}"\n\n  if \[ -L "\$\{source\}" \]; then\n/,
+      patched
+    )
+
+    File.write(frameworks_script, script)
   end
 end

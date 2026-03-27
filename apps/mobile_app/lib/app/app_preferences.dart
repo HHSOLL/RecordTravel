@@ -1,44 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AppPreferencesController extends ChangeNotifier {
+@immutable
+class AppPreferencesState {
+  const AppPreferencesState({
+    this.themeMode = ThemeMode.dark,
+    this.locale = const Locale('ko'),
+    this.isLoaded = false,
+  });
+
+  final ThemeMode themeMode;
+  final Locale locale;
+  final bool isLoaded;
+
+  ThemeMode get effectiveThemeMode =>
+      AppPreferencesController.enableThemePreview ? themeMode : ThemeMode.dark;
+  bool get followsSystem => effectiveThemeMode == ThemeMode.system;
+
+  AppPreferencesState copyWith({
+    ThemeMode? themeMode,
+    Locale? locale,
+    bool? isLoaded,
+  }) {
+    return AppPreferencesState(
+      themeMode: themeMode ?? this.themeMode,
+      locale: locale ?? this.locale,
+      isLoaded: isLoaded ?? this.isLoaded,
+    );
+  }
+}
+
+class AppPreferencesController extends Notifier<AppPreferencesState> {
   static const _themeKey = 'record.theme_mode';
   static const _languageKey = 'record.language_code';
   static const enableThemePreview = false;
 
-  ThemeMode _themeMode = ThemeMode.dark;
-  Locale _locale = const Locale('ko');
-  bool _loaded = false;
+  bool _isLoading = false;
 
-  ThemeMode get themeMode => _themeMode;
-  ThemeMode get effectiveThemeMode =>
-      enableThemePreview ? _themeMode : ThemeMode.dark;
-  Locale get locale => _locale;
-  bool get isLoaded => _loaded;
-  bool get followsSystem => effectiveThemeMode == ThemeMode.system;
+  @override
+  AppPreferencesState build() {
+    Future<void>.microtask(_load);
+    return const AppPreferencesState();
+  }
 
-  Future<void> load() async {
-    if (_loaded) return;
+  Future<void> _load() async {
+    if (state.isLoaded || _isLoading) {
+      return;
+    }
+    _isLoading = true;
     try {
       final prefs = await SharedPreferences.getInstance();
-      _themeMode = _themeModeFromString(prefs.getString(_themeKey));
-      _locale = Locale(prefs.getString(_languageKey) ?? 'ko');
+      final themeMode = _themeModeFromString(prefs.getString(_themeKey));
+      final locale = Locale(prefs.getString(_languageKey) ?? 'ko');
+      if (!ref.mounted) {
+        return;
+      }
+      state = AppPreferencesState(
+        themeMode: enableThemePreview ? themeMode : ThemeMode.dark,
+        locale: locale,
+        isLoaded: true,
+      );
     } catch (_) {
-      _themeMode = ThemeMode.dark;
-      _locale = const Locale('ko');
+      if (!ref.mounted) {
+        return;
+      }
+      state = const AppPreferencesState(isLoaded: true);
+    } finally {
+      _isLoading = false;
     }
-    if (!enableThemePreview) {
-      _themeMode = ThemeMode.dark;
-    }
-    _loaded = true;
-    notifyListeners();
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
-    if (_themeMode == mode) return;
-    _themeMode = mode;
-    notifyListeners();
+    if (state.themeMode == mode) {
+      return;
+    }
+    state = state.copyWith(themeMode: mode);
     await _persistString(_themeKey, mode.name);
   }
 
@@ -54,9 +91,10 @@ class AppPreferencesController extends ChangeNotifier {
   }
 
   Future<void> setLanguageCode(String languageCode) async {
-    if (_locale.languageCode == languageCode) return;
-    _locale = Locale(languageCode);
-    notifyListeners();
+    if (state.locale.languageCode == languageCode) {
+      return;
+    }
+    state = state.copyWith(locale: Locale(languageCode));
     await _persistString(_languageKey, languageCode);
   }
 
@@ -83,10 +121,7 @@ class AppPreferencesController extends ChangeNotifier {
   }
 }
 
-final appPreferencesProvider = ChangeNotifierProvider<AppPreferencesController>(
-  (ref) {
-    final controller = AppPreferencesController();
-    controller.load();
-    return controller;
-  },
-);
+final appPreferencesProvider =
+    NotifierProvider<AppPreferencesController, AppPreferencesState>(
+      AppPreferencesController.new,
+    );

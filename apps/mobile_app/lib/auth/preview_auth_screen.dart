@@ -81,7 +81,7 @@ class _PreviewAuthScreenState extends ConsumerState<PreviewAuthScreen> {
                           selected: {prefs.locale.languageCode},
                           onSelectionChanged: (selection) {
                             ref
-                                .read(appPreferencesProvider)
+                                .read(appPreferencesProvider.notifier)
                                 .setLanguageCode(selection.first);
                           },
                         ),

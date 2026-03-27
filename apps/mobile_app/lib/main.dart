@@ -12,9 +12,7 @@ import 'shell/mobile_app_shell.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final runtime = await loadMobileAppRuntime();
-  runApp(
-    MobileAppBootstrap(runtime: runtime, child: const TravelAtlasApp()),
-  );
+  runApp(MobileAppBootstrap(runtime: runtime, child: const TravelAtlasApp()));
 }
 
 class TravelAtlasApp extends ConsumerWidget {
@@ -24,6 +22,11 @@ class TravelAtlasApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final prefs = ref.watch(appPreferencesProvider);
     final session = ref.watch(sessionSnapshotProvider);
+    final startupWarning = ref.watch(
+      mobileAppRuntimeProvider.select(
+        (runtime) => runtime.startupWarningMessage,
+      ),
+    );
 
     return MaterialApp(
       title: 'record',
@@ -38,9 +41,81 @@ class TravelAtlasApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ],
+      builder: (context, child) {
+        if (child == null || startupWarning == null) {
+          return child ?? const SizedBox.shrink();
+        }
+        return Stack(
+          children: [
+            child,
+            _RuntimeStartupBanner(
+              locale: prefs.locale,
+              message: startupWarning,
+            ),
+          ],
+        );
+      },
       home: session.isSignedIn
           ? const MobileAppShell()
           : const PreviewAuthScreen(),
+    );
+  }
+}
+
+class _RuntimeStartupBanner extends StatelessWidget {
+  const _RuntimeStartupBanner({required this.locale, required this.message});
+
+  final Locale locale;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final isKorean = locale.languageCode == 'ko';
+    return SafeArea(
+      minimum: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 680),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF7C2D12).withValues(alpha: 0.94),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.18),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    isKorean
+                        ? '시작 복구 모드: 로컬 임시 모드로 실행되었습니다. 일부 변경사항은 동기화되지 않을 수 있습니다.'
+                        : message,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

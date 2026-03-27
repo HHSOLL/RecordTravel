@@ -99,5 +99,7 @@ MobileAppRuntime _buildFallbackRuntime() {
     remoteSyncGateway: NoopRemoteSyncGateway(),
     travelRemoteDataSource: NoopTravelRemoteDataSource(),
     photoIngestionAdapter: NativePhotoIngestionAdapter(),
+    startupWarningMessage:
+        'The app started in temporary local fallback mode because startup did not complete successfully.',
   );
 }

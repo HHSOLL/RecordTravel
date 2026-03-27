@@ -200,40 +200,39 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell>
   }
 
   Widget _buildCurrentPage(
-    AppPreferencesController prefs, {
+    AppPreferencesState prefs, {
     required bool forceGlobeFallback,
     required bool isGlobeAvailabilityPending,
-  }) =>
-      switch (_currentTab) {
-        AppTab.home => RecordHomeScreen(
-          forceGlobeFallback: forceGlobeFallback,
-          isGlobeAvailabilityPending: isGlobeAvailabilityPending,
-          onRetryGlobe3D: () => ref.invalidate(globe3dAvailabilityProvider),
-          onOpenProfile: () {
-            setState(() => _currentTab = AppTab.profile);
-          },
-        ),
-        AppTab.planner => RecordPlannerScreen(
-          onImportGallery: () =>
-              _openPhotoImport(scope: PhotoIngestionScope.library),
-          onCreateTrip: _openCreateTrip,
-        ),
-        AppTab.archive => const RecordArchiveScreen(),
-        AppTab.profile => RecordProfileScreen(
-          languageCode: prefs.locale.languageCode,
-          onLanguageChanged: (languageCode) {
-            ref.read(appPreferencesProvider).setLanguageCode(languageCode);
-          },
-          onSignOut: () {
-            ref.read(sessionRepositoryProvider).signOut();
-          },
-          onImportGallery: () =>
-              _openPhotoImport(scope: PhotoIngestionScope.library),
-          onRequestSync: () {
-            ref.read(travelAppControllerProvider.notifier).markSyncRequested();
-          },
-        ),
-      };
+  }) => switch (_currentTab) {
+    AppTab.home => RecordHomeScreen(
+      forceGlobeFallback: forceGlobeFallback,
+      isGlobeAvailabilityPending: isGlobeAvailabilityPending,
+      onRetryGlobe3D: () => ref.invalidate(globe3dAvailabilityProvider),
+      onOpenProfile: () {
+        setState(() => _currentTab = AppTab.profile);
+      },
+    ),
+    AppTab.planner => RecordPlannerScreen(
+      onImportGallery: () =>
+          _openPhotoImport(scope: PhotoIngestionScope.library),
+      onCreateTrip: _openCreateTrip,
+    ),
+    AppTab.archive => const RecordArchiveScreen(),
+    AppTab.profile => RecordProfileScreen(
+      languageCode: prefs.locale.languageCode,
+      onLanguageChanged: (languageCode) {
+        ref.read(appPreferencesProvider.notifier).setLanguageCode(languageCode);
+      },
+      onSignOut: () {
+        ref.read(sessionRepositoryProvider).signOut();
+      },
+      onImportGallery: () =>
+          _openPhotoImport(scope: PhotoIngestionScope.library),
+      onRequestSync: () {
+        ref.read(travelAppControllerProvider.notifier).markSyncRequested();
+      },
+    ),
+  };
 
   void _openCreateTrip() {
     Navigator.push(
