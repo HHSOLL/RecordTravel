@@ -35,6 +35,36 @@ class RecordStrings {
   String timelineEntries(int count) =>
       isKorean ? '기록 $count개' : '$count entries';
 
+  String stopCount(int count) =>
+      isKorean ? '$count 경유지' : '$count stop${count == 1 ? '' : 's'}';
+
+  String plannerCountdownLabel(int daysLeft) {
+    if (daysLeft > 0) {
+      return 'D-$daysLeft';
+    }
+    if (daysLeft == 0) {
+      return 'D-Day';
+    }
+    return isKorean ? '여행 중' : 'Started';
+  }
+
+  String continentLabel(String continent) {
+    if (!isKorean) {
+      return continent;
+    }
+
+    return switch (continent.toLowerCase()) {
+      'asia' => '아시아',
+      'europe' => '유럽',
+      'north america' => '북아메리카',
+      'south america' => '남아메리카',
+      'oceania' => '오세아니아',
+      'africa' => '아프리카',
+      'antarctica' => '남극',
+      _ => continent,
+    };
+  }
+
   static const _translations = <String, Map<String, String>>{
     'ko': {
       'app.name': 'record',
@@ -60,8 +90,7 @@ class RecordStrings {
       'home.globeUnavailableSubtitle':
           '이 기기에서는 안정적인 미리보기 경로로 전환했습니다. 아래 국가 버튼으로 2D 상세를 바로 열 수 있습니다.',
       'home.globeAvailabilityCheckingTitle': '3D 보기 가능 여부를 확인하는 중입니다.',
-      'home.globeAvailabilityCheckingSubtitle':
-          '기기를 확인하는 동안 홈 화면을 준비하고 있습니다.',
+      'home.globeAvailabilityCheckingSubtitle': '기기를 확인하는 동안 홈 화면을 준비하고 있습니다.',
       'home.retry3d': '3D 다시 시도',
       'home.quickCountries': '빠른 국가 열기',
       'map.unavailableTitle': '지도를 불러올 수 없습니다.',
@@ -75,11 +104,16 @@ class RecordStrings {
       'planner.importLibrary': '갤러리 전체 가져오기',
       'planner.importLibrarySubtitle': '사진 정보를 먼저 읽어 여행과 연결할 수 있습니다.',
       'planner.nextDeparture': '가장 가까운 출발',
+      'planner.mapped': '기록 위치',
+      'planner.nextShort': '다음',
       'planner.openMap': '지도 보기',
       'planner.schedule': '일정 보기',
       'planner.view': '열기',
       'archive.title': '아카이브',
       'archive.allCompanions': '전체',
+      'archive.trips': '여행',
+      'archive.countries': '국가',
+      'archive.continents': '대륙',
       'archive.empty': '완료된 여행 기록이 아직 없습니다.',
       'profile.title': '마이페이지',
       'profile.preferences': '환경 설정',
@@ -94,7 +128,7 @@ class RecordStrings {
       'profile.pendingUploads': '대기 업로드',
       'profile.language': '언어 설정',
       'profile.systemTheme': '시스템 테마',
-      'profile.systemThemeSubtitle': '아이폰의 밝기 설정을 그대로 따릅니다.',
+      'profile.systemThemeSubtitle': '현재는 다크 모드만 지원합니다.',
       'profile.systemShort': '시스템',
       'profile.lightShort': '라이트',
       'profile.darkShort': '다크',
@@ -178,11 +212,16 @@ class RecordStrings {
       'planner.importLibrarySubtitle':
           'Read photo metadata first, then connect it to trips.',
       'planner.nextDeparture': 'Next departure',
+      'planner.mapped': 'Mapped',
+      'planner.nextShort': 'Next',
       'planner.openMap': 'Open Map',
       'planner.schedule': 'Schedule',
       'planner.view': 'Open',
       'archive.title': 'Archive',
       'archive.allCompanions': 'All',
+      'archive.trips': 'Trips',
+      'archive.countries': 'Countries',
+      'archive.continents': 'Continents',
       'archive.empty': 'No completed trips yet.',
       'profile.title': 'Profile',
       'profile.preferences': 'Preferences',
@@ -201,7 +240,7 @@ class RecordStrings {
       'profile.language': 'Language',
       'profile.systemTheme': 'System Theme',
       'profile.systemThemeSubtitle':
-          'Follows your iPhone appearance automatically.',
+          'Dark mode is the only supported appearance right now.',
       'profile.systemShort': 'System',
       'profile.lightShort': 'Light',
       'profile.darkShort': 'Dark',

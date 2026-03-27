@@ -213,10 +213,9 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
       borderTexture.needsUpdate = true;
     }
 
-    final earthMaterial = three.MeshPhongMaterial.fromMap({
+    final earthMaterial = three.MeshBasicMaterial.fromMap({
       'map': baseTexture,
-      'shininess': scene.style == RecordGlobeStyle.dark ? 10.0 : 4.0,
-      'specular': scene.style == RecordGlobeStyle.dark ? 0x09111f : 0xd8dee9,
+      'color': scene.style == RecordGlobeStyle.dark ? 0xe2e8f0 : 0xffffff,
     });
     final earthMesh = three.Mesh(
       three.SphereGeometry(_globeRadius, _earthSegments, _earthSegments),
@@ -225,12 +224,11 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     _earthMesh = earthMesh;
     _globeRoot.add(earthMesh);
 
-    final borderMaterial = three.MeshPhongMaterial.fromMap({
+    final borderMaterial = three.MeshBasicMaterial.fromMap({
       'map': borderTexture,
       'transparent': true,
-      'opacity': scene.style == RecordGlobeStyle.dark ? 0.42 : 0.28,
+      'opacity': scene.style == RecordGlobeStyle.dark ? 0.52 : 0.34,
       'side': three.DoubleSide,
-      'shininess': 0.0,
     });
     final borderMesh = three.Mesh(
       three.SphereGeometry(
@@ -242,12 +240,11 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     );
     _globeRoot.add(borderMesh);
 
-    final atmosphereMaterial = three.MeshPhongMaterial.fromMap({
+    final atmosphereMaterial = three.MeshBasicMaterial.fromMap({
       'color': scene.style == RecordGlobeStyle.dark ? 0x60a5fa : 0x93c5fd,
       'transparent': true,
       'opacity': scene.style == RecordGlobeStyle.dark ? 0.16 : 0.10,
       'side': three.DoubleSide,
-      'shininess': 0.0,
     });
     final atmosphereMesh = three.Mesh(
       three.SphereGeometry(_globeRadius * 1.08, 48, 32),

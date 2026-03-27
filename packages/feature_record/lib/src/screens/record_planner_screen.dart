@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 
+import '../components/record_metric_grid.dart';
 import '../components/record_page_intro.dart';
 import '../i18n/record_strings.dart';
 import '../models/record_models.dart';
@@ -64,20 +65,27 @@ class RecordPlannerScreen extends ConsumerWidget {
                           glowColor: Color(0xFFF59E0B),
                         ),
                         metrics: [
-                          AtlasMiniMetric(
-                            label: strings.text('nav.planner'),
-                            value: '${upcomingTrips.length}',
-                            icon: Icons.luggage_rounded,
-                          ),
-                          AtlasMiniMetric(
-                            label: 'Mapped',
-                            value: '$mappedPlaces',
-                            icon: Icons.map_rounded,
-                          ),
-                          AtlasMiniMetric(
-                            label: 'Next',
-                            value: nextTrip?.countries.first.code ?? '--',
-                            icon: Icons.flight_takeoff_rounded,
+                          RecordMetricGrid(
+                            children: [
+                              AtlasMiniMetric(
+                                minWidth: 0,
+                                label: strings.text('nav.planner'),
+                                value: '${upcomingTrips.length}',
+                                icon: Icons.luggage_rounded,
+                              ),
+                              AtlasMiniMetric(
+                                minWidth: 0,
+                                label: strings.text('planner.mapped'),
+                                value: '$mappedPlaces',
+                                icon: Icons.map_rounded,
+                              ),
+                              AtlasMiniMetric(
+                                minWidth: 0,
+                                label: strings.text('planner.nextShort'),
+                                value: nextTrip?.countries.first.code ?? '--',
+                                icon: Icons.flight_takeoff_rounded,
+                              ),
+                            ],
                           ),
                         ],
                         actions: [
@@ -184,9 +192,7 @@ class _PlannerTripCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
-                        daysLeft > 0
-                            ? 'D-$daysLeft'
-                            : (daysLeft == 0 ? 'D-Day' : 'Started'),
+                        strings.plannerCountdownLabel(daysLeft),
                         style: theme.textTheme.labelLarge?.copyWith(
                           color: Colors.white,
                         ),
@@ -241,8 +247,7 @@ class _PlannerTripCard extends StatelessWidget {
                   runSpacing: 10,
                   children: [
                     AtlasStatusPill(
-                      label:
-                          '${trip.locations.length} stop${trip.locations.length == 1 ? '' : 's'}',
+                      label: strings.stopCount(trip.locations.length),
                       color: tripColor,
                       icon: Icons.route_rounded,
                     ),
@@ -364,46 +369,47 @@ class _MapModal extends ConsumerWidget {
           ),
           Expanded(
             child: switch (capability) {
-              AsyncData(value: RecordMapRuntimeCapability.available) => ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(26),
-                ),
-                child: GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(initial.lat, initial.lng),
-                    zoom: 4.6,
+              AsyncData(value: RecordMapRuntimeCapability.available) =>
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(26),
                   ),
-                  myLocationButtonEnabled: false,
-                  markers: trip.locations
-                      .map(
-                        (loc) => Marker(
-                          markerId: MarkerId(loc.id),
-                          position: LatLng(loc.lat, loc.lng),
-                          infoWindow: InfoWindow(title: loc.name),
+                  child: GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(initial.lat, initial.lng),
+                      zoom: 4.6,
+                    ),
+                    myLocationButtonEnabled: false,
+                    markers: trip.locations
+                        .map(
+                          (loc) => Marker(
+                            markerId: MarkerId(loc.id),
+                            position: LatLng(loc.lat, loc.lng),
+                            infoWindow: InfoWindow(title: loc.name),
+                          ),
+                        )
+                        .toSet(),
+                    polylines: {
+                      if (trip.locations.length > 1)
+                        Polyline(
+                          polylineId: const PolylineId('route'),
+                          points: trip.locations
+                              .map((loc) => LatLng(loc.lat, loc.lng))
+                              .toList(),
+                          color: tripColor,
+                          width: 3,
                         ),
-                      )
-                      .toSet(),
-                  polylines: {
-                    if (trip.locations.length > 1)
-                      Polyline(
-                        polylineId: const PolylineId('route'),
-                        points: trip.locations
-                            .map((loc) => LatLng(loc.lat, loc.lng))
-                            .toList(),
-                        color: tripColor,
-                        width: 3,
-                      ),
-                  },
+                    },
+                  ),
                 ),
-              ),
               AsyncLoading() => const Padding(
-                padding: EdgeInsets.all(20),
-                child: RecordMapLoadingSurface(),
-              ),
+                  padding: EdgeInsets.all(20),
+                  child: RecordMapLoadingSurface(),
+                ),
               _ => Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                child: RecordMapUnavailableSurface(accentColor: tripColor),
-              ),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  child: RecordMapUnavailableSurface(accentColor: tripColor),
+                ),
             },
           ),
         ],

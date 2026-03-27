@@ -841,17 +841,19 @@ class AtlasMiniMetric extends StatelessWidget {
     required this.label,
     required this.value,
     this.icon,
+    this.minWidth = 94,
   });
 
   final String label;
   final String value;
   final IconData? icon;
+  final double minWidth;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.atlasPalette;
     return Container(
-      constraints: const BoxConstraints(minWidth: 94),
+      constraints: BoxConstraints(minWidth: minWidth),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: palette.surfaceMuted,
@@ -865,9 +867,19 @@ class AtlasMiniMetric extends StatelessWidget {
             Icon(icon, size: 16, color: palette.accentSoft),
             const SizedBox(height: 8),
           ],
-          Text(value, style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 2),
-          Text(label, style: Theme.of(context).textTheme.bodyMedium),
+          Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ],
       ),
     );

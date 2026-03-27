@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../components/record_metric_grid.dart';
+import '../components/record_page_intro.dart';
 import '../i18n/record_strings.dart';
 import '../models/record_models.dart';
 import '../providers/record_provider.dart';
-import '../components/record_wordmark.dart';
 import 'record_trip_detail_screen.dart';
 
 class RecordArchiveScreen extends ConsumerStatefulWidget {
@@ -20,7 +21,7 @@ class RecordArchiveScreen extends ConsumerStatefulWidget {
 }
 
 class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
-  String _selectedContinent = 'All';
+  String? _selectedContinent;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,7 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
       for (final trip in pastTrips) trip.countries.first.continent,
     }.toList()
       ..sort();
-    final filteredTrips = _selectedContinent == 'All'
+    final filteredTrips = _selectedContinent == null
         ? pastTrips
         : pastTrips
             .where(
@@ -57,54 +58,14 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: RecordWordmark(
-                          logoSize: 24,
-                          fontSize: 20,
+                      RecordPageIntro(
+                        eyebrow: strings.text('nav.archive'),
+                        title: strings.text('archive.title'),
+                        subtitle: strings.pastTrips(
+                          pastTrips.length,
+                          filteredTrips.length,
                         ),
-                      ),
-                      const SizedBox(height: 18),
-                      Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 7,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(
-                                0xFFF59E0B,
-                              ).withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                color: const Color(
-                                  0xFFF59E0B,
-                                ).withValues(alpha: 0.24),
-                              ),
-                            ),
-                            child: Text(
-                              strings.text('nav.archive'),
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: const Color(0xFFF8D48B),
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            strings.pastTrips(
-                              pastTrips.length,
-                              filteredTrips.length,
-                            ),
-                            textAlign: TextAlign.center,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                        showTitle: false,
                       ),
                       const SizedBox(height: 20),
                       SingleChildScrollView(
@@ -113,15 +74,15 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                           children: [
                             _ContinentChip(
                               label: strings.text('archive.allCompanions'),
-                              selected: _selectedContinent == 'All',
+                              selected: _selectedContinent == null,
                               onTap: () =>
-                                  setState(() => _selectedContinent = 'All'),
+                                  setState(() => _selectedContinent = null),
                             ),
                             for (final continent in continents)
                               Padding(
                                 padding: const EdgeInsets.only(left: 8),
                                 child: _ContinentChip(
-                                  label: continent,
+                                  label: strings.continentLabel(continent),
                                   selected: _selectedContinent == continent,
                                   onTap: () => setState(
                                     () => _selectedContinent = continent,
@@ -132,23 +93,25 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                         ),
                       ),
                       const SizedBox(height: 18),
-                      Wrap(
+                      RecordMetricGrid(
                         spacing: 12,
-                        runSpacing: 12,
                         children: [
                           AtlasMiniMetric(
-                            label: 'Trips',
+                            minWidth: 0,
+                            label: strings.text('archive.trips'),
                             value: '${filteredTrips.length}',
                             icon: Icons.workspaces_rounded,
                           ),
                           AtlasMiniMetric(
-                            label: 'Countries',
+                            minWidth: 0,
+                            label: strings.text('archive.countries'),
                             value:
                                 '${filteredTrips.map((trip) => trip.countries.first.code).toSet().length}',
                             icon: Icons.public_rounded,
                           ),
                           AtlasMiniMetric(
-                            label: 'Continents',
+                            minWidth: 0,
+                            label: strings.text('archive.continents'),
                             value:
                                 '${filteredTrips.map((trip) => trip.countries.first.continent).toSet().length}',
                             icon: Icons.flight_rounded,
@@ -180,19 +143,18 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                       final crossAxisExtent = constraints.crossAxisExtent;
                       final crossAxisCount = switch (crossAxisExtent) {
                         >= 920 => 3,
-                        >= 520 => 2,
+                        >= 280 => 2,
                         _ => 1,
                       };
                       const spacing = 14.0;
-                      final tileWidth =
-                          (crossAxisExtent -
-                                  spacing * math.max(0, crossAxisCount - 1)) /
-                              crossAxisCount;
-                      final aspectRatio = tileWidth < 360
-                          ? 0.84
-                          : tileWidth < 480
-                          ? 0.94
-                          : 1.04;
+                      final tileWidth = (crossAxisExtent -
+                              spacing * math.max(0, crossAxisCount - 1)) /
+                          crossAxisCount;
+                      final aspectRatio = tileWidth < 180
+                          ? 0.72
+                          : tileWidth < 320
+                              ? 0.82
+                              : 0.92;
 
                       if (crossAxisCount == 1) {
                         return SliverList(
@@ -268,12 +230,15 @@ class _ContinentChip extends StatelessWidget {
 }
 
 class _ArchiveTripCard extends StatelessWidget {
-  const _ArchiveTripCard({required this.trip});
+  const _ArchiveTripCard({
+    required this.trip,
+  });
 
   final RecordTrip trip;
 
   @override
   Widget build(BuildContext context) {
+    final strings = RecordStrings.of(context);
     final theme = Theme.of(context);
     final tripColor = Color(int.parse(trip.color.replaceAll('#', '0xFF')));
     final startDate = DateTime.parse(trip.startDate);
@@ -322,7 +287,9 @@ class _ArchiveTripCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _ArchiveInfoPill(
-                        label: trip.countries.first.continent,
+                        label: strings.continentLabel(
+                          trip.countries.first.continent,
+                        ),
                         color: Colors.white,
                         icon: Icons.public_rounded,
                       ),
@@ -387,7 +354,7 @@ class _ArchiveTripCard extends StatelessWidget {
                               icon: Icons.flight_rounded,
                             ),
                             _ArchiveInfoPill(
-                              label: '${trip.locations.length} stops',
+                              label: strings.stopCount(trip.locations.length),
                               color: context.atlasPalette.accentSoft,
                               icon: Icons.route_rounded,
                             ),

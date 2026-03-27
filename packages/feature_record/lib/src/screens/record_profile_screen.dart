@@ -3,6 +3,7 @@ import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../components/record_metric_grid.dart';
 import '../components/record_page_intro.dart';
 import '../i18n/record_strings.dart';
 import '../providers/record_provider.dart';
@@ -27,7 +28,6 @@ class RecordProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = RecordStrings.of(context);
     final user = ref.watch(recordUserProvider);
-    final session = ref.watch(sessionSnapshotProvider);
     final sync = ref.watch(syncSnapshotProvider);
     final photos = ref.watch(photosProvider);
     final theme = Theme.of(context);
@@ -56,20 +56,27 @@ class RecordProfileScreen extends ConsumerWidget {
                     ? 'U'
                     : user.name.substring(0, 1).toUpperCase(),
                 metrics: [
-                  AtlasMiniMetric(
-                    label: strings.text('nav.archive'),
-                    value: '${user.totalTrips}',
-                    icon: Icons.auto_awesome_motion_rounded,
-                  ),
-                  AtlasMiniMetric(
-                    label: strings.text('profile.photos'),
-                    value: '${photos.length}',
-                    icon: Icons.photo_library_rounded,
-                  ),
-                  AtlasMiniMetric(
-                    label: strings.text('profile.pendingUploads'),
-                    value: '${sync.pendingUploads}',
-                    icon: Icons.cloud_upload_rounded,
+                  RecordMetricGrid(
+                    children: [
+                      AtlasMiniMetric(
+                        minWidth: 0,
+                        label: strings.text('nav.archive'),
+                        value: '${user.totalTrips}',
+                        icon: Icons.auto_awesome_motion_rounded,
+                      ),
+                      AtlasMiniMetric(
+                        minWidth: 0,
+                        label: strings.text('profile.photos'),
+                        value: '${photos.length}',
+                        icon: Icons.photo_library_rounded,
+                      ),
+                      AtlasMiniMetric(
+                        minWidth: 0,
+                        label: strings.text('profile.pendingUploads'),
+                        value: '${sync.pendingUploads}',
+                        icon: Icons.cloud_upload_rounded,
+                      ),
+                    ],
                   ),
                 ],
                 onImportGallery: onImportGallery,
@@ -117,18 +124,6 @@ class RecordProfileScreen extends ConsumerWidget {
                 title: strings.text('profile.account'),
                 child: Column(
                   children: [
-                    _PreferenceRow(
-                      icon: Icons.verified_user_rounded,
-                      title: strings.text('profile.previewAuth'),
-                      subtitle: strings.text('profile.previewAuthSubtitle'),
-                    ),
-                    const SizedBox(height: 12),
-                    _PreferenceRow(
-                      icon: Icons.storage_rounded,
-                      title: session.backendProfile.label,
-                      subtitle: session.backendProfile.notes,
-                    ),
-                    const SizedBox(height: 20),
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
