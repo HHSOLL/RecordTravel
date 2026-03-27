@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../i18n/record_strings.dart';
 import '../models/record_models.dart';
 import '../providers/record_provider.dart';
+import 'widgets/record_map_runtime.dart';
 
 class RecordTripDetailScreen extends ConsumerStatefulWidget {
   const RecordTripDetailScreen({super.key, required this.tripId});
@@ -242,45 +243,56 @@ class _TripTimelineTab extends StatelessWidget {
   }
 }
 
-class _TripMapTab extends StatelessWidget {
+class _TripMapTab extends ConsumerWidget {
   const _TripMapTab({required this.trip, required this.accentColor});
 
   final RecordTrip trip;
   final Color accentColor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final strings = RecordStrings.of(context);
     if (trip.locations.isEmpty) {
       return Center(child: Text(strings.text('trip.noMap')));
     }
+    final capability = ref.watch(recordMapRuntimeCapabilityProvider);
     final initial = trip.locations.first;
-    return GoogleMap(
-      initialCameraPosition: CameraPosition(
-        target: LatLng(initial.lat, initial.lng),
-        zoom: 4.7,
-      ),
-      myLocationButtonEnabled: false,
-      markers: trip.locations
-          .map(
-            (loc) => Marker(
-              markerId: MarkerId(loc.id),
-              position: LatLng(loc.lat, loc.lng),
-              infoWindow: InfoWindow(title: loc.name),
+    return switch (capability) {
+      AsyncData(value: RecordMapRuntimeCapability.available) => GoogleMap(
+        initialCameraPosition: CameraPosition(
+          target: LatLng(initial.lat, initial.lng),
+          zoom: 4.7,
+        ),
+        myLocationButtonEnabled: false,
+        markers: trip.locations
+            .map(
+              (loc) => Marker(
+                markerId: MarkerId(loc.id),
+                position: LatLng(loc.lat, loc.lng),
+                infoWindow: InfoWindow(title: loc.name),
+              ),
+            )
+            .toSet(),
+        polylines: {
+          if (trip.locations.length > 1)
+            Polyline(
+              polylineId: const PolylineId('route'),
+              points:
+                  trip.locations.map((loc) => LatLng(loc.lat, loc.lng)).toList(),
+              color: accentColor,
+              width: 3,
             ),
-          )
-          .toSet(),
-      polylines: {
-        if (trip.locations.length > 1)
-          Polyline(
-            polylineId: const PolylineId('route'),
-            points:
-                trip.locations.map((loc) => LatLng(loc.lat, loc.lng)).toList(),
-            color: accentColor,
-            width: 3,
-          ),
-      },
-    );
+        },
+      ),
+      AsyncLoading() => const Padding(
+        padding: EdgeInsets.all(20),
+        child: RecordMapLoadingSurface(),
+      ),
+      _ => Padding(
+        padding: const EdgeInsets.all(20),
+        child: RecordMapUnavailableSurface(accentColor: accentColor),
+      ),
+    };
   }
 }
 

@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../domain/record_travel_graph.dart';
 import '../../i18n/record_strings.dart';
 import 'record_country_detail_shared.dart';
+import 'record_map_runtime.dart';
 
 class RecordCountryMapTab extends StatefulWidget {
   const RecordCountryMapTab({
@@ -104,70 +106,95 @@ class _RecordCountryMapTabState extends State<RecordCountryMapTab> {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                height: 320,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(
-                        widget.projection.centerLat,
-                        widget.projection.centerLng,
+              Consumer(
+                builder: (context, ref, child) {
+                  final capability = ref.watch(
+                    recordMapRuntimeCapabilityProvider,
+                  );
+                  return SizedBox(
+                    height: 320,
+                    child: switch (capability) {
+                      AsyncData(
+                        value: RecordMapRuntimeCapability.available,
+                      ) =>
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(24),
+                          child: GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(
+                                widget.projection.centerLat,
+                                widget.projection.centerLng,
+                              ),
+                              zoom: 4.2,
+                            ),
+                            myLocationButtonEnabled: false,
+                            zoomControlsEnabled: false,
+                            markers: {
+                              for (final location in orderedLocations)
+                                Marker(
+                                  markerId: MarkerId(location.id),
+                                  position: LatLng(location.lat, location.lng),
+                                  infoWindow: InfoWindow(
+                                    title: location.name,
+                                    snippet: location.countryName,
+                                  ),
+                                  icon: BitmapDescriptor.defaultMarkerWithHue(
+                                    location.isPlanned
+                                        ? BitmapDescriptor.hueOrange
+                                        : BitmapDescriptor.hueAzure,
+                                  ),
+                                ),
+                            },
+                            polylines: {
+                              if (visitedRoute.length > 1)
+                                Polyline(
+                                  polylineId: const PolylineId(
+                                    'visited-route',
+                                  ),
+                                  points: [
+                                    for (final location in visitedRoute)
+                                      LatLng(location.lat, location.lng),
+                                  ],
+                                  color: widget.accentColor,
+                                  width: 4,
+                                ),
+                              if (plannedRoute.length > 1)
+                                Polyline(
+                                  polylineId: const PolylineId(
+                                    'planned-route',
+                                  ),
+                                  points: [
+                                    for (final location in plannedRoute)
+                                      LatLng(location.lat, location.lng),
+                                  ],
+                                  color: widget.accentColor.withValues(
+                                    alpha: 0.42,
+                                  ),
+                                  width: 4,
+                                  patterns: [
+                                    PatternItem.dash(18),
+                                    PatternItem.gap(10),
+                                  ],
+                                ),
+                            },
+                            onMapCreated: (controller) {
+                              if (!_controller.isCompleted) {
+                                _controller.complete(controller);
+                              }
+                              unawaited(_fitProjectionBounds(controller));
+                            },
+                          ),
+                        ),
+                      AsyncLoading() => const RecordMapLoadingSurface(
+                        height: 320,
                       ),
-                      zoom: 4.2,
-                    ),
-                    myLocationButtonEnabled: false,
-                    zoomControlsEnabled: false,
-                    markers: {
-                      for (final location in orderedLocations)
-                        Marker(
-                          markerId: MarkerId(location.id),
-                          position: LatLng(location.lat, location.lng),
-                          infoWindow: InfoWindow(
-                            title: location.name,
-                            snippet: location.countryName,
-                          ),
-                          icon: BitmapDescriptor.defaultMarkerWithHue(
-                            location.isPlanned
-                                ? BitmapDescriptor.hueOrange
-                                : BitmapDescriptor.hueAzure,
-                          ),
-                        ),
+                      _ => RecordMapUnavailableSurface(
+                        accentColor: widget.accentColor,
+                        height: 320,
+                      ),
                     },
-                    polylines: {
-                      if (visitedRoute.length > 1)
-                        Polyline(
-                          polylineId: const PolylineId('visited-route'),
-                          points: [
-                            for (final location in visitedRoute)
-                              LatLng(location.lat, location.lng),
-                          ],
-                          color: widget.accentColor,
-                          width: 4,
-                        ),
-                      if (plannedRoute.length > 1)
-                        Polyline(
-                          polylineId: const PolylineId('planned-route'),
-                          points: [
-                            for (final location in plannedRoute)
-                              LatLng(location.lat, location.lng),
-                          ],
-                          color: widget.accentColor.withValues(alpha: 0.42),
-                          width: 4,
-                          patterns: [
-                            PatternItem.dash(18),
-                            PatternItem.gap(10),
-                          ],
-                        ),
-                    },
-                    onMapCreated: (controller) {
-                      if (!_controller.isCompleted) {
-                        _controller.complete(controller);
-                      }
-                      unawaited(_fitProjectionBounds(controller));
-                    },
-                  ),
-                ),
+                  );
+                },
               ),
             ],
           ),

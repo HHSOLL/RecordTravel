@@ -34,77 +34,130 @@ class RecordCountryHero extends StatelessWidget {
       ),
       child: SafeArea(
         bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 76),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              RecordCountryRoundHeroButton(
-                icon: Icons.arrow_back_rounded,
-                onTap: () => Navigator.of(context).maybePop(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isCompact = constraints.maxHeight < 228;
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                16,
+                20,
+                isCompact ? 28 : 56,
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Stack(
                 children: [
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: [
-                      AtlasStatusPill(
-                        label: projection.continent,
-                        color: Colors.white,
-                        icon: Icons.public_rounded,
-                      ),
-                      AtlasStatusPill(
-                        label: _signalLabel(strings, projection.signal),
-                        color: Colors.white.withValues(alpha: 0.24),
-                        icon: projection.hasUpcomingTrip
-                            ? Icons.flight_takeoff_rounded
-                            : Icons.auto_graph_rounded,
-                      ),
-                    ],
+                  RecordCountryRoundHeroButton(
+                    key: const Key('record-country-detail-back'),
+                    icon: Icons.arrow_back_rounded,
+                    onTap: () => Navigator.of(context).maybePop(),
                   ),
-                  const SizedBox(height: 18),
-                  Text(
-                    projection.name,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
+                  Positioned.fill(
+                    top: isCompact ? 52 : 66,
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: [
+                              AtlasStatusPill(
+                                label: projection.continent,
+                                color: Colors.white,
+                                icon: Icons.public_rounded,
+                              ),
+                              AtlasStatusPill(
+                                label: _signalLabel(strings, projection.signal),
+                                color: Colors.white.withValues(alpha: 0.24),
+                                icon: projection.hasUpcomingTrip
+                                    ? Icons.flight_takeoff_rounded
+                                    : Icons.auto_graph_rounded,
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: isCompact ? 12 : 18),
+                          Text(
+                            projection.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: (isCompact
+                                    ? theme.textTheme.headlineSmall
+                                    : theme.textTheme.headlineMedium)
+                                ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          if (!isCompact) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              strings.isKorean
+                                  ? '하나의 여행 그래프를 지도, 타임라인, 앨범 세 가지 투영으로 정리했습니다.'
+                                  : 'One travel graph, rendered as map, timeline, and album projections.',
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.9),
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            Wrap(
+                              spacing: 10,
+                              runSpacing: 10,
+                              children: [
+                                RecordCountryHeroMetric(
+                                  label: strings.profileTrips(
+                                    projection.tripCount,
+                                  ),
+                                  value: '${projection.tripCount}',
+                                ),
+                                RecordCountryHeroMetric(
+                                  label: strings.timelineEntries(
+                                    projection.visitCount,
+                                  ),
+                                  value: '${projection.visitCount}',
+                                ),
+                                RecordCountryHeroMetric(
+                                  label: strings.isKorean ? '도시' : 'Cities',
+                                  value: '${projection.cityCount}',
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                            const SizedBox(height: 10),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                _RecordCountryHeroStatPill(
+                                  label: strings.profileTrips(
+                                    projection.tripCount,
+                                  ),
+                                  value: '${projection.tripCount}',
+                                ),
+                                _RecordCountryHeroStatPill(
+                                  label: strings.timelineEntries(
+                                    projection.visitCount,
+                                  ),
+                                  value: '${projection.visitCount}',
+                                ),
+                                _RecordCountryHeroStatPill(
+                                  label: strings.isKorean ? '도시' : 'Cities',
+                                  value: '${projection.cityCount}',
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    strings.isKorean
-                        ? '하나의 여행 그래프를 지도, 타임라인, 앨범 세 가지 투영으로 정리했습니다.'
-                        : 'One travel graph, rendered as map, timeline, and album projections.',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.9),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: [
-                      RecordCountryHeroMetric(
-                        label: strings.profileTrips(projection.tripCount),
-                        value: '${projection.tripCount}',
-                      ),
-                      RecordCountryHeroMetric(
-                        label: strings.timelineEntries(projection.visitCount),
-                        value: '${projection.visitCount}',
-                      ),
-                      RecordCountryHeroMetric(
-                        label: strings.isKorean ? '도시' : 'Cities',
-                        value: '${projection.cityCount}',
-                      ),
-                    ],
                   ),
                 ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -215,6 +268,45 @@ class RecordCountryHeroMetric extends StatelessWidget {
                 ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _RecordCountryHeroStatPill extends StatelessWidget {
+  const _RecordCountryHeroStatPill({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+      ),
+      child: RichText(
+        text: TextSpan(
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Colors.white.withValues(alpha: 0.82),
+              ),
+          children: [
+            TextSpan(
+              text: '$value ',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+            ),
+            TextSpan(text: label),
+          ],
+        ),
       ),
     );
   }

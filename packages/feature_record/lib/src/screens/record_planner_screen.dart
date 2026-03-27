@@ -8,6 +8,7 @@ import '../components/record_page_intro.dart';
 import '../i18n/record_strings.dart';
 import '../models/record_models.dart';
 import '../providers/record_provider.dart';
+import 'widgets/record_map_runtime.dart';
 import 'record_trip_detail_screen.dart';
 
 class RecordPlannerScreen extends ConsumerWidget {
@@ -51,6 +52,7 @@ class RecordPlannerScreen extends ConsumerWidget {
                         eyebrow: strings.text('nav.planner'),
                         title: strings.text('planner.title'),
                         subtitle: strings.upcomingTrips(upcomingTrips.length),
+                        showTitle: false,
                       ),
                       const SizedBox(height: 16),
                       AtlasHeroPanel(
@@ -315,17 +317,18 @@ class _PlannerTripCard extends StatelessWidget {
   }
 }
 
-class _MapModal extends StatelessWidget {
+class _MapModal extends ConsumerWidget {
   const _MapModal({required this.trip});
 
   final RecordTrip trip;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final palette = context.atlasPalette;
     final initial = trip.locations.first;
     final tripColor = Color(int.parse(trip.color.replaceAll('#', '0xFF')));
+    final capability = ref.watch(recordMapRuntimeCapabilityProvider);
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.76,
@@ -360,38 +363,48 @@ class _MapModal extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(26),
-              ),
-              child: GoogleMap(
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(initial.lat, initial.lng),
-                  zoom: 4.6,
+            child: switch (capability) {
+              AsyncData(value: RecordMapRuntimeCapability.available) => ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(26),
                 ),
-                myLocationButtonEnabled: false,
-                markers: trip.locations
-                    .map(
-                      (loc) => Marker(
-                        markerId: MarkerId(loc.id),
-                        position: LatLng(loc.lat, loc.lng),
-                        infoWindow: InfoWindow(title: loc.name),
+                child: GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(initial.lat, initial.lng),
+                    zoom: 4.6,
+                  ),
+                  myLocationButtonEnabled: false,
+                  markers: trip.locations
+                      .map(
+                        (loc) => Marker(
+                          markerId: MarkerId(loc.id),
+                          position: LatLng(loc.lat, loc.lng),
+                          infoWindow: InfoWindow(title: loc.name),
+                        ),
+                      )
+                      .toSet(),
+                  polylines: {
+                    if (trip.locations.length > 1)
+                      Polyline(
+                        polylineId: const PolylineId('route'),
+                        points: trip.locations
+                            .map((loc) => LatLng(loc.lat, loc.lng))
+                            .toList(),
+                        color: tripColor,
+                        width: 3,
                       ),
-                    )
-                    .toSet(),
-                polylines: {
-                  if (trip.locations.length > 1)
-                    Polyline(
-                      polylineId: const PolylineId('route'),
-                      points: trip.locations
-                          .map((loc) => LatLng(loc.lat, loc.lng))
-                          .toList(),
-                      color: tripColor,
-                      width: 3,
-                    ),
-                },
+                  },
+                ),
               ),
-            ),
+              AsyncLoading() => const Padding(
+                padding: EdgeInsets.all(20),
+                child: RecordMapLoadingSurface(),
+              ),
+              _ => Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                child: RecordMapUnavailableSurface(accentColor: tripColor),
+              ),
+            },
           ),
         ],
       ),

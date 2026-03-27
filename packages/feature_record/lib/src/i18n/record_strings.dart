@@ -64,6 +64,9 @@ class RecordStrings {
           '기기를 확인하는 동안 홈 화면을 준비하고 있습니다.',
       'home.retry3d': '3D 다시 시도',
       'home.quickCountries': '빠른 국가 열기',
+      'map.unavailableTitle': '지도를 불러올 수 없습니다.',
+      'map.unavailableSubtitle':
+          '이 빌드에는 Google Maps 키가 없어 경로와 정차를 카드 정보로만 표시합니다.',
       'planner.title': '플래너',
       'planner.noUpcoming': '예정된 여행이 없습니다.',
       'planner.planNew': '새 여행 계획하기',
@@ -162,6 +165,9 @@ class RecordStrings {
           'The home view is preparing while the device capability is verified.',
       'home.retry3d': 'Retry 3D view',
       'home.quickCountries': 'Quick countries',
+      'map.unavailableTitle': 'Map preview is unavailable.',
+      'map.unavailableSubtitle':
+          'This build does not have a Google Maps key, so routes and stops are shown as cards only.',
       'planner.title': 'Planner',
       'planner.noUpcoming': 'No upcoming trips yet.',
       'planner.planNew': 'Plan a new trip',
