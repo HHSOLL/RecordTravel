@@ -130,11 +130,13 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _NavButton(
+                        key: const Key('nav-home'),
                         icon: Icons.public_rounded,
                         isActive: _currentTab == AppTab.home,
                         onTap: () => setState(() => _currentTab = AppTab.home),
                       ),
                       _NavButton(
+                        key: const Key('nav-archive'),
                         icon: Icons.map_rounded,
                         isActive: _currentTab == AppTab.archive,
                         onTap: () =>
@@ -173,12 +175,14 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell>
                         ),
                       ),
                       _NavButton(
+                        key: const Key('nav-planner'),
                         icon: Icons.calendar_month_rounded,
                         isActive: _currentTab == AppTab.planner,
                         onTap: () =>
                             setState(() => _currentTab = AppTab.planner),
                       ),
                       _NavButton(
+                        key: const Key('nav-profile'),
                         icon: Icons.person_rounded,
                         isActive: _currentTab == AppTab.profile,
                         onTap: () =>
@@ -251,6 +255,7 @@ class _MobileAppShellState extends ConsumerState<MobileAppShell>
 
 class _NavButton extends StatelessWidget {
   const _NavButton({
+    super.key,
     required this.icon,
     required this.isActive,
     required this.onTap,

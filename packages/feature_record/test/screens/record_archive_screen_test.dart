@@ -1,15 +1,16 @@
 import 'package:feature_record/src/models/record_models.dart';
 import 'package:feature_record/src/providers/record_provider.dart';
+import 'package:feature_record/src/components/record_wordmark.dart';
 import 'package:feature_record/src/screens/record_archive_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('archive cards stay within layout bounds on a phone viewport', (
+  testWidgets('archive header and cards adapt on a narrow phone viewport', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(1179, 2556);
+    tester.view.physicalSize = const Size(320, 640);
     tester.view.devicePixelRatio = 3;
     addTearDown(() {
       tester.view.resetPhysicalSize();
@@ -39,6 +40,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(RecordArchiveScreen), findsOneWidget);
+    expect(find.byType(RecordWordmark), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

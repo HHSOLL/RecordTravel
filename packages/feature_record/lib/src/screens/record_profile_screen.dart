@@ -44,26 +44,17 @@ class RecordProfileScreen extends ConsumerWidget {
                 eyebrow: strings.text('nav.profile'),
                 title: strings.text('profile.title'),
                 subtitle: user.title,
+                showTitle: false,
               ),
               const SizedBox(height: 18),
-              AtlasHeroPanel(
+              _ProfileWorkspacePanel(
                 eyebrow: strings.text('profile.workspaceTitle'),
                 title: user.name,
                 message: strings.text('profile.workspaceSubtitle'),
-                trailing: CircleAvatar(
-                  radius: 28,
-                  backgroundColor: palette.accentSoft.withValues(
-                    alpha: palette.isLight ? 0.18 : 0.2,
-                  ),
-                  child: Text(
-                    user.name.isEmpty
-                        ? 'U'
-                        : user.name.substring(0, 1).toUpperCase(),
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
+                accentColor: palette.accentSoft,
+                initial: user.name.isEmpty
+                    ? 'U'
+                    : user.name.substring(0, 1).toUpperCase(),
                 metrics: [
                   AtlasMiniMetric(
                     label: strings.text('nav.archive'),
@@ -81,18 +72,10 @@ class RecordProfileScreen extends ConsumerWidget {
                     icon: Icons.cloud_upload_rounded,
                   ),
                 ],
-                actions: [
-                  FilledButton.icon(
-                    onPressed: onImportGallery,
-                    icon: const Icon(Icons.photo_library_rounded),
-                    label: Text(strings.text('profile.importLibrary')),
-                  ),
-                  OutlinedButton.icon(
-                    onPressed: onRequestSync,
-                    icon: const Icon(Icons.sync_rounded),
-                    label: Text(strings.text('profile.syncNow')),
-                  ),
-                ],
+                onImportGallery: onImportGallery,
+                onRequestSync: onRequestSync,
+                importLabel: strings.text('profile.importLibrary'),
+                syncLabel: strings.text('profile.syncNow'),
               ),
               const SizedBox(height: 24),
               _SectionCard(
@@ -160,6 +143,119 @@ class RecordProfileScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ProfileWorkspacePanel extends StatelessWidget {
+  const _ProfileWorkspacePanel({
+    required this.eyebrow,
+    required this.title,
+    required this.message,
+    required this.accentColor,
+    required this.initial,
+    required this.metrics,
+    required this.onImportGallery,
+    required this.onRequestSync,
+    required this.importLabel,
+    required this.syncLabel,
+  });
+
+  final String eyebrow;
+  final String title;
+  final String message;
+  final Color accentColor;
+  final String initial;
+  final List<Widget> metrics;
+  final VoidCallback onImportGallery;
+  final VoidCallback onRequestSync;
+  final String importLabel;
+  final String syncLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = context.atlasPalette;
+    return AtlasPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      eyebrow.toUpperCase(),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: palette.accent,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      message,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: accentColor.withValues(
+                  alpha: palette.isLight ? 0.18 : 0.2,
+                ),
+                child: Text(
+                  initial,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: metrics,
+          ),
+          const SizedBox(height: 18),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: onImportGallery,
+              icon: const Icon(Icons.photo_library_rounded),
+              label: Text(importLabel),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onRequestSync,
+              icon: const Icon(Icons.sync_rounded),
+              label: Text(syncLabel),
+            ),
+          ),
+        ],
       ),
     );
   }

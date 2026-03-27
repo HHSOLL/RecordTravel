@@ -9,11 +9,13 @@ class RecordPageIntro extends StatelessWidget {
     required this.eyebrow,
     required this.title,
     required this.subtitle,
+    this.showTitle = true,
   });
 
   final String eyebrow;
   final String title;
   final String subtitle;
+  final bool showTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -47,15 +49,16 @@ class RecordPageIntro extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 14),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w900,
-            letterSpacing: -1,
+        SizedBox(height: showTitle ? 14 : 10),
+        if (showTitle)
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w900,
+              letterSpacing: -1,
+            ),
           ),
-        ),
         const SizedBox(height: 8),
         Text(
           subtitle,

@@ -474,6 +474,7 @@ class _RecordHomeGlobeFallback extends StatelessWidget {
                   children: [
                     for (final country in quickCountries)
                       ActionChip(
+                        key: Key('record-home-quick-country-${country.code}'),
                         avatar: const Icon(Icons.map_rounded, size: 18),
                         label: Text(country.name),
                         onPressed: () => onOpenCountry(country.code),

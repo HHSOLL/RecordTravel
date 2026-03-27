@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../i18n/record_strings.dart';
 import '../models/record_models.dart';
 import '../providers/record_provider.dart';
+import '../components/record_wordmark.dart';
 import 'record_trip_detail_screen.dart';
 
 class RecordArchiveScreen extends ConsumerStatefulWidget {
@@ -32,14 +35,15 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
 
     final continents = <String>{
       for (final trip in pastTrips) trip.countries.first.continent,
-    }.toList()..sort();
+    }.toList()
+      ..sort();
     final filteredTrips = _selectedContinent == 'All'
         ? pastTrips
         : pastTrips
-              .where(
-                (trip) => trip.countries.first.continent == _selectedContinent,
-              )
-              .toList();
+            .where(
+              (trip) => trip.countries.first.continent == _selectedContinent,
+            )
+            .toList();
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -51,7 +55,17 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
                 sliver: SliverToBoxAdapter(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: RecordWordmark(
+                          logoSize: 24,
+                          fontSize: 20,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
                       Column(
                         children: [
                           Container(
@@ -78,16 +92,7 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 14),
-                          Text(
-                            strings.text('archive.title'),
-                            textAlign: TextAlign.center,
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -1,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
                           Text(
                             strings.pastTrips(
                               pastTrips.length,
@@ -130,7 +135,6 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                       Wrap(
                         spacing: 12,
                         runSpacing: 12,
-                        alignment: WrapAlignment.center,
                         children: [
                           AtlasMiniMetric(
                             label: 'Trips',
@@ -171,17 +175,56 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
               else
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  sliver: SliverGrid(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      return _ArchiveTripCard(trip: filteredTrips[index]);
-                    }, childCount: filteredTrips.length),
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 320,
-                          mainAxisSpacing: 14,
-                          crossAxisSpacing: 14,
-                          childAspectRatio: 0.92,
+                  sliver: SliverLayoutBuilder(
+                    builder: (context, constraints) {
+                      final crossAxisExtent = constraints.crossAxisExtent;
+                      final crossAxisCount = switch (crossAxisExtent) {
+                        >= 920 => 3,
+                        >= 520 => 2,
+                        _ => 1,
+                      };
+                      const spacing = 14.0;
+                      final tileWidth =
+                          (crossAxisExtent -
+                                  spacing * math.max(0, crossAxisCount - 1)) /
+                              crossAxisCount;
+                      final aspectRatio = tileWidth < 360
+                          ? 0.84
+                          : tileWidth < 480
+                          ? 0.94
+                          : 1.04;
+
+                      if (crossAxisCount == 1) {
+                        return SliverList(
+                          delegate:
+                              SliverChildBuilderDelegate((context, index) {
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                bottom:
+                                    index == filteredTrips.length - 1 ? 0 : 14,
+                              ),
+                              child: AspectRatio(
+                                aspectRatio: aspectRatio,
+                                child: _ArchiveTripCard(
+                                  trip: filteredTrips[index],
+                                ),
+                              ),
+                            );
+                          }, childCount: filteredTrips.length),
+                        );
+                      }
+                      return SliverGrid(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          return _ArchiveTripCard(trip: filteredTrips[index]);
+                        }, childCount: filteredTrips.length),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          mainAxisSpacing: spacing,
+                          crossAxisSpacing: spacing,
+                          childAspectRatio: aspectRatio,
                         ),
+                      );
+                    },
                   ),
                 ),
               const SliverToBoxAdapter(child: SizedBox(height: 120)),
@@ -236,110 +279,129 @@ class _ArchiveTripCard extends StatelessWidget {
     final startDate = DateTime.parse(trip.startDate);
     final endDate = DateTime.parse(trip.endDate);
 
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => RecordTripDetailScreen(tripId: trip.id),
-          ),
-        );
-      },
-      borderRadius: BorderRadius.circular(24),
-      child: AtlasPanel(
-        padding: EdgeInsets.zero,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 162,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(26),
-                ),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    tripColor.withValues(alpha: 0.96),
-                    tripColor.withValues(alpha: 0.60),
-                    tripColor.withValues(alpha: 0.30),
-                  ],
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compactCard = constraints.maxWidth < 340;
+        final heroHeight = (constraints.maxWidth * (compactCard ? 0.44 : 0.40))
+            .clamp(128.0, 156.0);
+        final bodyPadding = compactCard ? 10.0 : 14.0;
+        return InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => RecordTripDetailScreen(tripId: trip.id),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _ArchiveInfoPill(
-                    label: trip.countries.first.continent,
-                    color: Colors.white,
-                    icon: Icons.public_rounded,
-                  ),
-                  const Spacer(),
-                  Icon(
-                    Icons.public_rounded,
-                    color: Colors.white.withValues(alpha: 0.92),
-                    size: 30,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    trip.title,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
+            );
+          },
+          borderRadius: BorderRadius.circular(24),
+          child: AtlasPanel(
+            padding: EdgeInsets.zero,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: heroHeight,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(26),
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        tripColor.withValues(alpha: 0.96),
+                        tripColor.withValues(alpha: 0.60),
+                        tripColor.withValues(alpha: 0.30),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMM d, yyyy').format(endDate)}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _ArchiveInfoPill(
+                        label: trip.countries.first.continent,
+                        color: Colors.white,
+                        icon: Icons.public_rounded,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      trip.description,
-                      style: theme.textTheme.bodyMedium,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: [
-                        _ArchiveInfoPill(
-                          label: trip.countries.first.name,
-                          color: tripColor,
-                          icon: Icons.flight_rounded,
+                      const Spacer(),
+                      Icon(
+                        Icons.public_rounded,
+                        color: Colors.white.withValues(alpha: 0.92),
+                        size: compactCard ? 26 : 30,
+                      ),
+                      SizedBox(height: compactCard ? 10 : 12),
+                      Text(
+                        trip.title,
+                        style: (compactCard
+                                ? theme.textTheme.titleMedium
+                                : theme.textTheme.titleLarge)
+                            ?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
                         ),
-                        _ArchiveInfoPill(
-                          label: '${trip.locations.length} stops',
-                          color: context.atlasPalette.accentSoft,
-                          icon: Icons.route_rounded,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(bodyPadding),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMM d, yyyy').format(endDate)}',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: compactCard ? 6 : 8),
+                            Text(
+                              trip.description,
+                              style: theme.textTheme.bodyMedium,
+                              maxLines: compactCard ? 1 : 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: compactCard ? 6 : 10),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            _ArchiveInfoPill(
+                              label: trip.countries.first.name,
+                              color: tripColor,
+                              icon: Icons.flight_rounded,
+                            ),
+                            _ArchiveInfoPill(
+                              label: '${trip.locations.length} stops',
+                              color: context.atlasPalette.accentSoft,
+                              icon: Icons.route_rounded,
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
