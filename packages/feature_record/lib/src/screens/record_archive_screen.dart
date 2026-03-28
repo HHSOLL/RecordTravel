@@ -49,7 +49,8 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
       ..sort();
     final filteredTrips = pastTrips
         .where(
-          (trip) => _selectedContinent == null ||
+          (trip) =>
+              _selectedContinent == null ||
               trip.countries.first.continent == _selectedContinent,
         )
         .where((trip) => _matchesSearch(trip, _searchQuery))
@@ -242,11 +243,10 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                       final tileWidth = (crossAxisExtent -
                               spacing * math.max(0, crossAxisCount - 1)) /
                           crossAxisCount;
-                      final aspectRatio = crossAxisCount == 1
-                          ? (tileWidth < 320 ? 0.70 : 0.78)
-                          : crossAxisCount == 2
-                              ? (tileWidth < 180 ? 0.78 : 0.86)
-                              : 0.74;
+                      final aspectRatio = _archiveCardAspectRatio(
+                        crossAxisCount,
+                        tileWidth,
+                      );
 
                       if (crossAxisCount == 1) {
                         return SliverList(
@@ -370,8 +370,8 @@ class _ArchiveTripCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final compactCard = constraints.maxWidth < 200;
-        final heroHeight = compactCard ? 90.0 : 96.0;
-        final bodyPadding = compactCard ? 10.0 : 14.0;
+        final heroHeight = compactCard ? 84.0 : 96.0;
+        final bodyPadding = compactCard ? 9.0 : 14.0;
         return InkWell(
           onTap: () {
             Navigator.push(
@@ -452,22 +452,27 @@ class _ArchiveTripCard extends StatelessWidget {
                       children: [
                         Text(
                           '${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMM d, yyyy').format(endDate)}',
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          style: (compactCard
+                                  ? theme.textTheme.labelSmall
+                                  : theme.textTheme.bodySmall)
+                              ?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: compactCard ? 6 : 8),
+                        SizedBox(height: compactCard ? 4 : 8),
                         Expanded(
                           child: Text(
                             trip.description,
-                            style: theme.textTheme.bodySmall,
-                            maxLines: compactCard ? 2 : 3,
+                            style: compactCard
+                                ? theme.textTheme.labelSmall
+                                : theme.textTheme.bodySmall,
+                            maxLines: compactCard ? 1 : 3,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        SizedBox(height: compactCard ? 6 : 10),
+                        SizedBox(height: compactCard ? 4 : 10),
                         Wrap(
                           spacing: 6,
                           runSpacing: 6,
@@ -476,11 +481,13 @@ class _ArchiveTripCard extends StatelessWidget {
                               label: trip.countries.first.name,
                               color: tripColor,
                               icon: Icons.flight_rounded,
+                              compact: compactCard,
                             ),
                             _ArchiveInfoPill(
                               label: strings.stopCount(trip.locations.length),
                               color: context.atlasPalette.accentSoft,
                               icon: Icons.route_rounded,
+                              compact: compactCard,
                             ),
                           ],
                         ),
@@ -502,11 +509,13 @@ class _ArchiveInfoPill extends StatelessWidget {
     required this.label,
     required this.color,
     this.icon,
+    this.compact = false,
   });
 
   final String label;
   final Color color;
   final IconData? icon;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -520,22 +529,28 @@ class _ArchiveInfoPill extends StatelessWidget {
           border: Border.all(color: color.withValues(alpha: 0.26)),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 8 : 10,
+            vertical: compact ? 4 : 6,
+          ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null) ...[
-                Icon(icon, size: 12, color: color),
-                const SizedBox(width: 4),
+                Icon(icon, size: compact ? 11 : 12, color: color),
+                SizedBox(width: compact ? 3 : 4),
               ],
               Text(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: color,
-                      fontWeight: FontWeight.w700,
-                    ),
+                style: (compact
+                        ? Theme.of(context).textTheme.labelMedium
+                        : Theme.of(context).textTheme.bodyMedium)
+                    ?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
@@ -543,4 +558,23 @@ class _ArchiveInfoPill extends StatelessWidget {
       ),
     );
   }
+}
+
+double _archiveCardAspectRatio(int crossAxisCount, double tileWidth) {
+  if (crossAxisCount <= 1) {
+    return tileWidth < 320 ? 0.68 : 0.76;
+  }
+  if (crossAxisCount == 2) {
+    if (tileWidth < 172) {
+      return 0.70;
+    }
+    if (tileWidth < 194) {
+      return 0.76;
+    }
+    return 0.84;
+  }
+  if (tileWidth < 130) {
+    return 0.62;
+  }
+  return 0.70;
 }

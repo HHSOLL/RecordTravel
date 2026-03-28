@@ -131,10 +131,10 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                   );
                   final globeSize = hasTrips
                       ? math.min(
-                          contentWidth * (compactLayout ? 0.92 : 0.96),
+                          contentWidth * (compactLayout ? 0.98 : 1.0),
                           compactLayout
-                              ? math.min(globeHeightBudget, 340.0)
-                              : math.min(globeHeightBudget, 432.0),
+                              ? math.min(globeHeightBudget, 372.0)
+                              : math.min(globeHeightBudget, 456.0),
                         )
                       : 0.0;
 

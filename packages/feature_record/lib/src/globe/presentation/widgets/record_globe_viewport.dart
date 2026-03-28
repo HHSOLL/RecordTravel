@@ -99,8 +99,8 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
     final controller = EarthController()
       ..enableAutoRotate = state.selectedCountryCode == null
       ..rotateSpeed = 0.18
-      ..minZoom = 0.68
-      ..maxZoom = 1.56
+      ..minZoom = 0.82
+      ..maxZoom = 1.84
       ..lockNorthSouth = false
       ..lockZoom = false;
 
@@ -113,7 +113,7 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
         focusedCountry.anchorLongitude,
       );
       controller.setZoom(
-        state.selectedCountryCode == null ? 0.92 : 1.10,
+        state.selectedCountryCode == null ? 1.18 : 1.32,
       );
     }
 
@@ -180,7 +180,8 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
   Widget build(BuildContext context) {
     final sceneSpec = widget.state.sceneSpec;
     final controller = _controller;
-    if ((sceneSpec == null || controller == null) && widget.loadingBuilder != null) {
+    if ((sceneSpec == null || controller == null) &&
+        widget.loadingBuilder != null) {
       return widget.loadingBuilder!(context);
     }
     if (sceneSpec == null || controller == null) {
@@ -192,9 +193,23 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
       child: Earth3D(
         key: ValueKey(_signature),
         controller: controller,
-        initialScale: sceneSpec.style == RecordGlobeStyle.dark ? 0.94 : 0.90,
+        initialScale: _resolveInitialScale(sceneSpec.style),
       ),
     );
+  }
+
+  double _resolveInitialScale(RecordGlobeStyle style) {
+    final size = widget.size ?? 0;
+    if (size >= 420) {
+      return style == RecordGlobeStyle.dark ? 1.28 : 1.22;
+    }
+    if (size >= 360) {
+      return style == RecordGlobeStyle.dark ? 1.36 : 1.30;
+    }
+    if (size >= 300) {
+      return style == RecordGlobeStyle.dark ? 1.46 : 1.40;
+    }
+    return style == RecordGlobeStyle.dark ? 1.54 : 1.48;
   }
 }
 
@@ -254,7 +269,8 @@ class _CountryMarker extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: haloColor.withValues(alpha: isSelected ? 0.52 : 0.34),
+                    color:
+                        haloColor.withValues(alpha: isSelected ? 0.52 : 0.34),
                     blurRadius: isSelected ? 16 : 10,
                     spreadRadius: isSelected ? 1.5 : 0.0,
                   ),

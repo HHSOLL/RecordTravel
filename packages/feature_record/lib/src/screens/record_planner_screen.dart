@@ -127,12 +127,13 @@ class RecordPlannerScreen extends ConsumerWidget {
                       final crossAxisExtent = constraints.crossAxisExtent;
                       final crossAxisCount = crossAxisExtent < 220 ? 2 : 3;
                       const spacing = 14.0;
-                      final tileWidth = (crossAxisExtent -
-                              spacing * (crossAxisCount - 1)) /
-                          crossAxisCount;
-                      final aspectRatio = crossAxisCount == 3
-                          ? (tileWidth < 112 ? 0.66 : 0.72)
-                          : 0.84;
+                      final tileWidth =
+                          (crossAxisExtent - spacing * (crossAxisCount - 1)) /
+                              crossAxisCount;
+                      final aspectRatio = _plannerCardAspectRatio(
+                        crossAxisCount,
+                        tileWidth,
+                      );
 
                       return SliverGrid(
                         delegate: SliverChildBuilderDelegate((context, index) {
@@ -274,8 +275,10 @@ class _PlannerTripCard extends StatelessWidget {
                         const SizedBox(height: 6),
                         Text(
                           trip.description,
-                          style: theme.textTheme.bodySmall,
-                          maxLines: compactCard ? 2 : 3,
+                          style: compactCard
+                              ? theme.textTheme.labelSmall
+                              : theme.textTheme.bodySmall,
+                          maxLines: compactCard ? 1 : 3,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const Spacer(),
@@ -365,6 +368,25 @@ class _PlannerActionButton extends StatelessWidget {
       child: Icon(icon, size: 18),
     );
   }
+}
+
+double _plannerCardAspectRatio(int crossAxisCount, double tileWidth) {
+  if (crossAxisCount == 2) {
+    if (tileWidth < 120) {
+      return 0.72;
+    }
+    if (tileWidth < 156) {
+      return 0.78;
+    }
+    return 0.84;
+  }
+  if (tileWidth < 112) {
+    return 0.60;
+  }
+  if (tileWidth < 128) {
+    return 0.66;
+  }
+  return 0.72;
 }
 
 class _MapModal extends ConsumerWidget {
