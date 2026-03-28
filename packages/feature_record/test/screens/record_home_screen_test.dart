@@ -1,4 +1,3 @@
-import 'package:feature_record/src/globe/domain/entities/record_globe_asset_set.dart';
 import 'package:feature_record/src/globe/domain/entities/record_globe_country.dart';
 import 'package:feature_record/src/globe/domain/entities/record_globe_scene_spec.dart';
 import 'package:feature_record/src/globe/presentation/widgets/record_globe_viewport.dart';
@@ -47,14 +46,6 @@ void main() {
                   continent: 'Europe',
                 ),
               ],
-              assetSet: const RecordGlobeAssetSet(
-                baseEarthTextureAsset: 'assets/globe/earth_storybook_dark.png',
-                borderOverlayTextureAsset:
-                    'assets/globe/earth_borders_overlay_v1_4096.png',
-                countryLookupGridAsset: 'assets/globe/country_lookup_v1.bin',
-                countryLookupPaletteAsset:
-                    'assets/globe/country_lookup_v1_palette.json',
-              ),
             ),
           ),
         ],

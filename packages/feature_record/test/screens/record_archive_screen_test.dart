@@ -10,7 +10,7 @@ void main() {
   testWidgets('archive header and cards adapt on a narrow phone viewport', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(320, 640);
+    tester.view.physicalSize = const Size(960, 1920);
     tester.view.devicePixelRatio = 3;
     addTearDown(() {
       tester.view.resetPhysicalSize();
@@ -21,15 +21,15 @@ void main() {
       ProviderScope(
         overrides: [
           recordTripsProvider.overrideWith((ref) => [
-            _buildTrip(
-              id: 'trip-1',
-              color: '#6E8BF4',
-            ),
-            _buildTrip(
-              id: 'trip-2',
-              color: '#49B884',
-            ),
-          ]),
+                _buildTrip(
+                  id: 'trip-1',
+                  color: '#6E8BF4',
+                ),
+                _buildTrip(
+                  id: 'trip-2',
+                  color: '#49B884',
+                ),
+              ]),
         ],
         child: MaterialApp(
           theme: ThemeData.dark(),

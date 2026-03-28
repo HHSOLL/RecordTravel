@@ -14,8 +14,6 @@ This repository now contains the Flutter mobile app for Travel Atlas and the sha
   - Shared tabs and route identifiers.
 - `packages/core_ui`
   - Theme, reusable widgets, and formatting helpers.
-- `packages/feature_atlas_home`
-  - Home globe and entry surface.
 - `packages/feature_timeline`
   - Chronological trip and memory playback.
 - `packages/feature_journal`
@@ -45,7 +43,7 @@ This repository no longer includes the earlier rendering candidate experiments.
 
 ## Prerequisites
 
-- Flutter `3.32.0`
+- Flutter `3.41.6`
 - Dart `3.8.0`
 
 ## Run The App
@@ -121,7 +119,6 @@ Run package tests from the package directory you are working in. Common entry po
 ```bash
 cd apps/mobile_app && flutter test
 cd packages/core_data && flutter test
-cd packages/feature_atlas_home && flutter test
 ```
 
 From the repository root:

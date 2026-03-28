@@ -94,6 +94,10 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     final theme = Theme.of(context);
     final globeViewModel = _globeViewModel;
     final globeState = globeViewModel.state;
+    final globeSceneSpec = globeState.sceneSpec;
+    final globeAssetSet = globeSceneSpec == null
+        ? null
+        : ref.watch(recordGlobeAssetSetProvider(globeSceneSpec.style));
     final selectedCountryCode = globeState.selectedCountryCode;
     final selectedProjection = selectedCountryCode == null
         ? null
@@ -202,64 +206,66 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                                             globeSize: globeSize,
                                           )
                                         : showGlobeFallback
-                                        ? _RecordHomeGlobeFallback(
-                                            strings: strings,
-                                            isDark:
-                                                theme.brightness ==
-                                                Brightness.dark,
-                                            countries:
-                                                globeState.sceneSpec?.countries ??
-                                                const [],
-                                            globeSize: globeSize,
-                                            onOpenCountry: (countryCode) {
-                                              _openCountryDetails(
-                                                globeViewModel,
-                                                countryCode,
-                                              );
-                                            },
-                                            onRetry3D: widget.onRetryGlobe3D,
-                                          )
-                                        : RecordGlobeViewport(
-                                            engine: _globeEngine,
-                                            state: globeState,
-                                            size: globeSize,
-                                            loadingBuilder:
-                                                (context) => const Center(
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                        strokeWidth: 2.5,
-                                                      ),
-                                                ),
-                                            onCountrySelected: (countryCode) {
-                                              if (countryCode == null) {
-                                                globeViewModel.clearSelection();
-                                                return;
-                                              }
-                                              switch (
-                                                globeViewModel.tapCountry(
-                                                  countryCode,
-                                                )
-                                              ) {
-                                                case RecordGlobeTapAction
-                                                      .previewCountry:
-                                                  globeViewModel
-                                                      .pinFocusedCountry();
-                                                  break;
-                                                case RecordGlobeTapAction
-                                                      .enterCountry:
+                                            ? _RecordHomeGlobeFallback(
+                                                strings: strings,
+                                                isDark: theme.brightness ==
+                                                    Brightness.dark,
+                                                countries: globeState
+                                                        .sceneSpec?.countries ??
+                                                    const [],
+                                                globeSize: globeSize,
+                                                onOpenCountry: (countryCode) {
                                                   _openCountryDetails(
                                                     globeViewModel,
                                                     countryCode,
                                                   );
-                                                  break;
-                                                case RecordGlobeTapAction
-                                                      .clearSelection:
-                                                  globeViewModel
-                                                      .clearSelection();
-                                                  break;
-                                              }
-                                            },
-                                          ),
+                                                },
+                                                onRetry3D:
+                                                    widget.onRetryGlobe3D,
+                                              )
+                                            : RecordGlobeViewport(
+                                                engine: _globeEngine,
+                                                state: globeState,
+                                                assetSet: globeAssetSet,
+                                                size: globeSize,
+                                                loadingBuilder: (context) =>
+                                                    const Center(
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    strokeWidth: 2.5,
+                                                  ),
+                                                ),
+                                                onCountrySelected:
+                                                    (countryCode) {
+                                                  if (countryCode == null) {
+                                                    globeViewModel
+                                                        .clearSelection();
+                                                    return;
+                                                  }
+                                                  switch (
+                                                      globeViewModel.tapCountry(
+                                                    countryCode,
+                                                  )) {
+                                                    case RecordGlobeTapAction
+                                                          .previewCountry:
+                                                      globeViewModel
+                                                          .pinFocusedCountry();
+                                                      break;
+                                                    case RecordGlobeTapAction
+                                                          .enterCountry:
+                                                      _openCountryDetails(
+                                                        globeViewModel,
+                                                        countryCode,
+                                                      );
+                                                      break;
+                                                    case RecordGlobeTapAction
+                                                          .clearSelection:
+                                                      globeViewModel
+                                                          .clearSelection();
+                                                      break;
+                                                  }
+                                                },
+                                              ),
                                   ),
                                 ),
                               ),

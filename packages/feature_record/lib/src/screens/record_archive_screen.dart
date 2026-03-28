@@ -143,18 +143,20 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                       final crossAxisExtent = constraints.crossAxisExtent;
                       final crossAxisCount = switch (crossAxisExtent) {
                         >= 920 => 3,
-                        >= 280 => 2,
+                        >= 360 => 2,
                         _ => 1,
                       };
                       const spacing = 14.0;
                       final tileWidth = (crossAxisExtent -
                               spacing * math.max(0, crossAxisCount - 1)) /
                           crossAxisCount;
-                      final aspectRatio = tileWidth < 180
-                          ? 0.72
-                          : tileWidth < 320
-                              ? 0.82
-                              : 0.92;
+                      final aspectRatio = crossAxisCount == 1
+                          ? (tileWidth < 320 ? 0.68 : 0.78)
+                          : tileWidth < 180
+                              ? 0.72
+                              : tileWidth < 320
+                                  ? 0.82
+                                  : 0.92;
 
                       if (crossAxisCount == 1) {
                         return SliverList(
@@ -247,8 +249,8 @@ class _ArchiveTripCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final compactCard = constraints.maxWidth < 340;
-        final heroHeight = (constraints.maxWidth * (compactCard ? 0.44 : 0.40))
-            .clamp(128.0, 156.0);
+        final heroHeight = (constraints.maxWidth * (compactCard ? 0.48 : 0.40))
+            .clamp(compactCard ? 148.0 : 128.0, compactCard ? 176.0 : 156.0);
         final bodyPadding = compactCard ? 10.0 : 14.0;
         return InkWell(
           onTap: () {

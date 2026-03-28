@@ -8,17 +8,26 @@ class RecordMetricGrid extends StatelessWidget {
     required this.children,
     this.columns = 3,
     this.spacing = 10,
+    this.minTileWidth = 96,
   });
 
   final List<Widget> children;
   final int columns;
   final double spacing;
+  final double minTileWidth;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columnCount = math.max(1, columns);
+        final requestedColumns = math.max(1, columns);
+        final fittedColumns =
+            ((constraints.maxWidth + spacing) / (minTileWidth + spacing))
+                .floor();
+        final columnCount = math.max(
+          1,
+          math.min(requestedColumns, fittedColumns),
+        );
         final totalSpacing = spacing * (columnCount - 1);
         final double tileWidth = math
             .max(

@@ -29,8 +29,6 @@ dependencies:
     path: ../../packages/core_domain
   core_data:
     path: ../../packages/core_data
-  feature_atlas_home:
-    path: ../../packages/feature_atlas_home
   feature_timeline:
     path: ../../packages/feature_timeline
   feature_journal:
@@ -56,7 +54,6 @@ flutter:
   assets:
     - assets/globe/earth_storybook_light.png
     - assets/globe/earth_storybook_dark.png
-    - assets/globe/earth_day_albedo_v1_4096.webp
     - assets/globe/earth_borders_overlay_v1_4096.png
     - assets/globe/country_lookup_v1.bin
     - assets/globe/country_lookup_v1_palette.json

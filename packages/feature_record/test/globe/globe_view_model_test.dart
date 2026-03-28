@@ -1,4 +1,3 @@
-import 'package:feature_record/src/globe/domain/entities/record_globe_asset_set.dart';
 import 'package:feature_record/src/globe/domain/entities/record_globe_country.dart';
 import 'package:feature_record/src/globe/domain/entities/record_globe_scene_spec.dart';
 import 'package:feature_record/src/globe/presentation/globe_view_model.dart';
@@ -29,12 +28,6 @@ void main() {
               continent: 'Oceania',
             ),
           ],
-          assetSet: RecordGlobeAssetSet(
-            baseEarthTextureAsset: 'earth_light.png',
-            borderOverlayTextureAsset: 'earth_borders.png',
-            countryLookupGridAsset: 'country_lookup.bin',
-            countryLookupPaletteAsset: 'country_lookup.json',
-          ),
         ),
       );
 
@@ -88,12 +81,6 @@ void main() {
               continent: 'Oceania',
             ),
           ],
-          assetSet: RecordGlobeAssetSet(
-            baseEarthTextureAsset: 'earth_dark.png',
-            borderOverlayTextureAsset: 'earth_borders.png',
-            countryLookupGridAsset: 'country_lookup.bin',
-            countryLookupPaletteAsset: 'country_lookup.json',
-          ),
           initialCountryCode: 'FR',
         ),
       );

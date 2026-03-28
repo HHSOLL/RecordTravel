@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/entities/record_globe_asset_set.dart';
 import '../../../globe_engine/record_globe_engine.dart';
 import '../globe_view_state.dart';
 import 'record_globe_stage.dart';
@@ -9,6 +10,7 @@ class RecordGlobeViewport extends StatelessWidget {
     super.key,
     required this.engine,
     required this.state,
+    required this.assetSet,
     this.size,
     this.onCountrySelected,
     this.loadingBuilder,
@@ -16,6 +18,7 @@ class RecordGlobeViewport extends StatelessWidget {
 
   final RecordGlobeEngine engine;
   final RecordGlobeViewState state;
+  final RecordGlobeAssetSet? assetSet;
   final double? size;
   final ValueChanged<String?>? onCountrySelected;
   final Widget Function(BuildContext context)? loadingBuilder;
@@ -23,10 +26,10 @@ class RecordGlobeViewport extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sceneSpec = state.sceneSpec;
-    if (sceneSpec == null && loadingBuilder != null) {
+    if ((sceneSpec == null || assetSet == null) && loadingBuilder != null) {
       return loadingBuilder!(context);
     }
-    if (sceneSpec == null) {
+    if (sceneSpec == null || assetSet == null) {
       return SizedBox.square(dimension: size);
     }
     return SizedBox.square(
@@ -34,6 +37,7 @@ class RecordGlobeViewport extends StatelessWidget {
       child: RecordGlobeStage(
         engine: engine,
         sceneSpec: sceneSpec,
+        assetSet: assetSet,
         onCountrySelected: onCountrySelected,
       ),
     );

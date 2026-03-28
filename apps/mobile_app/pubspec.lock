@@ -260,13 +260,6 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
-  feature_atlas_home:
-    dependency: "direct main"
-    description:
-      path: "../../packages/feature_atlas_home"
-      relative: true
-    source: path
-    version: "0.1.0"
   feature_journal:
     dependency: "direct main"
     description:

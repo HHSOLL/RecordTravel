@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:vector_math/vector_math_64.dart' as vm;
 
+import '../../globe/domain/entities/record_globe_asset_set.dart';
 import '../../globe/domain/entities/record_globe_country.dart';
 import '../../globe/domain/entities/record_globe_scene_spec.dart';
 import '../controllers/camera_controller.dart';
@@ -13,6 +14,8 @@ import '../record_globe_camera_state.dart';
 import '../record_globe_engine.dart';
 import '../record_globe_engine_config.dart';
 import 'record_globe_country_render_signature.dart';
+import 'three_js/three_js_globe_assets.dart';
+import 'three_js/three_js_globe_mesh_factory.dart';
 
 class ThreeJsRecordGlobeRenderer extends RecordGlobeEngine {
   const ThreeJsRecordGlobeRenderer();
@@ -25,7 +28,9 @@ class ThreeJsRecordGlobeRenderer extends RecordGlobeEngine {
   }) {
     return _ThreeJsRecordGlobeStage(
       key: ValueKey(
-        '${config.style.name}:${config.scene?.countries.length ?? 0}',
+        '${config.style.name}:${config.scene?.countries.length ?? 0}:'
+        '${config.assetSet?.baseEarthTextureAsset ?? 'none'}:'
+        '${config.assetSet?.borderOverlayTextureAsset ?? 'none'}',
       ),
       config: config,
       onCountrySelected: onCountrySelected,
@@ -74,9 +79,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     pitch: -0.18,
     zoom: 1,
   );
-  three.Texture? _baseTexture;
-  three.Texture? _borderTexture;
-  RecordCountryLookupGrid? _countryLookupGrid;
+  ThreeJsGlobeAssets? _assets;
 
   bool _setupComplete = false;
   bool _gestureActive = false;
@@ -108,13 +111,14 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     final previousScene = oldWidget.config.scene;
     final nextScene = widget.config.scene;
     final styleChanged = oldWidget.config.style != widget.config.style;
+    final assetsChanged = oldWidget.config.assetSet != widget.config.assetSet;
     final countriesChanged = !hasSameCountryRenderState(
       previousScene?.countries,
       nextScene?.countries,
     );
 
-    if (styleChanged || countriesChanged) {
-      _rebuildSceneObjects(nextScene);
+    if (styleChanged || countriesChanged || assetsChanged) {
+      _rebuildSceneObjects(nextScene, widget.config.assetSet);
       return;
     }
 
@@ -132,7 +136,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     if (_setupComplete) {
       _clearSceneObjects();
     } else {
-      _disposeTextures();
+      _disposeAssets();
     }
     try {
       _threeJs.dispose();
@@ -173,7 +177,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     _threeJs.camera = _camera;
     _threeJs.scene = _scene;
 
-    await _rebuildSceneObjects(widget.config.scene);
+    await _rebuildSceneObjects(widget.config.scene, widget.config.assetSet);
     _threeJs.addAnimationEvent(_tick);
   }
 
@@ -184,76 +188,56 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     }
   }
 
-  Future<void> _rebuildSceneObjects(RecordGlobeSceneSpec? scene) async {
+  Future<void> _rebuildSceneObjects(
+    RecordGlobeSceneSpec? scene,
+    RecordGlobeAssetSet? assetSet,
+  ) async {
     _clearSceneObjects();
 
-    if (scene == null) {
+    if (scene == null || assetSet == null) {
       return;
     }
 
-    final textureLoader = three.TextureLoader(flipY: true);
-    final baseTexture = await textureLoader.fromAsset(
-      scene.assetSet.baseEarthTextureAsset,
-    );
-    final borderTexture = await textureLoader.fromAsset(
-      scene.assetSet.borderOverlayTextureAsset,
-    );
-
-    _baseTexture = baseTexture;
-    _borderTexture = borderTexture;
-    _countryLookupGrid = await RecordCountryLookupGrid.load(
-      gridAsset: scene.assetSet.countryLookupGridAsset,
-      paletteAsset: scene.assetSet.countryLookupPaletteAsset,
-    );
-
-    if (baseTexture != null) {
-      baseTexture.needsUpdate = true;
+    final assets = await ThreeJsGlobeAssets.load(assetSet);
+    if (!mounted) {
+      assets.dispose();
+      return;
     }
-    if (borderTexture != null) {
-      borderTexture.needsUpdate = true;
-    }
+    _assets = assets;
 
-    final earthMaterial = three.MeshBasicMaterial.fromMap({
-      'map': baseTexture,
-      'color': scene.style == RecordGlobeStyle.dark ? 0xe2e8f0 : 0xffffff,
-    });
-    final earthMesh = three.Mesh(
-      three.SphereGeometry(_globeRadius, _earthSegments, _earthSegments),
-      earthMaterial,
+    final earthMesh = ThreeJsGlobeMeshFactory.buildEarthMesh(
+      radius: _globeRadius,
+      segments: _earthSegments,
+      style: scene.style,
+      baseTexture: assets.baseTexture,
     );
     _earthMesh = earthMesh;
     _globeRoot.add(earthMesh);
 
-    final borderMaterial = three.MeshBasicMaterial.fromMap({
-      'map': borderTexture,
-      'transparent': true,
-      'opacity': scene.style == RecordGlobeStyle.dark ? 0.52 : 0.34,
-      'side': three.DoubleSide,
-    });
-    final borderMesh = three.Mesh(
-      three.SphereGeometry(
-        _globeRadius * 1.002,
-        _earthSegments,
-        _earthSegments,
-      ),
-      borderMaterial,
+    final borderMesh = ThreeJsGlobeMeshFactory.buildBorderMesh(
+      radius: _globeRadius,
+      segments: _earthSegments,
+      style: scene.style,
+      borderTexture: assets.borderTexture,
     );
     _globeRoot.add(borderMesh);
 
-    final atmosphereMaterial = three.MeshBasicMaterial.fromMap({
-      'color': scene.style == RecordGlobeStyle.dark ? 0x60a5fa : 0x93c5fd,
-      'transparent': true,
-      'opacity': scene.style == RecordGlobeStyle.dark ? 0.16 : 0.10,
-      'side': three.DoubleSide,
-    });
-    final atmosphereMesh = three.Mesh(
-      three.SphereGeometry(_globeRadius * 1.08, 48, 32),
-      atmosphereMaterial,
+    final atmosphereMesh = ThreeJsGlobeMeshFactory.buildAtmosphereMesh(
+      radius: _globeRadius,
+      style: scene.style,
     );
     _globeRoot.add(atmosphereMesh);
 
     for (final country in scene.countries) {
-      final marker = _buildMarker(country, scene.style);
+      final marker = _MarkerHandle(
+        country: country,
+        mesh: ThreeJsGlobeMeshFactory.buildMarkerMesh(
+          country: country,
+          style: scene.style,
+          altitude: _markerAltitude,
+          segments: _markerSegments,
+        ),
+      );
       _markersByCountry[country.code] = marker;
       _globeRoot.add(marker.mesh);
     }
@@ -276,8 +260,7 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
   void _clearSceneObjects() {
     _markersByCountry.clear();
     _earthMesh = null;
-    _countryLookupGrid = null;
-    _disposeTextures();
+    _disposeAssets();
     if (!_setupComplete && _globeRoot.children.isEmpty) {
       return;
     }
@@ -307,54 +290,9 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     material?.dispose();
   }
 
-  void _disposeTextures() {
-    _baseTexture?.dispose();
-    _borderTexture?.dispose();
-    _baseTexture = null;
-    _borderTexture = null;
-  }
-
-  _MarkerHandle _buildMarker(
-    RecordGlobeCountry country,
-    RecordGlobeStyle style,
-  ) {
-    final point = _latLngToUnitVector(
-      country.anchorLatitude,
-      country.anchorLongitude,
-    );
-    final radius = (0.028 + country.activityLevel * 0.01).toDouble();
-    final baseColor = switch (country.signal) {
-      RecordGlobeCountrySignal.planned => 0xfbbf24,
-      RecordGlobeCountrySignal.visited => 0x0f172a,
-      RecordGlobeCountrySignal.neutral => 0x64748b,
-    };
-    final emissiveColor = switch (country.signal) {
-      RecordGlobeCountrySignal.planned => 0xfde68a,
-      RecordGlobeCountrySignal.visited =>
-        country.hasRecentVisit ? 0x93c5fd : 0xffffff,
-      RecordGlobeCountrySignal.neutral => 0xcbd5e1,
-    };
-    final material = three.MeshPhongMaterial.fromMap({
-      'color': style == RecordGlobeStyle.dark ? 0xf8fafc : baseColor,
-      'emissive': style == RecordGlobeStyle.dark ? 0x60a5fa : emissiveColor,
-      'emissiveIntensity': style == RecordGlobeStyle.dark
-          ? (country.hasRecentVisit ? 0.34 : 0.22)
-          : (country.hasRecentVisit ? 0.18 : 0.08),
-      'transparent': true,
-      'opacity':
-          country.signal == RecordGlobeCountrySignal.planned ? 0.82 : 0.96,
-    });
-    final mesh = three.Mesh(
-      three.SphereGeometry(radius, _markerSegments, _markerSegments),
-      material,
-    );
-    mesh.position.setValues(
-      point.x * _markerAltitude,
-      point.y * _markerAltitude,
-      point.z * _markerAltitude,
-    );
-    mesh.userData['countryCode'] = country.code;
-    return _MarkerHandle(country: country, mesh: mesh);
+  void _disposeAssets() {
+    _assets?.dispose();
+    _assets = null;
   }
 
   void _tick(double dt) {
@@ -478,58 +416,14 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     final style = widget.config.style;
     for (final entry in _markersByCountry.entries) {
       final marker = entry.value;
-      final country = marker.country;
-      final material = marker.mesh.material as three.MeshPhongMaterial;
       final isSelected = entry.key == selectedCountryCode;
-      final unselectedColor = switch (country.signal) {
-        RecordGlobeCountrySignal.planned => 0xf59e0b,
-        RecordGlobeCountrySignal.visited =>
-          (style == RecordGlobeStyle.dark ? 0xf8fafc : 0x0f172a),
-        RecordGlobeCountrySignal.neutral => 0x94a3b8,
-      };
-      final unselectedEmissive = switch (country.signal) {
-        RecordGlobeCountrySignal.planned => 0xfcd34d,
-        RecordGlobeCountrySignal.visited => (style == RecordGlobeStyle.dark
-            ? 0x60a5fa
-            : (country.hasRecentVisit ? 0x93c5fd : 0xffffff)),
-        RecordGlobeCountrySignal.neutral => 0xe2e8f0,
-      };
-      material.color.setFrom(
-        three.Color.fromHex32(
-          isSelected
-              ? (style == RecordGlobeStyle.dark ? 0xf59e0b : 0x2563eb)
-              : unselectedColor,
-        ),
+      ThreeJsGlobeMeshFactory.applyMarkerSelection(
+        country: marker.country,
+        mesh: marker.mesh,
+        style: style,
+        isSelected: isSelected,
       );
-      material.emissive?.setFrom(
-        three.Color.fromHex32(
-          isSelected
-              ? (style == RecordGlobeStyle.dark ? 0xfdba74 : 0xbfdbfe)
-              : unselectedEmissive,
-        ),
-      );
-      material.emissiveIntensity = isSelected
-          ? (style == RecordGlobeStyle.dark ? 0.7 : 0.28)
-          : (style == RecordGlobeStyle.dark
-              ? (country.hasRecentVisit ? 0.34 : 0.22)
-              : (country.hasRecentVisit ? 0.18 : 0.08));
-      material.opacity =
-          country.signal == RecordGlobeCountrySignal.planned ? 0.82 : 0.96;
-      material.needsUpdate = true;
-
-      final scale = isSelected ? 1.55 : 1.0;
-      marker.mesh.scale.setValues(scale, scale, scale);
     }
-  }
-
-  vm.Vector3 _latLngToUnitVector(double latitude, double longitude) {
-    final lat = vm.radians(latitude);
-    final lng = vm.radians(longitude);
-    return vm.Vector3(
-      math.cos(lat) * math.sin(lng),
-      math.sin(lat),
-      math.cos(lat) * math.cos(lng),
-    );
   }
 
   double _wrapAngle(double value) {
@@ -585,7 +479,8 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
   }
 
   void _handleTapUp(TapUpDetails details) {
-    if (!_setupComplete || _earthMesh == null || _countryLookupGrid == null) {
+    final lookupGrid = _assets?.countryLookupGrid;
+    if (!_setupComplete || _earthMesh == null || lookupGrid == null) {
       return;
     }
 
@@ -612,11 +507,11 @@ class _ThreeJsRecordGlobeStageState extends State<_ThreeJsRecordGlobeStage> {
     final uv = hit.uv;
     String? countryCode;
     if (uv != null) {
-      countryCode = _countryLookupGrid!.countryCodeForUv(uv.x, uv.y);
+      countryCode = lookupGrid.countryCodeForUv(uv.x, uv.y);
     } else if (hit.point != null) {
       final localPoint = _earthMesh!.worldToLocal(hit.point!.clone());
       countryCode = RecordCountrySurfacePicker(
-        lookupGrid: _countryLookupGrid!,
+        lookupGrid: lookupGrid,
       ).countryCodeForLocalPoint(
         vm.Vector3(localPoint.x, localPoint.y, localPoint.z),
       );

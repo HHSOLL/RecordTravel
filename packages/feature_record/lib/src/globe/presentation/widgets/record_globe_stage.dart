@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/entities/record_globe_asset_set.dart';
 import '../../domain/entities/record_globe_scene_spec.dart';
 import '../../../globe_engine/record_globe_engine.dart';
 import '../../../globe_engine/record_globe_engine_config.dart';
@@ -9,16 +10,21 @@ class RecordGlobeStage extends StatelessWidget {
     super.key,
     required this.engine,
     required this.sceneSpec,
+    required this.assetSet,
     this.onCountrySelected,
   });
 
   final RecordGlobeEngine engine;
   final RecordGlobeSceneSpec? sceneSpec;
+  final RecordGlobeAssetSet? assetSet;
   final ValueChanged<String?>? onCountrySelected;
 
   @override
   Widget build(BuildContext context) {
-    final config = RecordGlobeEngineConfig.fromScene(scene: sceneSpec);
+    final config = RecordGlobeEngineConfig.fromScene(
+      scene: sceneSpec,
+      assetSet: assetSet,
+    );
     return engine.buildStage(
       context,
       config: config,

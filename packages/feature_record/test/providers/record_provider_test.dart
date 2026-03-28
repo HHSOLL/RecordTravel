@@ -8,6 +8,39 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('record providers', () {
+    test('globe assets stay style-specific and stable', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final lightAssets = container.read(
+        recordGlobeAssetSetProvider(RecordGlobeStyle.light),
+      );
+      final darkAssets = container.read(
+        recordGlobeAssetSetProvider(RecordGlobeStyle.dark),
+      );
+
+      expect(
+        lightAssets.baseEarthTextureAsset,
+        'assets/globe/earth_storybook_light.png',
+      );
+      expect(
+        darkAssets.baseEarthTextureAsset,
+        'assets/globe/earth_storybook_dark.png',
+      );
+      expect(
+        lightAssets.borderOverlayTextureAsset,
+        darkAssets.borderOverlayTextureAsset,
+      );
+      expect(
+        lightAssets.countryLookupGridAsset,
+        darkAssets.countryLookupGridAsset,
+      );
+      expect(
+        lightAssets.countryLookupPaletteAsset,
+        darkAssets.countryLookupPaletteAsset,
+      );
+    });
+
     test('globe scene updates immediately when an upcoming trip is added', () {
       final tripsState = legacy.StateProvider<List<TripSummary>>(
         (ref) => [
@@ -123,7 +156,8 @@ void main() {
       );
     });
 
-    test('country and globe projections refresh when the current time changes', () {
+    test('country and globe projections refresh when the current time changes',
+        () {
       final tripsState = legacy.StateProvider<List<TripSummary>>(
         (ref) => [
           TripSummary(
@@ -224,7 +258,8 @@ void main() {
         1,
         12,
       );
-      final mayProjection = container.read(recordCountryProjectionProvider('FR'))!;
+      final mayProjection =
+          container.read(recordCountryProjectionProvider('FR'))!;
       final mayScene = container.read(
         recordGlobeSceneSpecProvider(Brightness.light),
       );

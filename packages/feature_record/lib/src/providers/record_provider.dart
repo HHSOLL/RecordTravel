@@ -38,6 +38,18 @@ final recordTravelGraphProvider = Provider<RecordTravelGraph>((ref) {
   );
 });
 
+final recordGlobeAssetSetProvider =
+    Provider.family<RecordGlobeAssetSet, RecordGlobeStyle>((ref, style) {
+  return RecordGlobeAssetSet(
+    baseEarthTextureAsset: style == RecordGlobeStyle.light
+        ? 'assets/globe/earth_storybook_light.png'
+        : 'assets/globe/earth_storybook_dark.png',
+    borderOverlayTextureAsset: 'assets/globe/earth_borders_overlay_v1_4096.png',
+    countryLookupGridAsset: 'assets/globe/country_lookup_v1.bin',
+    countryLookupPaletteAsset: 'assets/globe/country_lookup_v1_palette.json',
+  );
+});
+
 final recordGlobeSceneSpecProvider =
     Provider.family<RecordGlobeSceneSpec, Brightness>((ref, brightness) {
   final graph = ref.watch(recordTravelGraphProvider);
@@ -51,15 +63,6 @@ final recordGlobeSceneSpecProvider =
   return RecordGlobeSceneSpec(
     style: style,
     countries: countries,
-    assetSet: RecordGlobeAssetSet(
-      baseEarthTextureAsset: style == RecordGlobeStyle.light
-          ? 'assets/globe/earth_storybook_light.png'
-          : 'assets/globe/earth_storybook_dark.png',
-      borderOverlayTextureAsset:
-          'assets/globe/earth_borders_overlay_v1_4096.png',
-      countryLookupGridAsset: 'assets/globe/country_lookup_v1.bin',
-      countryLookupPaletteAsset: 'assets/globe/country_lookup_v1_palette.json',
-    ),
     initialCountryCode: initialCountryCode,
   );
 });

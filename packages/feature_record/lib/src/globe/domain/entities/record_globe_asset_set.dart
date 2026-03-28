@@ -31,4 +31,22 @@ class RecordGlobeAssetSet {
           countryLookupPaletteAsset ?? this.countryLookupPaletteAsset,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is RecordGlobeAssetSet &&
+            other.baseEarthTextureAsset == baseEarthTextureAsset &&
+            other.borderOverlayTextureAsset == borderOverlayTextureAsset &&
+            other.countryLookupGridAsset == countryLookupGridAsset &&
+            other.countryLookupPaletteAsset == countryLookupPaletteAsset);
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        baseEarthTextureAsset,
+        borderOverlayTextureAsset,
+        countryLookupGridAsset,
+        countryLookupPaletteAsset,
+      );
 }
