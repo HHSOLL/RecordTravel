@@ -31,5 +31,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
+  shaders:
     - assets/shaders/record_globe_surface.frag

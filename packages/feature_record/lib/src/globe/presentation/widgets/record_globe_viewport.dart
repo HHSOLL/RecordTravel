@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_globe_3d/flutter_globe_3d.dart';
 
+import '../../../models/record_models.dart';
 import '../../domain/entities/record_globe_country.dart';
 import '../../domain/entities/record_globe_scene_spec.dart';
 import '../globe_view_state.dart';
@@ -14,10 +15,17 @@ const _defaultNightTexture = AssetImage(
   'packages/flutter_globe_3d/assets/images/earth_night.jpg',
 );
 
+enum RecordGlobeVisualMode {
+  night,
+  day,
+}
+
 class RecordGlobeViewport extends StatefulWidget {
   const RecordGlobeViewport({
     super.key,
     required this.state,
+    required this.trips,
+    required this.visualMode,
     this.size,
     this.onCountrySelected,
     this.loadingBuilder,
@@ -27,6 +35,8 @@ class RecordGlobeViewport extends StatefulWidget {
       Earth3D.routeObserver;
 
   final RecordGlobeViewState state;
+  final List<RecordTrip> trips;
+  final RecordGlobeVisualMode visualMode;
   final double? size;
   final ValueChanged<String?>? onCountrySelected;
   final Widget Function(BuildContext context)? loadingBuilder;
@@ -48,7 +58,7 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
   @override
   void didUpdateWidget(covariant RecordGlobeViewport oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!_sameViewportState(oldWidget.state, widget.state)) {
+    if (!_sameViewportState(oldWidget, widget)) {
       _syncController();
     }
   }
@@ -60,9 +70,11 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
   }
 
   bool _sameViewportState(
-    RecordGlobeViewState previous,
-    RecordGlobeViewState next,
+    RecordGlobeViewport previousWidget,
+    RecordGlobeViewport nextWidget,
   ) {
+    final previous = previousWidget.state;
+    final next = nextWidget.state;
     final previousSpec = previous.sceneSpec;
     final nextSpec = next.sceneSpec;
     if (previousSpec == null || nextSpec == null) {
@@ -72,7 +84,10 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
     return previous.selectedCountryCode == next.selectedCountryCode &&
         previous.focusedCountryCode == next.focusedCountryCode &&
         previousSpec.style == nextSpec.style &&
+        previousWidget.visualMode == nextWidget.visualMode &&
         previousSpec.countries.length == nextSpec.countries.length &&
+        _tripSignature(previousWidget.trips) ==
+            _tripSignature(nextWidget.trips) &&
         _countrySignature(previousSpec.countries) ==
             _countrySignature(nextSpec.countries);
   }
@@ -83,8 +98,10 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
         ? null
         : [
             sceneSpec.style.name,
+            widget.visualMode.name,
             widget.state.focusedCountryCode ?? '',
             widget.state.selectedCountryCode ?? '',
+            _tripSignature(widget.trips),
             _countrySignature(sceneSpec.countries),
           ].join('|');
 
@@ -94,7 +111,7 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
 
     final nextController = sceneSpec == null
         ? null
-        : _buildController(sceneSpec.countries, widget.state);
+        : _buildController(sceneSpec.countries, widget.trips, widget.state);
 
     _controller?.dispose();
     _controller = nextController;
@@ -103,13 +120,15 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
 
   EarthController _buildController(
     List<RecordGlobeCountry> countries,
+    List<RecordTrip> trips,
     RecordGlobeViewState state,
   ) {
+    final maxZoom = _resolveMaxZoom();
     final controller = EarthController()
       ..enableAutoRotate = state.selectedCountryCode == null
-      ..rotateSpeed = 0.18
-      ..minZoom = 1.16
-      ..maxZoom = 2.4
+      ..rotateSpeed = 0.14
+      ..minZoom = 1.0
+      ..maxZoom = maxZoom
       ..lockNorthSouth = false
       ..lockZoom = false;
 
@@ -122,7 +141,7 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
         focusedCountry.anchorLongitude,
       );
       controller.setZoom(
-        state.selectedCountryCode == null ? 1.5 : 1.68,
+        state.selectedCountryCode == null ? maxZoom - 0.12 : maxZoom,
       );
     }
 
@@ -141,6 +160,8 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
         ),
       );
     }
+
+    _addAnimatedTripConnections(controller, trips);
 
     return controller;
   }
@@ -185,6 +206,86 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
         .join('|');
   }
 
+  String _tripSignature(List<RecordTrip> trips) {
+    return trips
+        .map(
+          (trip) => [
+            trip.id,
+            trip.isUpcoming ? '1' : '0',
+            trip.color,
+            for (final location in trip.locations)
+              [
+                location.id,
+                location.lat.toStringAsFixed(3),
+                location.lng.toStringAsFixed(3),
+              ].join(':'),
+          ].join('|'),
+        )
+        .join('||');
+  }
+
+  void _addAnimatedTripConnections(
+    EarthController controller,
+    List<RecordTrip> trips,
+  ) {
+    final seenConnections = <String>{};
+
+    for (final trip in trips.take(6)) {
+      final routeStops = trip.locations
+          .where(
+            (location) =>
+                location.lat.isFinite &&
+                location.lng.isFinite &&
+                location.lat.abs() <= 90 &&
+                location.lng.abs() <= 180,
+          )
+          .toList(growable: false);
+      if (routeStops.length < 2) {
+        continue;
+      }
+
+      final routeColor = Color(int.parse(trip.color.replaceAll('#', '0xFF')));
+
+      for (final stop in routeStops) {
+        controller.addNode(
+          EarthNode(
+            id: _routeNodeId(trip.id, stop.id),
+            latitude: stop.lat,
+            longitude: stop.lng,
+            child: IgnorePointer(
+              child: _RouteNode(color: routeColor),
+            ),
+          ),
+        );
+      }
+
+      for (var index = 0; index < routeStops.length - 1; index++) {
+        final from = routeStops[index];
+        final to = routeStops[index + 1];
+        final fromId = _routeNodeId(trip.id, from.id);
+        final toId = _routeNodeId(trip.id, to.id);
+        final edgeKey = '$fromId->$toId';
+        if (!seenConnections.add(edgeKey)) {
+          continue;
+        }
+        controller.connect(
+          EarthConnection(
+            fromId: fromId,
+            toId: toId,
+            color: routeColor.withValues(alpha: trip.isUpcoming ? 0.92 : 0.82),
+            isDashed: true,
+            showArrow: true,
+            width: trip.isUpcoming ? 2.1 : 1.8,
+          ),
+        );
+      }
+    }
+  }
+
+  String _routeNodeId(String tripId, String locationId) {
+    return 'route:$tripId:$locationId';
+  }
+
   @override
   Widget build(BuildContext context) {
     final sceneSpec = widget.state.sceneSpec;
@@ -203,31 +304,45 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
         key: ValueKey(_signature),
         shaderAsset: _recordGlobeShaderAsset,
         controller: controller,
-        texture: _textureForStyle(sceneSpec.style),
+        texture: _textureForMode(widget.visualMode),
         nightTexture: null,
-        initialScale: _resolveInitialScale(sceneSpec.style),
+        initialScale: _resolveInitialScale(widget.visualMode),
       ),
     );
   }
 
-  ImageProvider _textureForStyle(RecordGlobeStyle style) {
-    return style == RecordGlobeStyle.dark
+  ImageProvider _textureForMode(RecordGlobeVisualMode mode) {
+    return mode == RecordGlobeVisualMode.night
         ? _defaultNightTexture
         : _defaultDayTexture;
   }
 
-  double _resolveInitialScale(RecordGlobeStyle style) {
+  double _resolveInitialScale(RecordGlobeVisualMode mode) {
     final size = widget.size ?? 0;
     if (size >= 420) {
-      return style == RecordGlobeStyle.dark ? 1.76 : 1.68;
+      return mode == RecordGlobeVisualMode.night ? 1.82 : 1.74;
     }
     if (size >= 360) {
-      return style == RecordGlobeStyle.dark ? 1.9 : 1.82;
+      return mode == RecordGlobeVisualMode.night ? 1.96 : 1.88;
     }
     if (size >= 300) {
-      return style == RecordGlobeStyle.dark ? 2.08 : 2.0;
+      return mode == RecordGlobeVisualMode.night ? 2.14 : 2.06;
     }
-    return style == RecordGlobeStyle.dark ? 2.22 : 2.14;
+    return mode == RecordGlobeVisualMode.night ? 2.26 : 2.18;
+  }
+
+  double _resolveMaxZoom() {
+    final size = widget.size ?? 0;
+    if (size >= 420) {
+      return 1.76;
+    }
+    if (size >= 360) {
+      return 1.68;
+    }
+    if (size >= 300) {
+      return 1.58;
+    }
+    return 1.5;
   }
 }
 
@@ -339,5 +454,30 @@ class _CountryMarker extends StatelessWidget {
           const Color(0xFF94A3B8),
         ),
     };
+  }
+}
+
+class _RouteNode extends StatelessWidget {
+  const _RouteNode({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.42),
+            blurRadius: 8,
+            spreadRadius: 1.5,
+          ),
+        ],
+      ),
+    );
   }
 }

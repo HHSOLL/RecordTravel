@@ -64,6 +64,7 @@ void main() {
             float v = 0.5 - asin(normal.y) / PI;
 
             vec3 texColor = texture(uTexture, vec2(u, v)).rgb;
+            vec3 nightReference = texture(uTextureNight, vec2(u, v)).rgb * 0.0;
             vec3 lightDir = normalize(uLightDir);
             float NdotL = max(dot(normal, lightDir), 0.0);
 
@@ -73,6 +74,8 @@ void main() {
             float limbShadow = smoothstep(0.0, 0.35, max(dot(normal, -rd), 0.0));
 
             vec3 finalColor = texColor * diffuse * limbShadow;
+            finalColor += nightReference;
+            finalColor += vec3((uHasNightTexture + uTime) * 0.0);
             finalColor += ATMOSPHERE_COLOR * fresnel * 0.42;
 
             fragColor = vec4(finalColor, 1.0);

@@ -32,6 +32,7 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _enterAnim;
   late final RecordGlobeViewModel _globeViewModel;
+  RecordGlobeVisualMode _globeVisualMode = RecordGlobeVisualMode.night;
 
   ProviderSubscription<RecordGlobeSceneSpec>? _globeSceneSubscription;
   Brightness? _sceneBrightness;
@@ -158,8 +159,12 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                         children: [
                           Row(
                             children: [
-                              const _HeaderButton(
-                                icon: Icons.dark_mode_rounded,
+                              _HeaderButton(
+                                onPressed: _toggleGlobeVisualMode,
+                                icon: _globeVisualMode ==
+                                        RecordGlobeVisualMode.night
+                                    ? Icons.dark_mode_rounded
+                                    : Icons.light_mode_rounded,
                               ),
                               Expanded(
                                 child: Center(
@@ -216,46 +221,73 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                                                 onRetry3D:
                                                     widget.onRetryGlobe3D,
                                               )
-                                            : RecordGlobeViewport(
-                                                state: globeState,
-                                                size: globeSize,
-                                                loadingBuilder: (context) =>
-                                                    const Center(
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    strokeWidth: 2.5,
-                                                  ),
+                                            : AnimatedSwitcher(
+                                                duration: const Duration(
+                                                  milliseconds: 380,
                                                 ),
-                                                onCountrySelected:
-                                                    (countryCode) {
-                                                  if (countryCode == null) {
-                                                    globeViewModel
-                                                        .clearSelection();
-                                                    return;
-                                                  }
-                                                  switch (
-                                                      globeViewModel.tapCountry(
-                                                    countryCode,
-                                                  )) {
-                                                    case RecordGlobeTapAction
-                                                          .previewCountry:
-                                                      globeViewModel
-                                                          .pinFocusedCountry();
-                                                      break;
-                                                    case RecordGlobeTapAction
-                                                          .enterCountry:
-                                                      _openCountryDetails(
-                                                        globeViewModel,
-                                                        countryCode,
-                                                      );
-                                                      break;
-                                                    case RecordGlobeTapAction
-                                                          .clearSelection:
+                                                switchInCurve:
+                                                    Curves.easeOutCubic,
+                                                switchOutCurve:
+                                                    Curves.easeInCubic,
+                                                transitionBuilder:
+                                                    (child, animation) {
+                                                  return FadeTransition(
+                                                    opacity: animation,
+                                                    child: ScaleTransition(
+                                                      scale: Tween<double>(
+                                                        begin: 0.94,
+                                                        end: 1.0,
+                                                      ).animate(animation),
+                                                      child: child,
+                                                    ),
+                                                  );
+                                                },
+                                                child: RecordGlobeViewport(
+                                                  key: ValueKey(
+                                                    'record-globe-${_globeVisualMode.name}',
+                                                  ),
+                                                  state: globeState,
+                                                  trips: trips,
+                                                  visualMode: _globeVisualMode,
+                                                  size: globeSize,
+                                                  loadingBuilder: (context) =>
+                                                      const Center(
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      strokeWidth: 2.5,
+                                                    ),
+                                                  ),
+                                                  onCountrySelected:
+                                                      (countryCode) {
+                                                    if (countryCode == null) {
                                                       globeViewModel
                                                           .clearSelection();
-                                                      break;
-                                                  }
-                                                },
+                                                      return;
+                                                    }
+                                                    switch (globeViewModel
+                                                        .tapCountry(
+                                                      countryCode,
+                                                    )) {
+                                                      case RecordGlobeTapAction
+                                                            .previewCountry:
+                                                        globeViewModel
+                                                            .pinFocusedCountry();
+                                                        break;
+                                                      case RecordGlobeTapAction
+                                                            .enterCountry:
+                                                        _openCountryDetails(
+                                                          globeViewModel,
+                                                          countryCode,
+                                                        );
+                                                        break;
+                                                      case RecordGlobeTapAction
+                                                            .clearSelection:
+                                                        globeViewModel
+                                                            .clearSelection();
+                                                        break;
+                                                    }
+                                                  },
+                                                ),
                                               ),
                                   ),
                                 ),
@@ -371,6 +403,14 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
   double _compactBottomPadding(BuildContext context) {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     return bottomInset > 0 ? 90 : 84;
+  }
+
+  void _toggleGlobeVisualMode() {
+    setState(() {
+      _globeVisualMode = _globeVisualMode == RecordGlobeVisualMode.night
+          ? RecordGlobeVisualMode.day
+          : RecordGlobeVisualMode.night;
+    });
   }
 }
 
