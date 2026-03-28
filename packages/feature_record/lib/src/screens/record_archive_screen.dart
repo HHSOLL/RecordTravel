@@ -22,6 +22,15 @@ class RecordArchiveScreen extends ConsumerStatefulWidget {
 
 class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
   String? _selectedContinent;
+  final TextEditingController _searchController = TextEditingController();
+  DateTimeRange? _selectedDateRange;
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,13 +47,17 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
       for (final trip in pastTrips) trip.countries.first.continent,
     }.toList()
       ..sort();
-    final filteredTrips = _selectedContinent == null
-        ? pastTrips
-        : pastTrips
-            .where(
-              (trip) => trip.countries.first.continent == _selectedContinent,
-            )
-            .toList();
+    final filteredTrips = pastTrips
+        .where(
+          (trip) => _selectedContinent == null ||
+              trip.countries.first.continent == _selectedContinent,
+        )
+        .where((trip) => _matchesSearch(trip, _searchQuery))
+        .where((trip) => _matchesDateRange(trip, _selectedDateRange))
+        .toList();
+    final hasActiveFilters = _selectedContinent != null ||
+        _searchQuery.isNotEmpty ||
+        _selectedDateRange != null;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -92,8 +105,81 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                           ],
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _searchController,
+                        textInputAction: TextInputAction.search,
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value.trim();
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: strings.text('archive.searchHint'),
+                          prefixIcon: const Icon(Icons.search_rounded),
+                          suffixIcon: _searchQuery.isEmpty
+                              ? null
+                              : IconButton(
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() {
+                                      _searchQuery = '';
+                                    });
+                                  },
+                                  icon: const Icon(Icons.close_rounded),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: () async {
+                              final picked = await showDateRangePicker(
+                                context: context,
+                                initialDateRange: _selectedDateRange,
+                                firstDate: DateTime(2010, 1, 1),
+                                lastDate: DateTime(2035, 12, 31),
+                                helpText: strings.text('archive.periodFilter'),
+                                confirmText: strings.text('common.save'),
+                                cancelText: strings.text('common.cancel'),
+                              );
+                              if (picked == null) {
+                                return;
+                              }
+                              setState(() {
+                                _selectedDateRange = picked;
+                              });
+                            },
+                            icon: const Icon(Icons.calendar_month_rounded),
+                            label: Text(
+                              _selectedDateRange == null
+                                  ? strings.text('archive.periodFilter')
+                                  : _formatDateRange(_selectedDateRange!),
+                            ),
+                          ),
+                          if (hasActiveFilters)
+                            TextButton.icon(
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() {
+                                  _selectedContinent = null;
+                                  _searchQuery = '';
+                                  _selectedDateRange = null;
+                                });
+                              },
+                              icon: const Icon(Icons.refresh_rounded),
+                              label: Text(
+                                strings.text('archive.clearFilters'),
+                              ),
+                            ),
+                        ],
+                      ),
                       const SizedBox(height: 18),
                       RecordMetricGrid(
+                        minTileWidth: 82,
                         spacing: 12,
                         children: [
                           AtlasMiniMetric(
@@ -129,7 +215,9 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                     padding: const EdgeInsets.all(20),
                     child: Center(
                       child: AtlasEmptyState(
-                        title: strings.text('archive.empty'),
+                        title: pastTrips.isEmpty
+                            ? strings.text('archive.empty')
+                            : strings.text('archive.noMatches'),
                         message: strings.text('nav.create'),
                       ),
                     ),
@@ -141,22 +229,24 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
                   sliver: SliverLayoutBuilder(
                     builder: (context, constraints) {
                       final crossAxisExtent = constraints.crossAxisExtent;
-                      final crossAxisCount = switch (crossAxisExtent) {
-                        >= 920 => 3,
-                        >= 360 => 2,
-                        _ => 1,
-                      };
+                      final crossAxisCount = crossAxisExtent < 320
+                          ? 1
+                          : math.max(
+                              2,
+                              math.min(
+                                3,
+                                ((crossAxisExtent + 12) / 156).floor(),
+                              ),
+                            );
                       const spacing = 14.0;
                       final tileWidth = (crossAxisExtent -
                               spacing * math.max(0, crossAxisCount - 1)) /
                           crossAxisCount;
                       final aspectRatio = crossAxisCount == 1
-                          ? (tileWidth < 320 ? 0.68 : 0.78)
-                          : tileWidth < 180
-                              ? 0.72
-                              : tileWidth < 320
-                                  ? 0.82
-                                  : 0.92;
+                          ? (tileWidth < 320 ? 0.70 : 0.78)
+                          : crossAxisCount == 2
+                              ? (tileWidth < 180 ? 0.78 : 0.86)
+                              : 0.74;
 
                       if (crossAxisCount == 1) {
                         return SliverList(
@@ -197,6 +287,37 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
         ),
       ),
     );
+  }
+
+  bool _matchesSearch(RecordTrip trip, String query) {
+    if (query.isEmpty) {
+      return true;
+    }
+
+    final lowerQuery = query.toLowerCase();
+    return trip.title.toLowerCase().contains(lowerQuery) ||
+        trip.countries.any(
+          (country) => country.name.toLowerCase().contains(lowerQuery),
+        );
+  }
+
+  bool _matchesDateRange(RecordTrip trip, DateTimeRange? range) {
+    if (range == null) {
+      return true;
+    }
+
+    final tripStart = DateUtils.dateOnly(DateTime.parse(trip.startDate));
+    final tripEnd = DateUtils.dateOnly(DateTime.parse(trip.endDate));
+    final filterStart = DateUtils.dateOnly(range.start);
+    final filterEnd = DateUtils.dateOnly(range.end);
+
+    return !tripEnd.isBefore(filterStart) && !tripStart.isAfter(filterEnd);
+  }
+
+  String _formatDateRange(DateTimeRange range) {
+    final start = DateFormat('yy.MM.dd').format(range.start);
+    final end = DateFormat('yy.MM.dd').format(range.end);
+    return '$start - $end';
   }
 }
 
@@ -248,9 +369,8 @@ class _ArchiveTripCard extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compactCard = constraints.maxWidth < 340;
-        final heroHeight = (constraints.maxWidth * (compactCard ? 0.48 : 0.40))
-            .clamp(compactCard ? 148.0 : 128.0, compactCard ? 176.0 : 156.0);
+        final compactCard = constraints.maxWidth < 200;
+        final heroHeight = compactCard ? 90.0 : 96.0;
         final bodyPadding = compactCard ? 10.0 : 14.0;
         return InkWell(
           onTap: () {
@@ -270,7 +390,7 @@ class _ArchiveTripCard extends StatelessWidget {
                 Container(
                   width: double.infinity,
                   height: heroHeight,
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(compactCard ? 12 : 16),
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(26),
@@ -288,25 +408,32 @@ class _ArchiveTripCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _ArchiveInfoPill(
-                        label: strings.continentLabel(
-                          trip.countries.first.continent,
+                      if (compactCard)
+                        Text(
+                          strings.continentLabel(
+                            trip.countries.first.continent,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.82),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        )
+                      else
+                        _ArchiveInfoPill(
+                          label: strings.continentLabel(
+                            trip.countries.first.continent,
+                          ),
+                          color: Colors.white,
+                          icon: Icons.public_rounded,
                         ),
-                        color: Colors.white,
-                        icon: Icons.public_rounded,
-                      ),
-                      const Spacer(),
-                      Icon(
-                        Icons.public_rounded,
-                        color: Colors.white.withValues(alpha: 0.92),
-                        size: compactCard ? 26 : 30,
-                      ),
-                      SizedBox(height: compactCard ? 10 : 12),
+                      SizedBox(height: compactCard ? 4 : 8),
                       Text(
                         trip.title,
                         style: (compactCard
-                                ? theme.textTheme.titleMedium
-                                : theme.textTheme.titleLarge)
+                                ? theme.textTheme.titleSmall
+                                : theme.textTheme.titleMedium)
                             ?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w800,
@@ -322,28 +449,23 @@ class _ArchiveTripCard extends StatelessWidget {
                     padding: EdgeInsets.all(bodyPadding),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMM d, yyyy').format(endDate)}',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            SizedBox(height: compactCard ? 6 : 8),
-                            Text(
-                              trip.description,
-                              style: theme.textTheme.bodyMedium,
-                              maxLines: compactCard ? 1 : 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                        Text(
+                          '${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMM d, yyyy').format(endDate)}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: compactCard ? 6 : 8),
+                        Expanded(
+                          child: Text(
+                            trip.description,
+                            style: theme.textTheme.bodySmall,
+                            maxLines: compactCard ? 2 : 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         SizedBox(height: compactCard ? 6 : 10),
                         Wrap(

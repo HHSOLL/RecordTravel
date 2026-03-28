@@ -66,6 +66,7 @@ class RecordPlannerScreen extends ConsumerWidget {
                         ),
                         metrics: [
                           RecordMetricGrid(
+                            minTileWidth: 82,
                             children: [
                               AtlasMiniMetric(
                                 minWidth: 0,
@@ -121,17 +122,30 @@ class RecordPlannerScreen extends ConsumerWidget {
               else
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final trip = upcomingTrips[index];
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          bottom: 18,
-                          top: index == 0 ? 6 : 0,
+                  sliver: SliverLayoutBuilder(
+                    builder: (context, constraints) {
+                      final crossAxisExtent = constraints.crossAxisExtent;
+                      final crossAxisCount = crossAxisExtent < 220 ? 2 : 3;
+                      const spacing = 14.0;
+                      final tileWidth = (crossAxisExtent -
+                              spacing * (crossAxisCount - 1)) /
+                          crossAxisCount;
+                      final aspectRatio = crossAxisCount == 3
+                          ? (tileWidth < 112 ? 0.66 : 0.72)
+                          : 0.84;
+
+                      return SliverGrid(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          return _PlannerTripCard(trip: upcomingTrips[index]);
+                        }, childCount: upcomingTrips.length),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          mainAxisSpacing: spacing,
+                          crossAxisSpacing: spacing,
+                          childAspectRatio: aspectRatio,
                         ),
-                        child: _PlannerTripCard(trip: trip),
                       );
-                    }, childCount: upcomingTrips.length),
+                    },
                   ),
                 ),
             ],
@@ -157,149 +171,159 @@ class _PlannerTripCard extends StatelessWidget {
     final endDate = DateTime.parse(trip.endDate);
     final daysLeft = startDate.difference(DateTime.now()).inDays;
 
-    return AtlasPanel(
-      padding: EdgeInsets.zero,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(26),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compactCard = constraints.maxWidth < 120;
+        return InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => RecordTripDetailScreen(tripId: trip.id),
               ),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  tripColor.withValues(alpha: 0.92),
-                  tripColor.withValues(alpha: 0.52),
-                ],
-              ),
-            ),
+            );
+          },
+          borderRadius: BorderRadius.circular(24),
+          child: AtlasPanel(
+            padding: EdgeInsets.zero,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
+                Container(
+                  padding: EdgeInsets.all(compactCard ? 10 : 12),
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(26),
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        tripColor.withValues(alpha: 0.94),
+                        tripColor.withValues(alpha: 0.62),
+                      ],
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              strings.plannerCountdownLabel(daysLeft),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          Icon(
+                            Icons.luggage_rounded,
+                            size: compactCard ? 16 : 18,
+                            color: Colors.white.withValues(alpha: 0.92),
+                          ),
+                        ],
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.18),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        strings.plannerCountdownLabel(daysLeft),
-                        style: theme.textTheme.labelLarge?.copyWith(
+                      const SizedBox(height: 12),
+                      Text(
+                        trip.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
                           color: Colors.white,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                    ),
-                    const Spacer(),
-                    Icon(
-                      Icons.luggage_rounded,
-                      color: Colors.white.withValues(alpha: 0.92),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                Text(
-                  trip.title,
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  trip.countries.map((country) => country.name).join(' • '),
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.88),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '${DateFormat('MMM d, yyyy').format(startDate)} - ${DateFormat('MMM d, yyyy').format(endDate)}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.82),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  trip.description,
-                  style: theme.textTheme.bodyMedium,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 18),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: [
-                    AtlasStatusPill(
-                      label: strings.stopCount(trip.locations.length),
-                      color: tripColor,
-                      icon: Icons.route_rounded,
-                    ),
-                    AtlasStatusPill(
-                      label: trip.countries.first.continent,
-                      color: palette.accentSoft,
-                      icon: Icons.public_rounded,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => _openMapModal(context, trip),
-                        icon: const Icon(Icons.map_outlined),
-                        label: Text(strings.text('planner.openMap')),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => _openScheduleModal(context, trip),
-                        icon: const Icon(Icons.calendar_month_outlined),
-                        label: Text(strings.text('planner.schedule')),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    FilledButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                RecordTripDetailScreen(tripId: trip.id),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(compactCard ? 10 : 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMM d').format(endDate)}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w700,
                           ),
-                        );
-                      },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: tripColor,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: Text(strings.text('planner.view')),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          trip.countries.first.name,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: palette.accentSoft,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          trip.description,
+                          style: theme.textTheme.bodySmall,
+                          maxLines: compactCard ? 2 : 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const Spacer(),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            AtlasStatusPill(
+                              label: '${trip.locations.length}',
+                              color: tripColor,
+                              icon: Icons.route_rounded,
+                            ),
+                            AtlasStatusPill(
+                              label: strings.continentLabel(
+                                trip.countries.first.continent,
+                              ),
+                              color: palette.accentSoft,
+                              icon: Icons.public_rounded,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _PlannerActionButton(
+                                icon: Icons.map_outlined,
+                                onTap: () => _openMapModal(context, trip),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: _PlannerActionButton(
+                                icon: Icons.calendar_month_outlined,
+                                onTap: () => _openScheduleModal(context, trip),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -318,6 +342,27 @@ class _PlannerTripCard extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => _ScheduleModal(trip: trip),
+    );
+  }
+}
+
+class _PlannerActionButton extends StatelessWidget {
+  const _PlannerActionButton({
+    required this.icon,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onTap,
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+      ),
+      child: Icon(icon, size: 18),
     );
   }
 }

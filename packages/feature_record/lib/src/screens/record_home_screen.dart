@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../globe/globe.dart';
-import '../globe_engine/record_globe_engine.dart';
-import '../globe_engine/renderers/three_js_record_globe_renderer.dart';
 import '../components/record_wordmark.dart';
 import '../i18n/record_strings.dart';
 import '../providers/record_provider.dart';
@@ -34,7 +32,6 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _enterAnim;
   late final RecordGlobeViewModel _globeViewModel;
-  final RecordGlobeEngine _globeEngine = const ThreeJsRecordGlobeRenderer();
 
   ProviderSubscription<RecordGlobeSceneSpec>? _globeSceneSubscription;
   Brightness? _sceneBrightness;
@@ -94,10 +91,6 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     final theme = Theme.of(context);
     final globeViewModel = _globeViewModel;
     final globeState = globeViewModel.state;
-    final globeSceneSpec = globeState.sceneSpec;
-    final globeAssetSet = globeSceneSpec == null
-        ? null
-        : ref.watch(recordGlobeAssetSetProvider(globeSceneSpec.style));
     final selectedCountryCode = globeState.selectedCountryCode;
     final selectedProjection = selectedCountryCode == null
         ? null
@@ -224,9 +217,7 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                                                     widget.onRetryGlobe3D,
                                               )
                                             : RecordGlobeViewport(
-                                                engine: _globeEngine,
                                                 state: globeState,
-                                                assetSet: globeAssetSet,
                                                 size: globeSize,
                                                 loadingBuilder: (context) =>
                                                     const Center(

@@ -57,6 +57,7 @@ class RecordProfileScreen extends ConsumerWidget {
                     : user.name.substring(0, 1).toUpperCase(),
                 metrics: [
                   RecordMetricGrid(
+                    minTileWidth: 82,
                     children: [
                       AtlasMiniMetric(
                         minWidth: 0,

@@ -1,4 +1,5 @@
 import 'package:core_ui/core_ui.dart';
+import 'package:feature_record/feature_record.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,6 +32,7 @@ class TravelAtlasApp extends ConsumerWidget {
     return MaterialApp(
       title: 'record',
       debugShowCheckedModeBanner: false,
+      navigatorObservers: [RecordGlobeViewport.navigatorObserver],
       theme: AtlasTheme.buildTheme(brightness: Brightness.light),
       darkTheme: AtlasTheme.buildTheme(brightness: Brightness.dark),
       themeMode: prefs.effectiveThemeMode,

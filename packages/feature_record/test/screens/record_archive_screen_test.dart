@@ -10,7 +10,7 @@ void main() {
   testWidgets('archive header and cards adapt on a narrow phone viewport', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(960, 1920);
+    tester.view.physicalSize = const Size(1179, 2556);
     tester.view.devicePixelRatio = 3;
     addTearDown(() {
       tester.view.resetPhysicalSize();
@@ -32,6 +32,7 @@ void main() {
               ]),
         ],
         child: MaterialApp(
+          locale: const Locale('ko'),
           theme: ThemeData.dark(),
           home: const RecordArchiveScreen(),
         ),
@@ -41,6 +42,10 @@ void main() {
 
     expect(find.byType(RecordArchiveScreen), findsOneWidget);
     expect(find.byType(RecordWordmark), findsOneWidget);
+    expect(find.byIcon(Icons.search_rounded), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'trip-zzz');
+    await tester.pumpAndSettle();
+    expect(find.textContaining('A very long reflective trip title'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:feature_record/src/screens/record_home_screen.dart';
 import 'package:mobile_app/bootstrap/mobile_app_bootstrap.dart';
 import 'package:mobile_app/main.dart';
-import 'package:feature_record/src/globe/presentation/widgets/record_globe_viewport.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support/test_mobile_app_runtime.dart';
@@ -16,7 +16,7 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
-    expect(find.byType(RecordGlobeViewport), findsOneWidget);
+    expect(find.byType(RecordHomeScreen), findsOneWidget);
     expect(find.text('record'), findsWidgets);
     expect(find.byIcon(Icons.add_rounded), findsOneWidget);
   });
