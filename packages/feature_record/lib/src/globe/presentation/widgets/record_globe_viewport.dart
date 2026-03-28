@@ -5,6 +5,15 @@ import '../../domain/entities/record_globe_country.dart';
 import '../../domain/entities/record_globe_scene_spec.dart';
 import '../globe_view_state.dart';
 
+const _recordGlobeShaderAsset =
+    'packages/feature_record/assets/shaders/record_globe_surface.frag';
+const _defaultDayTexture = AssetImage(
+  'packages/flutter_globe_3d/assets/images/earth.jpg',
+);
+const _defaultNightTexture = AssetImage(
+  'packages/flutter_globe_3d/assets/images/earth_night.jpg',
+);
+
 class RecordGlobeViewport extends StatefulWidget {
   const RecordGlobeViewport({
     super.key,
@@ -99,12 +108,12 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
     final controller = EarthController()
       ..enableAutoRotate = state.selectedCountryCode == null
       ..rotateSpeed = 0.18
-      ..minZoom = 0.82
-      ..maxZoom = 1.84
+      ..minZoom = 1.16
+      ..maxZoom = 2.4
       ..lockNorthSouth = false
       ..lockZoom = false;
 
-    controller.setLightMode(EarthLightMode.realTime);
+    controller.setLightMode(EarthLightMode.followCamera);
 
     final focusedCountry = _resolveFocusedCountry(countries, state);
     if (focusedCountry != null) {
@@ -113,7 +122,7 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
         focusedCountry.anchorLongitude,
       );
       controller.setZoom(
-        state.selectedCountryCode == null ? 1.18 : 1.32,
+        state.selectedCountryCode == null ? 1.5 : 1.68,
       );
     }
 
@@ -192,24 +201,33 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
       dimension: widget.size,
       child: Earth3D(
         key: ValueKey(_signature),
+        shaderAsset: _recordGlobeShaderAsset,
         controller: controller,
+        texture: _textureForStyle(sceneSpec.style),
+        nightTexture: null,
         initialScale: _resolveInitialScale(sceneSpec.style),
       ),
     );
   }
 
+  ImageProvider _textureForStyle(RecordGlobeStyle style) {
+    return style == RecordGlobeStyle.dark
+        ? _defaultNightTexture
+        : _defaultDayTexture;
+  }
+
   double _resolveInitialScale(RecordGlobeStyle style) {
     final size = widget.size ?? 0;
     if (size >= 420) {
-      return style == RecordGlobeStyle.dark ? 1.28 : 1.22;
+      return style == RecordGlobeStyle.dark ? 1.76 : 1.68;
     }
     if (size >= 360) {
-      return style == RecordGlobeStyle.dark ? 1.36 : 1.30;
+      return style == RecordGlobeStyle.dark ? 1.9 : 1.82;
     }
     if (size >= 300) {
-      return style == RecordGlobeStyle.dark ? 1.46 : 1.40;
+      return style == RecordGlobeStyle.dark ? 2.08 : 2.0;
     }
-    return style == RecordGlobeStyle.dark ? 1.54 : 1.48;
+    return style == RecordGlobeStyle.dark ? 2.22 : 2.14;
   }
 }
 
