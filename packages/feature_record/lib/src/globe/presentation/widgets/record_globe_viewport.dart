@@ -300,13 +300,31 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
 
     return SizedBox.square(
       dimension: widget.size,
-      child: Earth3D(
-        key: ValueKey(_signature),
-        shaderAsset: _recordGlobeShaderAsset,
-        controller: controller,
-        texture: _textureForMode(widget.visualMode),
-        nightTexture: null,
-        initialScale: _resolveInitialScale(widget.visualMode),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x3D5B8CFF),
+              blurRadius: 44,
+              spreadRadius: 6,
+            ),
+          ],
+        ),
+        child: ClipOval(
+          clipBehavior: Clip.antiAlias,
+          child: ColoredBox(
+            color: Colors.transparent,
+            child: Earth3D(
+              key: ValueKey(_signature),
+              shaderAsset: _recordGlobeShaderAsset,
+              controller: controller,
+              texture: _textureForMode(widget.visualMode),
+              nightTexture: null,
+              initialScale: _resolveInitialScale(widget.visualMode),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -320,29 +338,29 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
   double _resolveInitialScale(RecordGlobeVisualMode mode) {
     final size = widget.size ?? 0;
     if (size >= 420) {
-      return mode == RecordGlobeVisualMode.night ? 1.82 : 1.74;
+      return mode == RecordGlobeVisualMode.night ? 1.74 : 1.68;
     }
     if (size >= 360) {
-      return mode == RecordGlobeVisualMode.night ? 1.96 : 1.88;
+      return mode == RecordGlobeVisualMode.night ? 1.84 : 1.78;
     }
     if (size >= 300) {
-      return mode == RecordGlobeVisualMode.night ? 2.14 : 2.06;
+      return mode == RecordGlobeVisualMode.night ? 1.96 : 1.90;
     }
-    return mode == RecordGlobeVisualMode.night ? 2.26 : 2.18;
+    return mode == RecordGlobeVisualMode.night ? 2.06 : 2.00;
   }
 
   double _resolveMaxZoom() {
     final size = widget.size ?? 0;
     if (size >= 420) {
-      return 1.76;
+      return 1.62;
     }
     if (size >= 360) {
-      return 1.68;
+      return 1.56;
     }
     if (size >= 300) {
-      return 1.58;
+      return 1.48;
     }
-    return 1.5;
+    return 1.42;
   }
 }
 
@@ -363,11 +381,35 @@ class _CountryMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     final (coreColor, ringColor, haloColor) = _markerPalette(country.signal);
     final size = isSelected
-        ? 30.0
+        ? 34.0
         : (isFocused || country.hasUpcomingTrip)
             ? 24.0
             : 18.0;
     final showLabel = isSelected || (isFocused && country.activityLevel > 0);
+    final label = DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xD9020617),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: ringColor.withValues(alpha: 0.34)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.22),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        child: Text(
+          country.name,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+        ),
+      ),
+    );
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -375,6 +417,18 @@ class _CountryMarker extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (showLabel) ...[
+            label,
+            Container(
+              width: 2,
+              height: isSelected ? 14 : 10,
+              margin: const EdgeInsets.only(top: 2, bottom: 2),
+              decoration: BoxDecoration(
+                color: ringColor.withValues(alpha: 0.85),
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ],
           Container(
             width: size,
             height: size,
@@ -411,26 +465,6 @@ class _CountryMarker extends StatelessWidget {
               ),
             ),
           ),
-          if (showLabel) ...[
-            const SizedBox(height: 4),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: const Color(0xCC020617),
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: ringColor.withValues(alpha: 0.28)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Text(
-                  country.name,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('RecordGlobeViewModel', () {
-    test('transitions from preview to pinned to entered', () {
+    test('transitions from preview to entered on repeated tap', () {
       final viewModel = RecordGlobeViewModel();
 
       viewModel.syncScene(
@@ -42,13 +42,6 @@ void main() {
       expect(
         viewModel.state.phase,
         RecordGlobeInteractionPhase.countryFocused,
-      );
-
-      viewModel.pinFocusedCountry();
-      expect(viewModel.state.isSheetOpen, isTrue);
-      expect(
-        viewModel.state.phase,
-        RecordGlobeInteractionPhase.countryPinned,
       );
 
       final enterAction = viewModel.tapCountry('FR');

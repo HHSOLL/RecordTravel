@@ -8,18 +8,22 @@ class RecordCountryOverviewMetricCard extends StatelessWidget {
     required this.value,
     required this.icon,
     required this.accentColor,
+    this.compact = false,
   });
 
   final String label;
   final String value;
   final IconData icon;
   final Color accentColor;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(minWidth: 108),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 10 : 14,
+        vertical: compact ? 10 : 12,
+      ),
       decoration: BoxDecoration(
         color: context.atlasPalette.surfaceMuted,
         borderRadius: BorderRadius.circular(18),
@@ -30,16 +34,29 @@ class RecordCountryOverviewMetricCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: accentColor),
-          const SizedBox(height: 8),
+          Icon(icon, size: compact ? 16 : 18, color: accentColor),
+          SizedBox(height: compact ? 6 : 8),
           Text(
             value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: (compact
+                    ? Theme.of(context).textTheme.titleSmall
+                    : Theme.of(context).textTheme.titleMedium)
+                ?.copyWith(
+              fontWeight: FontWeight.w900,
+            ),
           ),
-          const SizedBox(height: 4),
-          Text(label, style: Theme.of(context).textTheme.bodySmall),
+          SizedBox(height: compact ? 3 : 4),
+          Text(
+            label,
+            maxLines: compact ? 2 : 1,
+            overflow: TextOverflow.ellipsis,
+            style: (compact
+                    ? Theme.of(context).textTheme.labelSmall
+                    : Theme.of(context).textTheme.bodySmall)
+                ?.copyWith(height: 1.15),
+          ),
         ],
       ),
     );

@@ -68,8 +68,9 @@ class RecordGlobeViewModel extends ChangeNotifier {
 
   RecordGlobeTapAction tapCountry(String countryCode) {
     if (_state.selectedCountryCode == countryCode &&
-        _state.phase == RecordGlobeInteractionPhase.countryPinned) {
+        _state.phase != RecordGlobeInteractionPhase.idle) {
       _state = _state.copyWith(
+        isSheetOpen: false,
         phase: RecordGlobeInteractionPhase.countryEntered,
       );
       notifyListeners();
@@ -112,7 +113,7 @@ class RecordGlobeViewModel extends ChangeNotifier {
         selectedState,
         focusedCountryCode: countryCode,
       ).copyWith(
-        isSheetOpen: true,
+        isSheetOpen: false,
         phase: RecordGlobeInteractionPhase.countryEntered,
       );
       notifyListeners();

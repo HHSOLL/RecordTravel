@@ -79,7 +79,7 @@ class _RecordCountryDetailScreenState
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              expandedHeight: 288,
+              expandedHeight: 252,
               pinned: true,
               backgroundColor: theme.scaffoldBackgroundColor,
               surfaceTintColor: Colors.transparent,

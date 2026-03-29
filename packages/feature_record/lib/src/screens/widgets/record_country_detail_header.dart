@@ -36,13 +36,13 @@ class RecordCountryHero extends StatelessWidget {
         bottom: false,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final isCompact = constraints.maxHeight < 228;
+            final isCompact = constraints.maxHeight < 260;
             return Padding(
               padding: EdgeInsets.fromLTRB(
                 20,
                 16,
                 20,
-                isCompact ? 28 : 56,
+                isCompact ? 24 : 42,
               ),
               child: Stack(
                 children: [
@@ -77,7 +77,7 @@ class RecordCountryHero extends StatelessWidget {
                               ),
                             ],
                           ),
-                          SizedBox(height: isCompact ? 12 : 18),
+                          SizedBox(height: isCompact ? 10 : 16),
                           Text(
                             projection.name,
                             maxLines: 1,
@@ -96,13 +96,13 @@ class RecordCountryHero extends StatelessWidget {
                               strings.isKorean
                                   ? '하나의 여행 그래프를 지도, 타임라인, 앨범 세 가지 투영으로 정리했습니다.'
                                   : 'One travel graph, rendered as map, timeline, and album projections.',
-                              maxLines: 3,
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 color: Colors.white.withValues(alpha: 0.9),
                               ),
                             ),
-                            const SizedBox(height: 18),
+                            const SizedBox(height: 14),
                             Wrap(
                               spacing: 10,
                               runSpacing: 10,
@@ -196,35 +196,62 @@ class RecordCountryOverviewStrip extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 16),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              RecordCountryOverviewMetricCard(
-                label: strings.isKorean ? '활동 점수' : 'Activity',
-                value: projection.activityScore.toStringAsFixed(1),
-                icon: Icons.auto_graph_rounded,
-                accentColor: accentColor,
-              ),
-              RecordCountryOverviewMetricCard(
-                label: strings.isKorean ? '기록 일수' : 'Days',
-                value: '${projection.totalDays}',
-                icon: Icons.calendar_month_rounded,
-                accentColor: accentColor,
-              ),
-              RecordCountryOverviewMetricCard(
-                label: strings.isKorean ? '사진' : 'Photos',
-                value: '${projection.photoCount}',
-                icon: Icons.photo_library_rounded,
-                accentColor: accentColor,
-              ),
-              RecordCountryOverviewMetricCard(
-                label: strings.isKorean ? '예정 정차' : 'Planned stops',
-                value: '${projection.plannedStopCount}',
-                icon: Icons.flight_takeoff_rounded,
-                accentColor: accentColor,
-              ),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const spacing = 8.0;
+              final cardWidth = (constraints.maxWidth - (spacing * 3)) / 4;
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const NeverScrollableScrollPhysics(),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: cardWidth,
+                      child: RecordCountryOverviewMetricCard(
+                        label: strings.isKorean ? '활동 점수' : 'Activity',
+                        value: projection.activityScore.toStringAsFixed(1),
+                        icon: Icons.auto_graph_rounded,
+                        accentColor: accentColor,
+                        compact: true,
+                      ),
+                    ),
+                    const SizedBox(width: spacing),
+                    SizedBox(
+                      width: cardWidth,
+                      child: RecordCountryOverviewMetricCard(
+                        label: strings.isKorean ? '기록 일수' : 'Days',
+                        value: '${projection.totalDays}',
+                        icon: Icons.calendar_month_rounded,
+                        accentColor: accentColor,
+                        compact: true,
+                      ),
+                    ),
+                    const SizedBox(width: spacing),
+                    SizedBox(
+                      width: cardWidth,
+                      child: RecordCountryOverviewMetricCard(
+                        label: strings.isKorean ? '사진' : 'Photos',
+                        value: '${projection.photoCount}',
+                        icon: Icons.photo_library_rounded,
+                        accentColor: accentColor,
+                        compact: true,
+                      ),
+                    ),
+                    const SizedBox(width: spacing),
+                    SizedBox(
+                      width: cardWidth,
+                      child: RecordCountryOverviewMetricCard(
+                        label: strings.isKorean ? '예정 정차' : 'Planned stops',
+                        value: '${projection.plannedStopCount}',
+                        icon: Icons.flight_takeoff_rounded,
+                        accentColor: accentColor,
+                        compact: true,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),

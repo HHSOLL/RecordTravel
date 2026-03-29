@@ -92,15 +92,7 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     final theme = Theme.of(context);
     final globeViewModel = _globeViewModel;
     final globeState = globeViewModel.state;
-    final selectedCountryCode = globeState.selectedCountryCode;
-    final selectedProjection = selectedCountryCode == null
-        ? null
-        : ref.watch(recordCountryProjectionProvider(selectedCountryCode));
     final hasTrips = trips.isNotEmpty;
-    final isSheetVisible = hasTrips &&
-        selectedProjection != null &&
-        globeState.isSheetOpen &&
-        !_openingCountry;
     final showGlobeAvailabilityPending =
         hasTrips && widget.isGlobeAvailabilityPending;
     final showGlobeFallback = hasTrips && widget.forceGlobeFallback;
@@ -121,9 +113,7 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                 builder: (context, constraints) {
                   final compactLayout = constraints.maxHeight < 780;
                   final contentWidth = constraints.maxWidth - 40;
-                  final bottomClearance = compactLayout
-                      ? (isSheetVisible ? 224.0 : 108.0)
-                      : (isSheetVisible ? 244.0 : 124.0);
+                  final bottomClearance = compactLayout ? 108.0 : 124.0;
                   final globeHeightBudget = math.max(
                     compactLayout ? 260.0 : 312.0,
                     constraints.maxHeight -
@@ -270,8 +260,6 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                                                     )) {
                                                       case RecordGlobeTapAction
                                                             .previewCountry:
-                                                        globeViewModel
-                                                            .pinFocusedCountry();
                                                         break;
                                                       case RecordGlobeTapAction
                                                             .enterCountry:
@@ -314,31 +302,6 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
                 },
               ),
             ),
-            if (isSheetVisible)
-              Positioned(
-                left: 20,
-                right: 20,
-                bottom: _compactBottomPadding(context),
-                child: SafeArea(
-                  top: false,
-                  child: Builder(
-                    builder: (context) {
-                      final spotlight = selectedProjection;
-                      return RecordCountryBottomSheet(
-                        spotlight: spotlight,
-                        strings: strings,
-                        onOpen: () => _openCountryDetails(
-                          globeViewModel,
-                          spotlight.code,
-                        ),
-                        onClose: () {
-                          globeViewModel.clearSelection();
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ),
           ],
         ),
       ),
