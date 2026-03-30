@@ -46,13 +46,8 @@ class RecordCountryHero extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  RecordCountryRoundHeroButton(
-                    key: const Key('record-country-detail-back'),
-                    icon: Icons.arrow_back_rounded,
-                    onTap: () => Navigator.of(context).maybePop(),
-                  ),
                   Positioned.fill(
-                    top: isCompact ? 52 : 66,
+                    top: isCompact ? 34 : 46,
                     child: Align(
                       alignment: Alignment.bottomLeft,
                       child: Column(

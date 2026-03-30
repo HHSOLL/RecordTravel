@@ -47,7 +47,8 @@ class RecordGlobeViewport extends StatefulWidget {
 
 class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
   EarthController? _controller;
-  String? _signature;
+  String? _dataSignature;
+  String? _selectionSignature;
 
   @override
   void initState() {
@@ -94,38 +95,60 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
 
   void _syncController() {
     final sceneSpec = widget.state.sceneSpec;
-    final signature = sceneSpec == null
+    final dataSignature = sceneSpec == null
         ? null
         : [
             sceneSpec.style.name,
             widget.visualMode.name,
-            widget.state.focusedCountryCode ?? '',
-            widget.state.selectedCountryCode ?? '',
             _tripSignature(widget.trips),
             _countrySignature(sceneSpec.countries),
           ].join('|');
+    final selectionSignature = sceneSpec == null
+        ? null
+        : [
+            widget.state.focusedCountryCode ?? '',
+            widget.state.selectedCountryCode ?? '',
+          ].join('|');
 
-    if (signature == _signature) {
+    if (sceneSpec == null) {
+      _controller?.dispose();
+      _controller = null;
+      _dataSignature = null;
+      _selectionSignature = null;
       return;
     }
 
-    final nextController = sceneSpec == null
-        ? null
-        : _buildController(sceneSpec.countries, widget.trips, widget.state);
+    if (_controller == null || dataSignature != _dataSignature) {
+      _controller?.dispose();
+      final nextController = _buildController(
+        sceneSpec.countries,
+        widget.trips,
+        widget.state,
+        centerOnFocusedCountry: true,
+      );
+      _controller = nextController;
+      _dataSignature = dataSignature;
+      _selectionSignature = selectionSignature;
+      return;
+    }
 
-    _controller?.dispose();
-    _controller = nextController;
-    _signature = signature;
+    if (selectionSignature != _selectionSignature) {
+      _configureController(
+        _controller!,
+        sceneSpec.countries,
+        widget.trips,
+        widget.state,
+        centerOnFocusedCountry: false,
+      );
+      _selectionSignature = selectionSignature;
+    }
   }
 
-  EarthController _buildController(
-    List<RecordGlobeCountry> countries,
-    List<RecordTrip> trips,
-    RecordGlobeViewState state,
-  ) {
+  EarthController _buildController(List<RecordGlobeCountry> countries,
+      List<RecordTrip> trips, RecordGlobeViewState state,
+      {required bool centerOnFocusedCountry}) {
     final maxZoom = _resolveMaxZoom();
     final controller = EarthController()
-      ..enableAutoRotate = state.selectedCountryCode == null
       ..rotateSpeed = 0.14
       ..minZoom = 1.0
       ..maxZoom = maxZoom
@@ -133,20 +156,47 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
       ..lockZoom = false;
 
     controller.setLightMode(EarthLightMode.followCamera);
+    _configureController(
+      controller,
+      countries,
+      trips,
+      state,
+      centerOnFocusedCountry: centerOnFocusedCountry,
+    );
+    return controller;
+  }
 
-    final focusedCountry = _resolveFocusedCountry(countries, state);
-    if (focusedCountry != null) {
-      controller.setCameraFocus(
-        focusedCountry.anchorLatitude,
-        focusedCountry.anchorLongitude,
-      );
-      controller.setZoom(
-        state.selectedCountryCode == null ? maxZoom - 0.12 : maxZoom,
-      );
+  void _configureController(
+    EarthController controller,
+    List<RecordGlobeCountry> countries,
+    List<RecordTrip> trips,
+    RecordGlobeViewState state, {
+    required bool centerOnFocusedCountry,
+  }) {
+    controller
+      ..enableAutoRotate = state.selectedCountryCode == null
+      ..minZoom = 1.0
+      ..maxZoom = _resolveMaxZoom();
+
+    controller.nodes.clear();
+    controller.connections.clear();
+    controller.projectedPositions.clear();
+    controller.nodeVisibility.clear();
+    controller.connectionPaths.clear();
+
+    if (centerOnFocusedCountry) {
+      final focusedCountry = _resolveFocusedCountry(countries, state);
+      if (focusedCountry != null) {
+        controller.setCameraFocus(
+          focusedCountry.anchorLatitude,
+          focusedCountry.anchorLongitude,
+        );
+        controller.setZoom(_resolveInitialZoom(state.selectedCountryCode));
+      }
     }
 
     for (final country in countries) {
-      controller.addNode(
+      controller.nodes.add(
         EarthNode(
           id: country.code,
           latitude: country.anchorLatitude,
@@ -162,8 +212,7 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
     }
 
     _addAnimatedTripConnections(controller, trips);
-
-    return controller;
+    controller.notifyListeners();
   }
 
   RecordGlobeCountry? _resolveFocusedCountry(
@@ -247,7 +296,7 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
       final routeColor = Color(int.parse(trip.color.replaceAll('#', '0xFF')));
 
       for (final stop in routeStops) {
-        controller.addNode(
+        controller.nodes.add(
           EarthNode(
             id: _routeNodeId(trip.id, stop.id),
             latitude: stop.lat,
@@ -268,7 +317,7 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
         if (!seenConnections.add(edgeKey)) {
           continue;
         }
-        controller.connect(
+        controller.connections.add(
           EarthConnection(
             fromId: fromId,
             toId: toId,
@@ -313,16 +362,27 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
         ),
         child: ClipOval(
           clipBehavior: Clip.antiAlias,
-          child: ColoredBox(
-            color: Colors.transparent,
-            child: Earth3D(
-              key: ValueKey(_signature),
-              shaderAsset: _recordGlobeShaderAsset,
-              controller: controller,
-              texture: _textureForMode(widget.visualMode),
-              nightTexture: null,
-              initialScale: _resolveInitialScale(widget.visualMode),
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final bleedSize = constraints.biggest.shortestSide * 1.24;
+              return OverflowBox(
+                maxWidth: bleedSize,
+                maxHeight: bleedSize,
+                child: SizedBox.square(
+                  dimension: bleedSize,
+                  child: ColoredBox(
+                    color: Colors.transparent,
+                    child: Earth3D(
+                      shaderAsset: _recordGlobeShaderAsset,
+                      controller: controller,
+                      texture: _textureForMode(widget.visualMode),
+                      nightTexture: null,
+                      initialScale: _resolveInitialScale(widget.visualMode),
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -338,29 +398,34 @@ class _RecordGlobeViewportState extends State<RecordGlobeViewport> {
   double _resolveInitialScale(RecordGlobeVisualMode mode) {
     final size = widget.size ?? 0;
     if (size >= 420) {
-      return mode == RecordGlobeVisualMode.night ? 1.74 : 1.68;
+      return mode == RecordGlobeVisualMode.night ? 1.88 : 1.82;
     }
     if (size >= 360) {
-      return mode == RecordGlobeVisualMode.night ? 1.84 : 1.78;
+      return mode == RecordGlobeVisualMode.night ? 1.98 : 1.92;
     }
     if (size >= 300) {
-      return mode == RecordGlobeVisualMode.night ? 1.96 : 1.90;
+      return mode == RecordGlobeVisualMode.night ? 2.08 : 2.02;
     }
-    return mode == RecordGlobeVisualMode.night ? 2.06 : 2.00;
+    return mode == RecordGlobeVisualMode.night ? 2.18 : 2.12;
   }
 
   double _resolveMaxZoom() {
     final size = widget.size ?? 0;
     if (size >= 420) {
-      return 1.62;
+      return 2.26;
     }
     if (size >= 360) {
-      return 1.56;
+      return 2.18;
     }
     if (size >= 300) {
-      return 1.48;
+      return 2.08;
     }
-    return 1.42;
+    return 2.0;
+  }
+
+  double _resolveInitialZoom(String? selectedCountryCode) {
+    final maxZoom = _resolveMaxZoom();
+    return selectedCountryCode == null ? maxZoom - 0.28 : maxZoom - 0.12;
   }
 }
 
@@ -386,6 +451,7 @@ class _CountryMarker extends StatelessWidget {
             ? 24.0
             : 18.0;
     final showLabel = isSelected || (isFocused && country.activityLevel > 0);
+    final showLabelAbove = country.anchorLatitude < 24;
     final label = DecoratedBox(
       decoration: BoxDecoration(
         color: const Color(0xD9020617),
@@ -411,24 +477,63 @@ class _CountryMarker extends StatelessWidget {
       ),
     );
 
+    Widget animatedPin(Widget child) {
+      return AnimatedSwitcher(
+        duration: const Duration(milliseconds: 320),
+        switchInCurve: Curves.easeOutBack,
+        switchOutCurve: Curves.easeInCubic,
+        transitionBuilder: (child, animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.16),
+                end: Offset.zero,
+              ).animate(animation),
+              child: ScaleTransition(
+                scale: Tween<double>(begin: 0.82, end: 1.0).animate(animation),
+                child: child,
+              ),
+            ),
+          );
+        },
+        child: child,
+      );
+    }
+
+    Widget buildPinStem() {
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        width: 2,
+        height: isSelected ? 14 : 10,
+        margin: const EdgeInsets.symmetric(vertical: 2),
+        decoration: BoxDecoration(
+          color: ringColor.withValues(alpha: 0.85),
+          borderRadius: BorderRadius.circular(999),
+        ),
+      );
+    }
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (showLabel) ...[
-            label,
-            Container(
-              width: 2,
-              height: isSelected ? 14 : 10,
-              margin: const EdgeInsets.only(top: 2, bottom: 2),
-              decoration: BoxDecoration(
-                color: ringColor.withValues(alpha: 0.85),
-                borderRadius: BorderRadius.circular(999),
-              ),
+          if (showLabelAbove)
+            animatedPin(
+              showLabel
+                  ? Column(
+                      key: ValueKey('pin-above-${country.code}'),
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        label,
+                        buildPinStem(),
+                      ],
+                    )
+                  : const SizedBox.shrink(key: ValueKey('pin-empty-above')),
             ),
-          ],
           Container(
             width: size,
             height: size,
@@ -465,6 +570,19 @@ class _CountryMarker extends StatelessWidget {
               ),
             ),
           ),
+          if (!showLabelAbove)
+            animatedPin(
+              showLabel
+                  ? Column(
+                      key: ValueKey('pin-below-${country.code}'),
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        buildPinStem(),
+                        label,
+                      ],
+                    )
+                  : const SizedBox.shrink(key: ValueKey('pin-empty-below')),
+            ),
         ],
       ),
     );

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -251,47 +253,276 @@ class _TripMapTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    return _TripMapSurface(trip: trip, accentColor: accentColor);
+  }
+}
+
+class _TripMapSurface extends ConsumerStatefulWidget {
+  const _TripMapSurface({
+    required this.trip,
+    required this.accentColor,
+  });
+
+  final RecordTrip trip;
+  final Color accentColor;
+
+  @override
+  ConsumerState<_TripMapSurface> createState() => _TripMapSurfaceState();
+}
+
+class _TripMapSurfaceState extends ConsumerState<_TripMapSurface> {
+  final Completer<GoogleMapController> _controller = Completer();
+
+  Future<void> _fitTripBounds(GoogleMapController controller) async {
+    final orderedLocations = [...widget.trip.locations]
+      ..sort((a, b) => a.date.compareTo(b.date));
+    if (orderedLocations.isEmpty) {
+      return;
+    }
+
+    final hasBounds = orderedLocations.any(
+      (location) =>
+          location.lat != orderedLocations.first.lat ||
+          location.lng != orderedLocations.first.lng,
+    );
+
+    if (!hasBounds) {
+      final only = orderedLocations.first;
+      await controller.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(only.lat, only.lng),
+            zoom: 9.6,
+          ),
+        ),
+      );
+      return;
+    }
+
+    final latitudes = orderedLocations.map((location) => location.lat);
+    final longitudes = orderedLocations.map((location) => location.lng);
+    await controller.animateCamera(
+      CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+          southwest: LatLng(
+            latitudes.reduce((a, b) => a < b ? a : b),
+            longitudes.reduce((a, b) => a < b ? a : b),
+          ),
+          northeast: LatLng(
+            latitudes.reduce((a, b) => a > b ? a : b),
+            longitudes.reduce((a, b) => a > b ? a : b),
+          ),
+        ),
+        52,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final strings = RecordStrings.of(context);
+    final trip = widget.trip;
     if (trip.locations.isEmpty) {
       return Center(child: Text(strings.text('trip.noMap')));
     }
     final capability = ref.watch(recordMapRuntimeCapabilityProvider);
-    final initial = trip.locations.first;
+    final orderedLocations = [...trip.locations]
+      ..sort((a, b) => a.date.compareTo(b.date));
+    final initial = orderedLocations.first;
+    final representativeStops = orderedLocations
+        .where((location) => location.photos.isNotEmpty)
+        .take(6)
+        .toList(growable: false);
+
     return switch (capability) {
-      AsyncData(value: RecordMapRuntimeCapability.available) => GoogleMap(
-        initialCameraPosition: CameraPosition(
-          target: LatLng(initial.lat, initial.lng),
-          zoom: 4.7,
-        ),
-        myLocationButtonEnabled: false,
-        markers: trip.locations
-            .map(
-              (loc) => Marker(
-                markerId: MarkerId(loc.id),
-                position: LatLng(loc.lat, loc.lng),
-                infoWindow: InfoWindow(title: loc.name),
+      AsyncData(value: RecordMapRuntimeCapability.available) => ListView(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+          children: [
+            AtlasPanel(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          strings.isKorean ? '여행 경로 지도' : 'Trip route map',
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                        ),
+                      ),
+                      AtlasStatusPill(
+                        label: trip.isUpcoming
+                            ? (strings.isKorean ? '예정 여행' : 'Upcoming')
+                            : (strings.isKorean ? '기록된 이동' : 'Recorded route'),
+                        color: widget.accentColor,
+                        icon: Icons.route_rounded,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    strings.isKorean
+                        ? '타임라인 순서대로 이동 경로를 이어서 보고, 사진이 남은 지점은 대표 컷으로 다시 확인합니다.'
+                        : 'Trace the route in timeline order and revisit stops that still carry a representative photo.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 340,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: LatLng(initial.lat, initial.lng),
+                          zoom: 7.2,
+                        ),
+                        myLocationButtonEnabled: false,
+                        zoomControlsEnabled: false,
+                        markers: {
+                          for (var index = 0;
+                              index < orderedLocations.length;
+                              index++)
+                            Marker(
+                              markerId: MarkerId(orderedLocations[index].id),
+                              position: LatLng(
+                                orderedLocations[index].lat,
+                                orderedLocations[index].lng,
+                              ),
+                              infoWindow: InfoWindow(
+                                title:
+                                    '${index + 1}. ${orderedLocations[index].name}',
+                                snippet: orderedLocations[index].photos.isEmpty
+                                    ? (strings.isKorean
+                                        ? '기록만 있음'
+                                        : 'Notes only')
+                                    : '${strings.text('common.photo')} • ${orderedLocations[index].photos.first}',
+                              ),
+                              icon: BitmapDescriptor.defaultMarkerWithHue(
+                                orderedLocations[index].photos.isEmpty
+                                    ? BitmapDescriptor.hueAzure
+                                    : BitmapDescriptor.hueRose,
+                              ),
+                            ),
+                        },
+                        polylines: {
+                          if (orderedLocations.length > 1)
+                            Polyline(
+                              polylineId: const PolylineId('trip-route'),
+                              points: [
+                                for (final loc in orderedLocations)
+                                  LatLng(loc.lat, loc.lng),
+                              ],
+                              color: widget.accentColor,
+                              width: 4,
+                            ),
+                        },
+                        onMapCreated: (controller) {
+                          if (!_controller.isCompleted) {
+                            _controller.complete(controller);
+                          }
+                          unawaited(_fitTripBounds(controller));
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            )
-            .toSet(),
-        polylines: {
-          if (trip.locations.length > 1)
-            Polyline(
-              polylineId: const PolylineId('route'),
-              points:
-                  trip.locations.map((loc) => LatLng(loc.lat, loc.lng)).toList(),
-              color: accentColor,
-              width: 3,
             ),
-        },
-      ),
+            if (representativeStops.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Text(
+                strings.isKorean ? '대표 사진 포인트' : 'Representative photo stops',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 118,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: representativeStops.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    final stop = representativeStops[index];
+                    return SizedBox(
+                      width: 188,
+                      child: AtlasPanel(
+                        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${index + 1}. ${stop.name}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(fontWeight: FontWeight.w800),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: context.atlasPalette.surfaceMuted,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: context.atlasPalette.outline,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.photo_library_rounded,
+                                    size: 16,
+                                    color: widget.accentColor,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      stop.photos.first,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Spacer(),
+                            Text(
+                              DateFormat('MMM d • HH:mm').format(
+                                DateTime.parse(stop.date),
+                              ),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ],
+        ),
       AsyncLoading() => const Padding(
-        padding: EdgeInsets.all(20),
-        child: RecordMapLoadingSurface(),
-      ),
+          padding: EdgeInsets.all(20),
+          child: RecordMapLoadingSurface(),
+        ),
       _ => Padding(
-        padding: const EdgeInsets.all(20),
-        child: RecordMapUnavailableSurface(accentColor: accentColor),
-      ),
+          padding: const EdgeInsets.all(20),
+          child: RecordMapUnavailableSurface(accentColor: widget.accentColor),
+        ),
     };
   }
 }

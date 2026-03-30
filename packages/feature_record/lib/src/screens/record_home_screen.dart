@@ -363,11 +363,6 @@ class _RecordHomeScreenState extends ConsumerState<RecordHomeScreen>
     globeViewModel.clearSelection();
   }
 
-  double _compactBottomPadding(BuildContext context) {
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
-    return bottomInset > 0 ? 90 : 84;
-  }
-
   void _toggleGlobeVisualMode() {
     setState(() {
       _globeVisualMode = _globeVisualMode == RecordGlobeVisualMode.night
