@@ -11,7 +11,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_globe_3d: ^2.2.5
+  flutter_globe_3d:
+    path: ../flutter_globe_3d
+  flutter_naver_map: ^1.4.4
   flutter_riverpod: ^3.2.1
   google_maps_flutter: ^2.5.3
   intl: ^0.20.2

@@ -1,8 +1,12 @@
 import 'package:core_ui/core_ui.dart';
 import 'package:feature_record/feature_record.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:core_data/core_data.dart';
 import 'app/app_preferences.dart';
 import 'auth/preview_auth_screen.dart';
@@ -10,10 +14,67 @@ import 'bootstrap/mobile_app_bootstrap.dart';
 import 'bootstrap/mobile_app_runtime_loader.dart';
 import 'shell/mobile_app_shell.dart';
 
+const _runtimeChannel = MethodChannel('travel_atlas/runtime_capabilities');
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await _initializeDateFormatting();
+  await _initializeNaverMapIfConfigured();
   final runtime = await loadMobileAppRuntime();
   runApp(MobileAppBootstrap(runtime: runtime, child: const TravelAtlasApp()));
+}
+
+Future<void> _initializeDateFormatting() async {
+  await Future.wait([
+    initializeDateFormatting('ko'),
+    initializeDateFormatting('en'),
+  ]);
+}
+
+Future<void> _initializeNaverMapIfConfigured() async {
+  if (kIsWeb) {
+    return;
+  }
+
+  switch (defaultTargetPlatform) {
+    case TargetPlatform.iOS:
+    case TargetPlatform.android:
+      try {
+        final payload = await _runtimeChannel
+            .invokeMapMethod<Object?, Object?>('getMapConfig')
+            .timeout(const Duration(seconds: 2));
+        final rawClientId = payload?['naverMapClientId'] as String?;
+        final clientId = _normalizeRuntimeString(rawClientId);
+        if (clientId == null) {
+          return;
+        }
+        await FlutterNaverMap().init(
+          clientId: clientId,
+          onAuthFailed: (error) {
+            debugPrint('record: Naver Map auth failed: $error');
+          },
+        );
+        debugPrint('record: Naver Map init success');
+      } catch (error) {
+        debugPrint('record: Naver Map init skipped: $error');
+      }
+    case TargetPlatform.macOS:
+    case TargetPlatform.windows:
+    case TargetPlatform.linux:
+    case TargetPlatform.fuchsia:
+      return;
+  }
+}
+
+String? _normalizeRuntimeString(String? value) {
+  if (value == null) {
+    return null;
+  }
+  final trimmed = value.trim();
+  if (trimmed.isEmpty || trimmed.startsWith(r'$(')) {
+    return null;
+  }
+  return trimmed;
 }
 
 class TravelAtlasApp extends ConsumerWidget {

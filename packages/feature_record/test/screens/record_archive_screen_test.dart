@@ -5,8 +5,14 @@ import 'package:feature_record/src/screens/record_archive_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() {
+  setUpAll(() async {
+    await initializeDateFormatting('ko');
+    await initializeDateFormatting('en');
+  });
+
   testWidgets('archive header and cards adapt on a narrow phone viewport', (
     tester,
   ) async {
@@ -45,7 +51,8 @@ void main() {
     expect(find.byIcon(Icons.search_rounded), findsOneWidget);
     await tester.enterText(find.byType(TextField), 'trip-zzz');
     await tester.pumpAndSettle();
-    expect(find.textContaining('A very long reflective trip title'), findsNothing);
+    expect(
+        find.textContaining('A very long reflective trip title'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }

@@ -4,21 +4,43 @@ import UIKit
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
-  private func hasGoogleMapsKey() -> Bool {
-    guard let apiKey = Bundle.main.object(forInfoDictionaryKey: "GOOGLE_MAPS_API_KEY") as? String
-    else {
-      return false
+  private func bundleString(forKey key: String) -> String? {
+    guard let value = Bundle.main.object(forInfoDictionaryKey: key) as? String else {
+      return nil
     }
-    return !apiKey.isEmpty && apiKey != "$(GOOGLE_MAPS_API_KEY)"
+
+    let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !trimmed.isEmpty, !trimmed.hasPrefix("$(") else {
+      return nil
+    }
+    return trimmed
+  }
+
+  private func hasGoogleMapsKey() -> Bool {
+    return bundleString(forKey: "GOOGLE_MAPS_API_KEY") != nil
+  }
+
+  private func naverMapClientId() -> String? {
+    return bundleString(forKey: "NAVER_MAP_CLIENT_ID")
+  }
+
+  private func hasNaverMapClientId() -> Bool {
+    return naverMapClientId() != nil
+  }
+
+  private func runtimeMapConfig() -> [String: Any] {
+    [
+      "hasGoogleMapsKey": hasGoogleMapsKey(),
+      "hasNaverMapClientId": hasNaverMapClientId(),
+      "naverMapClientId": naverMapClientId() as Any,
+    ]
   }
 
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    if let apiKey = Bundle.main.object(forInfoDictionaryKey: "GOOGLE_MAPS_API_KEY") as? String,
-      hasGoogleMapsKey()
-    {
+    if let apiKey = bundleString(forKey: "GOOGLE_MAPS_API_KEY"), hasGoogleMapsKey() {
       GMSServices.provideAPIKey(apiKey)
     } else {
       NSLog("record: GOOGLE_MAPS_API_KEY is missing. Google Maps tiles will not load.")
@@ -38,6 +60,8 @@ import UIKit
       switch call.method {
       case "hasGoogleMapsKey":
         result(self?.hasGoogleMapsKey() ?? false)
+      case "getMapConfig":
+        result(self?.runtimeMapConfig())
       default:
         result(FlutterMethodNotImplemented)
       }

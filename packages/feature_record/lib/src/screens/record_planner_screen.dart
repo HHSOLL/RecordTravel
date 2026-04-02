@@ -2,13 +2,13 @@ import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:intl/intl.dart';
 
 import '../components/record_metric_grid.dart';
 import '../components/record_page_intro.dart';
 import '../i18n/record_strings.dart';
 import '../models/record_models.dart';
 import '../providers/record_provider.dart';
+import 'widgets/record_naver_route_map.dart';
 import 'widgets/record_map_runtime.dart';
 import 'record_trip_detail_screen.dart';
 
@@ -168,9 +168,19 @@ class _PlannerTripCard extends StatelessWidget {
     final theme = Theme.of(context);
     final palette = context.atlasPalette;
     final tripColor = Color(int.parse(trip.color.replaceAll('#', '0xFF')));
+    final displayTitle = strings.tripTitle(trip.id, trip.title);
+    final displayDescription = strings.tripDescription(
+      trip.id,
+      trip.description,
+    );
+    final displayCountry = strings.countryName(
+      trip.countries.first.code,
+      trip.countries.first.name,
+    );
     final startDate = DateTime.parse(trip.startDate);
     final endDate = DateTime.parse(trip.endDate);
     final daysLeft = startDate.difference(DateTime.now()).inDays;
+    final shortDateFormat = strings.dateFormat('MMM d');
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -237,7 +247,7 @@ class _PlannerTripCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        trip.title,
+                        displayTitle,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleSmall?.copyWith(
@@ -255,7 +265,7 @@ class _PlannerTripCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMM d').format(endDate)}',
+                          '${shortDateFormat.format(startDate)} - ${shortDateFormat.format(endDate)}',
                           style: theme.textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -264,7 +274,7 @@ class _PlannerTripCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          trip.countries.first.name,
+                          displayCountry,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: palette.accentSoft,
                             fontWeight: FontWeight.w700,
@@ -274,7 +284,7 @@ class _PlannerTripCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          trip.description,
+                          displayDescription,
                           style: compactCard
                               ? theme.textTheme.labelSmall
                               : theme.textTheme.bodySmall,
@@ -396,11 +406,12 @@ class _MapModal extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final strings = RecordStrings.of(context);
     final theme = Theme.of(context);
     final palette = context.atlasPalette;
-    final initial = trip.locations.first;
     final tripColor = Color(int.parse(trip.color.replaceAll('#', '0xFF')));
-    final capability = ref.watch(recordMapRuntimeCapabilityProvider);
+    final displayTitle = strings.tripTitle(trip.id, trip.title);
+    final runtimeConfig = ref.watch(recordMapRuntimeConfigProvider);
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.76,
@@ -418,10 +429,12 @@ class _MapModal extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(trip.title, style: theme.textTheme.titleLarge),
+                      Text(displayTitle, style: theme.textTheme.titleLarge),
                       const SizedBox(height: 4),
                       Text(
-                        '${trip.locations.length} mapped places',
+                        strings.isKorean
+                            ? '${trip.locations.length}개 기록 위치'
+                            : '${trip.locations.length} mapped places',
                         style: theme.textTheme.bodyMedium,
                       ),
                     ],
@@ -435,40 +448,61 @@ class _MapModal extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: switch (capability) {
-              AsyncData(value: RecordMapRuntimeCapability.available) =>
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(26),
-                  ),
-                  child: GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(initial.lat, initial.lng),
-                      zoom: 4.6,
-                    ),
-                    myLocationButtonEnabled: false,
-                    markers: trip.locations
-                        .map(
-                          (loc) => Marker(
-                            markerId: MarkerId(loc.id),
-                            position: LatLng(loc.lat, loc.lng),
-                            infoWindow: InfoWindow(title: loc.name),
+            child: switch (runtimeConfig) {
+              AsyncData(:final value) => switch (recordMapProviderForTrip(
+                  config: value,
+                  trip: trip,
+                )) {
+                  RecordMapProviderKind.google => ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(26),
+                      ),
+                      child: GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: LatLng(
+                            trip.locations.first.lat,
+                            trip.locations.first.lng,
                           ),
-                        )
-                        .toSet(),
-                    polylines: {
-                      if (trip.locations.length > 1)
-                        Polyline(
-                          polylineId: const PolylineId('route'),
-                          points: trip.locations
-                              .map((loc) => LatLng(loc.lat, loc.lng))
-                              .toList(),
-                          color: tripColor,
-                          width: 3,
+                          zoom: 4.6,
                         ),
-                    },
-                  ),
-                ),
+                        myLocationButtonEnabled: false,
+                        markers: trip.locations
+                            .map(
+                              (loc) => Marker(
+                                markerId: MarkerId(loc.id),
+                                position: LatLng(loc.lat, loc.lng),
+                                infoWindow: InfoWindow(title: loc.name),
+                              ),
+                            )
+                            .toSet(),
+                        polylines: {
+                          if (trip.locations.length > 1)
+                            Polyline(
+                              polylineId: const PolylineId('route'),
+                              points: trip.locations
+                                  .map((loc) => LatLng(loc.lat, loc.lng))
+                                  .toList(),
+                              color: tripColor,
+                              width: 3,
+                            ),
+                        },
+                      ),
+                    ),
+                  RecordMapProviderKind.naver => RecordNaverRouteMap(
+                      locations: trip.locations,
+                      accentColor: tripColor,
+                      initialZoom: 4.6,
+                      singleStopZoom: 10.4,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(26),
+                      ),
+                    ),
+                  RecordMapProviderKind.unavailable => Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                      child:
+                          RecordMapUnavailableSurface(accentColor: tripColor),
+                    ),
+                },
               AsyncLoading() => const Padding(
                   padding: EdgeInsets.all(20),
                   child: RecordMapLoadingSurface(),
@@ -495,6 +529,9 @@ class _ScheduleModal extends StatelessWidget {
     final strings = RecordStrings.of(context);
     final theme = Theme.of(context);
     final tripColor = Color(int.parse(trip.color.replaceAll('#', '0xFF')));
+    final displayTitle = strings.tripTitle(trip.id, trip.title);
+    final shortDateFormat = strings.dateFormat('MMM d');
+    final dateTimeFormat = strings.dateFormat('MMM d, yyyy • HH:mm');
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.8,
@@ -512,10 +549,10 @@ class _ScheduleModal extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(trip.title, style: theme.textTheme.titleLarge),
+                      Text(displayTitle, style: theme.textTheme.titleLarge),
                       const SizedBox(height: 4),
                       Text(
-                        '${DateFormat('MMM d').format(DateTime.parse(trip.startDate))} - ${DateFormat('MMM d').format(DateTime.parse(trip.endDate))}',
+                        '${shortDateFormat.format(DateTime.parse(trip.startDate))} - ${shortDateFormat.format(DateTime.parse(trip.endDate))}',
                         style: theme.textTheme.bodyMedium,
                       ),
                     ],
@@ -584,9 +621,9 @@ class _ScheduleModal extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
-                                    DateFormat(
-                                      'MMM d, yyyy • HH:mm',
-                                    ).format(DateTime.parse(location.date)),
+                                    dateTimeFormat.format(
+                                      DateTime.parse(location.date),
+                                    ),
                                     style: theme.textTheme.bodyMedium,
                                   ),
                                 ],

@@ -8,6 +8,9 @@ PODS:
     - Flutter
     - FlutterAngle (~> 0.0.8)
     - FlutterMacOS
+  - flutter_naver_map (1.4.2):
+    - Flutter
+    - NMapsMap (= 3.23.0)
   - FlutterAngle (0.0.8)
   - Google-Maps-iOS-Utils (5.0.0):
     - GoogleMaps (~> 8.0)
@@ -26,6 +29,9 @@ PODS:
     - Flutter
   - native_exif (0.0.1):
     - Flutter
+  - NMapsGeometry (1.0.2)
+  - NMapsMap (3.23.0):
+    - NMapsGeometry
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -70,6 +76,7 @@ DEPENDENCIES:
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
   - flutter_angle (from `.symlinks/plugins/flutter_angle/darwin`)
+  - flutter_naver_map (from `.symlinks/plugins/flutter_naver_map/ios`)
   - google_maps_flutter_ios (from `.symlinks/plugins/google_maps_flutter_ios/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
@@ -86,6 +93,8 @@ SPEC REPOS:
     - FlutterAngle
     - Google-Maps-iOS-Utils
     - GoogleMaps
+    - NMapsGeometry
+    - NMapsMap
     - sqlite3
 
 EXTERNAL SOURCES:
@@ -97,6 +106,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_angle:
     :path: ".symlinks/plugins/flutter_angle/darwin"
+  flutter_naver_map:
+    :path: ".symlinks/plugins/flutter_naver_map/ios"
   google_maps_flutter_ios:
     :path: ".symlinks/plugins/google_maps_flutter_ios/ios"
   image_picker_ios:
@@ -123,6 +134,7 @@ SPEC CHECKSUMS:
   device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_angle: fd425c2f11c130891a5e87a0dad8de8815413b43
+  flutter_naver_map: a1f6df83f663d9770e01624ba97a2d34c4fe349b
   FlutterAngle: c810891af800750361b1d0e7cc944f2338d5ae18
   Google-Maps-iOS-Utils: 66d6de12be1ce6d3742a54661e7a79cb317a9321
   google_maps_flutter_ios: ffdd933832966673a1f57f5effd014dc8d4d43a2
@@ -130,6 +142,8 @@ SPEC CHECKSUMS:
   image_picker_ios: c560581cceedb403a6ff17f2f816d7fea1421fc1
   integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
   native_exif: 837ad189661d7b353660ae7f19f9f6932418f195
+  NMapsGeometry: 4e02554fa9880ef02ed96b075dc84355d6352479
+  NMapsMap: 1964e6f9073301ad3cbe3a12235ba36f6f6cd905
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   photo_manager: d8a1055c2d3ee24fc300461c66e0defdec58b3d6
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78

@@ -3,7 +3,6 @@ import 'package:core_domain/core_domain.dart';
 import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../i18n/record_strings.dart';
 
@@ -211,6 +210,7 @@ class _RecordCreateTripScreenState
     final description = _descriptionController.text.trim();
     final startDate = _startDate!;
     final endDate = _endDate!;
+    final shortDateFormat = RecordStrings.of(context).dateFormat('MMM d');
 
     await ref.read(travelAppControllerProvider.notifier).createTrip(
           title: title,
@@ -223,7 +223,7 @@ class _RecordCreateTripScreenState
             cityName: city,
           ),
           coverHint:
-              '${DateFormat('MMM d').format(startDate)} • ${_colorMoodLabel(_selectedColor)}',
+              '${shortDateFormat.format(startDate)} • ${_colorMoodLabel(_selectedColor)}',
         );
 
     if (!mounted) return;
@@ -424,7 +424,9 @@ class _TripMoodStep extends StatelessWidget {
             maxLines: 4,
           ),
           const SizedBox(height: 24),
-          _InputLabel(label: 'Accent'),
+          _InputLabel(
+            label: strings.isKorean ? '강조 색상' : 'Accent color',
+          ),
           Wrap(
             spacing: 12,
             runSpacing: 12,
@@ -471,6 +473,7 @@ class _TripReviewStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final longDateFormat = strings.dateFormat('MMM d, yyyy');
     final theme = Theme.of(context);
     return AtlasPanel(
       child: Column(
@@ -511,7 +514,7 @@ class _TripReviewStep extends StatelessWidget {
                 const SizedBox(height: 12),
                 if (startDate != null && endDate != null)
                   Text(
-                    '${DateFormat('MMM d, yyyy').format(startDate!)} - ${DateFormat('MMM d, yyyy').format(endDate!)}',
+                    '${longDateFormat.format(startDate!)} - ${longDateFormat.format(endDate!)}',
                     style: theme.textTheme.bodyMedium
                         ?.copyWith(color: Colors.white.withValues(alpha: 0.88)),
                   ),
@@ -594,6 +597,7 @@ class _DateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = RecordStrings.of(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
@@ -611,8 +615,8 @@ class _DateField extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               value == null
-                  ? 'Select'
-                  : DateFormat('MMM d, yyyy').format(value!),
+                  ? (strings.isKorean ? '선택' : 'Select')
+                  : strings.dateFormat('MMM d, yyyy').format(value!),
               style: Theme.of(context).textTheme.bodyLarge,
             ),
           ],

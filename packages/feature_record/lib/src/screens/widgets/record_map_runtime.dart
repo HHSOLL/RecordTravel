@@ -4,49 +4,178 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/record_travel_graph.dart';
 import '../../i18n/record_strings.dart';
+import '../../models/record_models.dart';
 
 const MethodChannel _recordRuntimeChannel = MethodChannel(
   'travel_atlas/runtime_capabilities',
 );
+
+enum RecordMapProviderKind {
+  google,
+  naver,
+  unavailable,
+}
+
+@immutable
+class RecordMapRuntimeConfig {
+  const RecordMapRuntimeConfig({
+    required this.hasGoogleMapsKey,
+    required this.hasNaverMapClientId,
+    required this.naverMapClientId,
+  });
+
+  final bool hasGoogleMapsKey;
+  final bool hasNaverMapClientId;
+  final String? naverMapClientId;
+
+  bool get hasAnyMapProvider => hasGoogleMapsKey || hasNaverMapClientId;
+
+  factory RecordMapRuntimeConfig.fromPlatformPayload(
+    Map<Object?, Object?>? payload,
+  ) {
+    final rawNaverClientId = payload?['naverMapClientId'] as String?;
+    final normalizedNaverClientId = _normalizeRuntimeString(rawNaverClientId);
+    return RecordMapRuntimeConfig(
+      hasGoogleMapsKey: payload?['hasGoogleMapsKey'] as bool? ?? false,
+      hasNaverMapClientId: payload?['hasNaverMapClientId'] as bool? ??
+          normalizedNaverClientId != null,
+      naverMapClientId: normalizedNaverClientId,
+    );
+  }
+
+  static String? _normalizeRuntimeString(String? value) {
+    if (value == null) {
+      return null;
+    }
+    final trimmed = value.trim();
+    if (trimmed.isEmpty || trimmed.startsWith(r'$(')) {
+      return null;
+    }
+    return trimmed;
+  }
+}
 
 enum RecordMapRuntimeCapability {
   available,
   unavailable,
 }
 
-final recordMapRuntimeCapabilityProvider =
-    FutureProvider<RecordMapRuntimeCapability>((ref) async {
+final recordMapRuntimeConfigProvider =
+    FutureProvider<RecordMapRuntimeConfig>((ref) async {
   if (kIsWeb) {
-    return RecordMapRuntimeCapability.unavailable;
+    return const RecordMapRuntimeConfig(
+      hasGoogleMapsKey: false,
+      hasNaverMapClientId: false,
+      naverMapClientId: null,
+    );
   }
 
   switch (defaultTargetPlatform) {
     case TargetPlatform.iOS:
     case TargetPlatform.android:
       try {
+        final payload = await _recordRuntimeChannel
+            .invokeMapMethod<Object?, Object?>('getMapConfig')
+            .timeout(
+              const Duration(seconds: 2),
+              onTimeout: () => null,
+            );
+        if (payload != null) {
+          return RecordMapRuntimeConfig.fromPlatformPayload(payload);
+        }
+      } catch (_) {
+        // Fall back to the legacy single-capability probe below.
+      }
+
+      try {
         final hasGoogleMapsKey = await _recordRuntimeChannel
-                .invokeMethod<bool>(
-                  'hasGoogleMapsKey',
-                )
+                .invokeMethod<bool>('hasGoogleMapsKey')
                 .timeout(
                   const Duration(seconds: 2),
                   onTimeout: () => false,
                 ) ??
             false;
-        return hasGoogleMapsKey
-            ? RecordMapRuntimeCapability.available
-            : RecordMapRuntimeCapability.unavailable;
+        return RecordMapRuntimeConfig(
+          hasGoogleMapsKey: hasGoogleMapsKey,
+          hasNaverMapClientId: false,
+          naverMapClientId: null,
+        );
       } catch (_) {
-        return RecordMapRuntimeCapability.unavailable;
+        return const RecordMapRuntimeConfig(
+          hasGoogleMapsKey: false,
+          hasNaverMapClientId: false,
+          naverMapClientId: null,
+        );
       }
     case TargetPlatform.macOS:
     case TargetPlatform.windows:
     case TargetPlatform.linux:
     case TargetPlatform.fuchsia:
-      return RecordMapRuntimeCapability.unavailable;
+      return const RecordMapRuntimeConfig(
+        hasGoogleMapsKey: false,
+        hasNaverMapClientId: false,
+        naverMapClientId: null,
+      );
   }
 });
+
+final recordMapRuntimeCapabilityProvider =
+    FutureProvider<RecordMapRuntimeCapability>((ref) async {
+  final config = await ref.watch(recordMapRuntimeConfigProvider.future);
+  return config.hasAnyMapProvider
+      ? RecordMapRuntimeCapability.available
+      : RecordMapRuntimeCapability.unavailable;
+});
+
+RecordMapProviderKind recordMapProviderForCountry({
+  required RecordMapRuntimeConfig config,
+  required String countryCode,
+}) {
+  final normalizedCode = countryCode.trim().toUpperCase();
+  if (normalizedCode == 'KR' && config.hasNaverMapClientId) {
+    return RecordMapProviderKind.naver;
+  }
+  if (config.hasGoogleMapsKey) {
+    return RecordMapProviderKind.google;
+  }
+  return RecordMapProviderKind.unavailable;
+}
+
+RecordMapProviderKind recordMapProviderForProjection({
+  required RecordMapRuntimeConfig config,
+  required RecordCountryProjection projection,
+}) {
+  return recordMapProviderForCountry(
+    config: config,
+    countryCode: projection.code,
+  );
+}
+
+RecordMapProviderKind recordMapProviderForTrip({
+  required RecordMapRuntimeConfig config,
+  required RecordTrip trip,
+}) {
+  if (_isKoreaOnlyTrip(trip) && config.hasNaverMapClientId) {
+    return RecordMapProviderKind.naver;
+  }
+  if (config.hasGoogleMapsKey) {
+    return RecordMapProviderKind.google;
+  }
+  return RecordMapProviderKind.unavailable;
+}
+
+bool _isKoreaOnlyTrip(RecordTrip trip) {
+  final normalizedCodes = <String>{
+    for (final country in trip.countries) country.code.trim().toUpperCase(),
+    for (final location in trip.locations)
+      location.countryCode.trim().toUpperCase(),
+  }..removeWhere((value) => value.isEmpty);
+
+  return normalizedCodes.isNotEmpty &&
+      normalizedCodes.every((value) => value == 'KR');
+}
 
 class RecordMapLoadingSurface extends StatelessWidget {
   const RecordMapLoadingSurface({

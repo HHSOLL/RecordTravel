@@ -68,6 +68,8 @@
 	<true/>
 	<key>GOOGLE_MAPS_API_KEY</key>
 	<string>$(GOOGLE_MAPS_API_KEY)</string>
+	<key>NAVER_MAP_CLIENT_ID</key>
+	<string>$(NAVER_MAP_CLIENT_ID)</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>record uses your photo library so you can import travel memories and infer places from embedded metadata.</string>
 	<key>NSLocalNetworkUsageDescription</key>

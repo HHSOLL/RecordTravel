@@ -19,6 +19,10 @@ val googleMapsApiKey =
     providers.environmentVariable("GOOGLE_MAPS_API_KEY").orNull
         ?: localProperties.getProperty("GOOGLE_MAPS_API_KEY", "")
 
+val naverMapClientId =
+    providers.environmentVariable("NAVER_MAP_CLIENT_ID").orNull
+        ?: localProperties.getProperty("NAVER_MAP_CLIENT_ID", "")
+
 android {
     namespace = "com.example.mobile_app"
     compileSdk = flutter.compileSdkVersion
@@ -43,6 +47,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         manifestPlaceholders["googleMapsApiKey"] = googleMapsApiKey
+        manifestPlaceholders["naverMapClientId"] = naverMapClientId
     }
 
     buildTypes {

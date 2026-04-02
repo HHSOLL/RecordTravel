@@ -1,6 +1,5 @@
 import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../domain/record_travel_graph.dart';
 import '../../i18n/record_strings.dart';
@@ -28,7 +27,7 @@ class RecordCountryTimelineTab extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       children: [
         RecordCountrySectionHeader(
-          title: 'Day / Segment / Moment',
+          title: strings.isKorean ? '날짜 / 세그먼트 / 순간' : 'Day / Segment / Moment',
           subtitle: strings.isKorean
               ? '날짜별로 여행 흐름을 묶고, 순간 단위의 기록과 사진을 아래로 이어 보여줍니다.'
               : 'Grouped by day, then rendered as moments with notes, locations, and photos.',
@@ -55,7 +54,8 @@ class RecordTimelineDaySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatter = DateFormat('EEE, MMM d');
+    final strings = RecordStrings.of(context);
+    final formatter = strings.dateFormat('EEE, MMM d');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,6 +95,7 @@ class RecordTimelineMomentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = RecordStrings.of(context);
+    final dateTimeFormat = strings.dateFormat('MMM d, yyyy • HH:mm');
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,9 +138,7 @@ class RecordTimelineMomentCard extends StatelessWidget {
                     if (moment.isPlanned)
                       AtlasStatusPill(
                         label: moment.isSynthetic
-                            ? (strings.isKorean
-                                ? '예정 세그먼트'
-                                : 'Planned segment')
+                            ? (strings.isKorean ? '예정 세그먼트' : 'Planned segment')
                             : (strings.isKorean ? '예정' : 'Planned'),
                         color: accentColor,
                         icon: Icons.schedule_rounded,
@@ -148,12 +147,12 @@ class RecordTimelineMomentCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${moment.tripTitle} • ${moment.locationName}',
+                  '${strings.tripTitle(moment.tripId, moment.tripTitle)} • ${moment.locationName}',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  DateFormat('MMM d, yyyy • HH:mm').format(moment.happenedAt),
+                  dateTimeFormat.format(moment.happenedAt),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 if (moment.summary.trim().isNotEmpty) ...[

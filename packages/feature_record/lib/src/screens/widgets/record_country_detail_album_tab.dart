@@ -1,6 +1,5 @@
 import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../domain/record_travel_graph.dart';
 import '../../i18n/record_strings.dart';
@@ -57,6 +56,7 @@ class RecordAlbumMomentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = RecordStrings.of(context);
+    final dateFormat = strings.dateFormat('MMM d, yyyy');
 
     return AtlasPanel(
       padding: EdgeInsets.zero,
@@ -88,9 +88,7 @@ class RecordAlbumMomentCard extends StatelessWidget {
                       ? (strings.isKorean ? '예정 커버' : 'Planned cover')
                       : (moment.isPlanned
                           ? (strings.isKorean ? '예정 여행' : 'Planned trip')
-                          : (strings.isKorean
-                              ? '기록된 순간'
-                              : 'Recorded moment')),
+                          : (strings.isKorean ? '기록된 순간' : 'Recorded moment')),
                   color: Colors.white.withValues(alpha: 0.2),
                   icon: Icons.photo_rounded,
                 ),
@@ -104,7 +102,7 @@ class RecordAlbumMomentCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${moment.tripTitle} • ${moment.locationName}',
+                  '${strings.tripTitle(moment.tripId, moment.tripTitle)} • ${moment.locationName}',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Colors.white.withValues(alpha: 0.9),
                       ),
@@ -129,7 +127,7 @@ class RecordAlbumMomentCard extends StatelessWidget {
                       icon: Icons.collections_rounded,
                     ),
                     AtlasStatusPill(
-                      label: DateFormat('MMM d, yyyy').format(moment.happenedAt),
+                      label: dateFormat.format(moment.happenedAt),
                       color: accentColor.withValues(alpha: 0.2),
                       icon: Icons.schedule_rounded,
                     ),

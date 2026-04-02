@@ -36,18 +36,21 @@ class RecordCountryHero extends StatelessWidget {
         bottom: false,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final isCompact = constraints.maxHeight < 260;
+            final isCompact =
+                constraints.maxHeight < 280 || constraints.maxWidth < 360;
+            final ultraCompact =
+                constraints.maxHeight < 240 || constraints.maxWidth < 360;
             return Padding(
               padding: EdgeInsets.fromLTRB(
                 20,
-                16,
+                ultraCompact ? 10 : 16,
                 20,
-                isCompact ? 24 : 42,
+                ultraCompact ? 18 : (isCompact ? 24 : 42),
               ),
               child: Stack(
                 children: [
                   Positioned.fill(
-                    top: isCompact ? 34 : 46,
+                    top: ultraCompact ? 12 : (isCompact ? 34 : 46),
                     child: Align(
                       alignment: Alignment.bottomLeft,
                       child: Column(
@@ -59,22 +62,31 @@ class RecordCountryHero extends StatelessWidget {
                             runSpacing: 10,
                             children: [
                               AtlasStatusPill(
-                                label: projection.continent,
+                                label: strings.continentLabel(
+                                  projection.continent,
+                                ),
                                 color: Colors.white,
                                 icon: Icons.public_rounded,
                               ),
-                              AtlasStatusPill(
-                                label: _signalLabel(strings, projection.signal),
-                                color: Colors.white.withValues(alpha: 0.24),
-                                icon: projection.hasUpcomingTrip
-                                    ? Icons.flight_takeoff_rounded
-                                    : Icons.auto_graph_rounded,
-                              ),
+                              if (!ultraCompact)
+                                AtlasStatusPill(
+                                  label: _signalLabel(
+                                    strings,
+                                    projection.signal,
+                                  ),
+                                  color: Colors.white.withValues(alpha: 0.24),
+                                  icon: projection.hasUpcomingTrip
+                                      ? Icons.flight_takeoff_rounded
+                                      : Icons.auto_graph_rounded,
+                                ),
                             ],
                           ),
                           SizedBox(height: isCompact ? 10 : 16),
                           Text(
-                            projection.name,
+                            strings.countryName(
+                              projection.code,
+                              projection.name,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: (isCompact
@@ -120,7 +132,7 @@ class RecordCountryHero extends StatelessWidget {
                                 ),
                               ],
                             ),
-                          ] else ...[
+                          ] else if (!ultraCompact) ...[
                             const SizedBox(height: 10),
                             Wrap(
                               spacing: 8,
@@ -193,58 +205,52 @@ class RecordCountryOverviewStrip extends StatelessWidget {
           const SizedBox(height: 16),
           LayoutBuilder(
             builder: (context, constraints) {
-              const spacing = 8.0;
-              final cardWidth = (constraints.maxWidth - (spacing * 3)) / 4;
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const NeverScrollableScrollPhysics(),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: cardWidth,
-                      child: RecordCountryOverviewMetricCard(
-                        label: strings.isKorean ? '활동 점수' : 'Activity',
-                        value: projection.activityScore.toStringAsFixed(1),
-                        icon: Icons.auto_graph_rounded,
-                        accentColor: accentColor,
-                        compact: true,
-                      ),
-                    ),
-                    const SizedBox(width: spacing),
-                    SizedBox(
-                      width: cardWidth,
-                      child: RecordCountryOverviewMetricCard(
-                        label: strings.isKorean ? '기록 일수' : 'Days',
-                        value: '${projection.totalDays}',
-                        icon: Icons.calendar_month_rounded,
-                        accentColor: accentColor,
-                        compact: true,
-                      ),
-                    ),
-                    const SizedBox(width: spacing),
-                    SizedBox(
-                      width: cardWidth,
-                      child: RecordCountryOverviewMetricCard(
-                        label: strings.isKorean ? '사진' : 'Photos',
-                        value: '${projection.photoCount}',
-                        icon: Icons.photo_library_rounded,
-                        accentColor: accentColor,
-                        compact: true,
-                      ),
-                    ),
-                    const SizedBox(width: spacing),
-                    SizedBox(
-                      width: cardWidth,
-                      child: RecordCountryOverviewMetricCard(
-                        label: strings.isKorean ? '예정 정차' : 'Planned stops',
-                        value: '${projection.plannedStopCount}',
-                        icon: Icons.flight_takeoff_rounded,
-                        accentColor: accentColor,
-                        compact: true,
-                      ),
-                    ),
-                  ],
+              const spacing = 10.0;
+              final useTwoColumns = constraints.maxWidth < 360;
+              final cardWidth = useTwoColumns
+                  ? (constraints.maxWidth - spacing) / 2
+                  : (constraints.maxWidth - (spacing * 3)) / 4;
+              final cards = [
+                RecordCountryOverviewMetricCard(
+                  label: strings.isKorean ? '활동 점수' : 'Activity',
+                  value: projection.activityScore.toStringAsFixed(1),
+                  icon: Icons.auto_graph_rounded,
+                  accentColor: accentColor,
+                  compact: true,
                 ),
+                RecordCountryOverviewMetricCard(
+                  label: strings.isKorean ? '기록 일수' : 'Days',
+                  value: '${projection.totalDays}',
+                  icon: Icons.calendar_month_rounded,
+                  accentColor: accentColor,
+                  compact: true,
+                ),
+                RecordCountryOverviewMetricCard(
+                  label: strings.isKorean ? '사진' : 'Photos',
+                  value: '${projection.photoCount}',
+                  icon: Icons.photo_library_rounded,
+                  accentColor: accentColor,
+                  compact: true,
+                ),
+                RecordCountryOverviewMetricCard(
+                  label: strings.isKorean ? '예정 정차' : 'Planned stops',
+                  value: '${projection.plannedStopCount}',
+                  icon: Icons.flight_takeoff_rounded,
+                  accentColor: accentColor,
+                  compact: true,
+                ),
+              ];
+
+              return Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                children: [
+                  for (final card in cards)
+                    SizedBox(
+                      width: cardWidth,
+                      child: card,
+                    ),
+                ],
               );
             },
           ),

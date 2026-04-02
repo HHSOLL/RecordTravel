@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 class RecordStrings {
   RecordStrings._(this._languageCode);
@@ -10,6 +11,14 @@ class RecordStrings {
   }
 
   bool get isKorean => _languageCode == 'ko';
+
+  DateFormat dateFormat(String pattern) {
+    try {
+      return DateFormat(pattern, _languageCode);
+    } catch (_) {
+      return DateFormat(pattern);
+    }
+  }
 
   String text(String key) {
     return _translations[_languageCode]?[key] ??
@@ -65,6 +74,24 @@ class RecordStrings {
     };
   }
 
+  String countryName(String countryCode, String fallback) {
+    return _countryNames[_languageCode]?[countryCode] ??
+        _countryNames['en']?[countryCode] ??
+        fallback;
+  }
+
+  String tripTitle(String tripId, String fallback) {
+    return _tripTitles[_languageCode]?[tripId] ??
+        _tripTitles['en']?[tripId] ??
+        fallback;
+  }
+
+  String tripDescription(String tripId, String fallback) {
+    return _tripDescriptions[_languageCode]?[tripId] ??
+        _tripDescriptions['en']?[tripId] ??
+        fallback;
+  }
+
   static const _translations = <String, Map<String, String>>{
     'ko': {
       'app.name': 'record',
@@ -95,7 +122,7 @@ class RecordStrings {
       'home.quickCountries': '빠른 국가 열기',
       'map.unavailableTitle': '지도를 불러올 수 없습니다.',
       'map.unavailableSubtitle':
-          '이 빌드에는 Google Maps 키가 없어 경로와 정차를 카드 정보로만 표시합니다.',
+          '이 빌드에는 사용할 수 있는 지도 인증 정보가 없어 경로와 정차를 카드 정보로만 표시합니다.',
       'planner.title': '플래너',
       'planner.noUpcoming': '예정된 여행이 없습니다.',
       'planner.planNew': '새 여행 계획하기',
@@ -205,7 +232,7 @@ class RecordStrings {
       'home.quickCountries': 'Quick countries',
       'map.unavailableTitle': 'Map preview is unavailable.',
       'map.unavailableSubtitle':
-          'This build does not have a Google Maps key, so routes and stops are shown as cards only.',
+          'This build does not have usable native map credentials, so routes and stops are shown as cards only.',
       'planner.title': 'Planner',
       'planner.noUpcoming': 'No upcoming trips yet.',
       'planner.planNew': 'Plan a new trip',
@@ -287,6 +314,55 @@ class RecordStrings {
       'common.photo': 'Photo',
       'common.note': 'Note',
       'common.none': 'None',
+    },
+  };
+
+  static const _countryNames = <String, Map<String, String>>{
+    'ko': {
+      'KR': '대한민국',
+      'JP': '일본',
+      'PT': '포르투갈',
+      'FR': '프랑스',
+      'TH': '태국',
+      'US': '미국',
+      'CA': '캐나다',
+      'ES': '스페인',
+      'IT': '이탈리아',
+    },
+    'en': {
+      'KR': 'South Korea',
+      'JP': 'Japan',
+      'PT': 'Portugal',
+      'FR': 'France',
+      'TH': 'Thailand',
+      'US': 'United States',
+      'CA': 'Canada',
+      'ES': 'Spain',
+      'IT': 'Italy',
+    },
+  };
+
+  static const _tripTitles = <String, Map<String, String>>{
+    'ko': {
+      'trip-seoul-kyoto': '서울과 교토 사이의 봄',
+      'trip-paris-lisbon': '리스본의 대서양 빛',
+      'trip-busan-jeju': '해안선을 따라 쉬어가기',
+      'trip-sapporo-osaka': '북쪽의 눈빛, 도시의 밤',
+      'trip-bangkok-chiangmai': '사원 열기와 야간열차',
+      'trip-sf-vancouver': '태평양 편집 스프린트',
+      'trip-barcelona-rome': '지중해 환승 여정',
+    },
+  };
+
+  static const _tripDescriptions = <String, Map<String, String>>{
+    'ko': {
+      'trip-seoul-kyoto': '박물관, 비 내리는 골목, 그리고 늦은 밤의 메모들',
+      'trip-paris-lisbon': '파리 일정 뒤에 이어진 조용한 한 주',
+      'trip-busan-jeju': '카메라를 먼저 꺼낸 짧은 국내 리셋 여행',
+      'trip-sapporo-osaka': '삿포로의 눈 내린 아침과 오사카의 골목 저녁',
+      'trip-bangkok-chiangmai': '방콕 시장, 치앙마이 카페, 그리고 긴 야간열차 한 번',
+      'trip-sf-vancouver': '업무 이동이 사진 일지가 된 태평양 연안 여정',
+      'trip-barcelona-rome': '두 도시와 하나의 캐리온, 그리고 늦은 저녁이 많은 일정',
     },
   };
 }

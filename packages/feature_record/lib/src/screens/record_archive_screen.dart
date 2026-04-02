@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../components/record_metric_grid.dart';
 import '../components/record_page_intro.dart';
@@ -53,7 +52,7 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
               _selectedContinent == null ||
               trip.countries.first.continent == _selectedContinent,
         )
-        .where((trip) => _matchesSearch(trip, _searchQuery))
+        .where((trip) => _matchesSearch(trip, _searchQuery, strings))
         .where((trip) => _matchesDateRange(trip, _selectedDateRange))
         .toList();
     final hasActiveFilters = _selectedContinent != null ||
@@ -289,15 +288,26 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
     );
   }
 
-  bool _matchesSearch(RecordTrip trip, String query) {
+  bool _matchesSearch(RecordTrip trip, String query, RecordStrings strings) {
     if (query.isEmpty) {
       return true;
     }
 
     final lowerQuery = query.toLowerCase();
-    return trip.title.toLowerCase().contains(lowerQuery) ||
+    return strings.tripTitle(trip.id, trip.title).toLowerCase().contains(
+              lowerQuery,
+            ) ||
+        strings
+            .tripDescription(trip.id, trip.description)
+            .toLowerCase()
+            .contains(
+              lowerQuery,
+            ) ||
         trip.countries.any(
-          (country) => country.name.toLowerCase().contains(lowerQuery),
+          (country) => strings
+              .countryName(country.code, country.name)
+              .toLowerCase()
+              .contains(lowerQuery),
         );
   }
 
@@ -315,8 +325,9 @@ class _RecordArchiveScreenState extends ConsumerState<RecordArchiveScreen> {
   }
 
   String _formatDateRange(DateTimeRange range) {
-    final start = DateFormat('yy.MM.dd').format(range.start);
-    final end = DateFormat('yy.MM.dd').format(range.end);
+    final formatter = RecordStrings.of(context).dateFormat('yy.MM.dd');
+    final start = formatter.format(range.start);
+    final end = formatter.format(range.end);
     return '$start - $end';
   }
 }
@@ -364,8 +375,19 @@ class _ArchiveTripCard extends StatelessWidget {
     final strings = RecordStrings.of(context);
     final theme = Theme.of(context);
     final tripColor = Color(int.parse(trip.color.replaceAll('#', '0xFF')));
+    final displayTitle = strings.tripTitle(trip.id, trip.title);
+    final displayDescription = strings.tripDescription(
+      trip.id,
+      trip.description,
+    );
+    final displayCountry = strings.countryName(
+      trip.countries.first.code,
+      trip.countries.first.name,
+    );
     final startDate = DateTime.parse(trip.startDate);
     final endDate = DateTime.parse(trip.endDate);
+    final shortDateFormat = strings.dateFormat('MMM d');
+    final longDateFormat = strings.dateFormat('MMM d, yyyy');
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -373,6 +395,7 @@ class _ArchiveTripCard extends StatelessWidget {
         final heroHeight = compactCard ? 84.0 : 96.0;
         final bodyPadding = compactCard ? 9.0 : 14.0;
         return InkWell(
+          key: Key('record-archive-trip-${trip.id}'),
           onTap: () {
             Navigator.push(
               context,
@@ -430,7 +453,7 @@ class _ArchiveTripCard extends StatelessWidget {
                         ),
                       SizedBox(height: compactCard ? 4 : 8),
                       Text(
-                        trip.title,
+                        displayTitle,
                         style: (compactCard
                                 ? theme.textTheme.titleSmall
                                 : theme.textTheme.titleMedium)
@@ -451,7 +474,7 @@ class _ArchiveTripCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMM d, yyyy').format(endDate)}',
+                          '${shortDateFormat.format(startDate)} - ${longDateFormat.format(endDate)}',
                           style: (compactCard
                                   ? theme.textTheme.labelSmall
                                   : theme.textTheme.bodySmall)
@@ -464,7 +487,7 @@ class _ArchiveTripCard extends StatelessWidget {
                         SizedBox(height: compactCard ? 4 : 8),
                         Expanded(
                           child: Text(
-                            trip.description,
+                            displayDescription,
                             style: compactCard
                                 ? theme.textTheme.labelSmall
                                 : theme.textTheme.bodySmall,
@@ -478,7 +501,7 @@ class _ArchiveTripCard extends StatelessWidget {
                           runSpacing: 6,
                           children: [
                             _ArchiveInfoPill(
-                              label: trip.countries.first.name,
+                              label: displayCountry,
                               color: tripColor,
                               icon: Icons.flight_rounded,
                               compact: compactCard,

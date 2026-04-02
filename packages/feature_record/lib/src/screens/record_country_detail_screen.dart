@@ -44,7 +44,7 @@ class _RecordCountryDetailScreenState
     final strings = RecordStrings.of(context);
     final projection =
         ref.watch(recordCountryProjectionProvider(widget.countryCode));
-    final mapCapability = ref.watch(recordMapRuntimeCapabilityProvider);
+    final mapRuntimeConfig = ref.watch(recordMapRuntimeConfigProvider);
 
     if (projection == null) {
       return Scaffold(
@@ -59,8 +59,13 @@ class _RecordCountryDetailScreenState
     }
 
     final accentColor = _colorFromHex(projection.accentColor);
-    final isMapUnavailable = mapCapability.maybeWhen(
-      data: (value) => value == RecordMapRuntimeCapability.unavailable,
+    final isMapUnavailable = mapRuntimeConfig.maybeWhen(
+      data: (value) =>
+          recordMapProviderForProjection(
+            config: value,
+            projection: projection,
+          ) ==
+          RecordMapProviderKind.unavailable,
       orElse: () => false,
     );
 
@@ -79,7 +84,7 @@ class _RecordCountryDetailScreenState
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              expandedHeight: 252,
+              expandedHeight: 416,
               pinned: true,
               backgroundColor: theme.scaffoldBackgroundColor,
               surfaceTintColor: Colors.transparent,
@@ -137,12 +142,25 @@ class _RecordCountryDetailScreenState
         body: TabBarView(
           controller: _tabController,
           children: [
-            switch (mapCapability) {
-              AsyncData(value: RecordMapRuntimeCapability.available) =>
-                RecordCountryMapTab(
+            switch (mapRuntimeConfig) {
+              AsyncData(:final value) => switch (recordMapProviderForProjection(
+                  config: value,
                   projection: projection,
-                  accentColor: accentColor,
-                ),
+                )) {
+                  RecordMapProviderKind.google ||
+                  RecordMapProviderKind.naver =>
+                    RecordCountryMapTab(
+                      projection: projection,
+                      accentColor: accentColor,
+                    ),
+                  RecordMapProviderKind.unavailable =>
+                    _RecordCountryDetailMapFallback(
+                      child: RecordMapUnavailableSurface(
+                        accentColor: accentColor,
+                        height: 320,
+                      ),
+                    ),
+                },
               AsyncLoading() => const _RecordCountryDetailMapFallback(
                   child: RecordMapLoadingSurface(height: 320),
                 ),

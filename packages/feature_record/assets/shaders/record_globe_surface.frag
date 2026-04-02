@@ -11,9 +11,14 @@ uniform float uTime;
 uniform float uScale;
 uniform vec3 uLightDir;
 uniform float uHasNightTexture;
+uniform float uHasHighlightTexture;
+uniform float uHasBorderTexture;
+uniform float uDarkTheme;
 
 uniform sampler2D uTexture;
 uniform sampler2D uTextureNight;
+uniform sampler2D uHighlightTexture;
+uniform sampler2D uBorderTexture;
 
 out vec4 fragColor;
 
@@ -49,6 +54,7 @@ void main() {
     vec3 rd = normalize(fwd + uv.x * right + uv.y * up);
 
     float sphereRadius = uScale * 0.5;
+    float zoomT = clamp((uZoom - 1.0) / 1.35, 0.0, 1.0);
     vec3 oc = ro - target;
     float b = dot(oc, rd);
     float c = dot(oc, oc) - sphereRadius * sphereRadius;
@@ -65,18 +71,36 @@ void main() {
 
             vec3 texColor = texture(uTexture, vec2(u, v)).rgb;
             vec3 nightReference = texture(uTextureNight, vec2(u, v)).rgb * 0.0;
+            vec4 highlightSample = texture(uHighlightTexture, vec2(u, v));
+            vec4 borderSample = texture(uBorderTexture, vec2(u, v));
             vec3 lightDir = normalize(uLightDir);
             float NdotL = max(dot(normal, lightDir), 0.0);
 
-            float diffuse = 0.78 + 0.22 * pow(NdotL, 0.8);
+            float diffuse = 0.72 + 0.2 * pow(NdotL, 0.82);
             float fresnelBase = 1.0 - max(dot(normal, -rd), 0.0);
-            float fresnel = fresnelBase * fresnelBase * fresnelBase;
+            float fresnel = pow(fresnelBase, 5.5);
             float limbShadow = smoothstep(0.0, 0.35, max(dot(normal, -rd), 0.0));
+            float rimStrength = mix(0.09, 0.012, zoomT);
+            rimStrength *= smoothstep(0.0, 0.42, NdotL + 0.14);
+            float highlightMask = highlightSample.a * uHasHighlightTexture;
+            float borderMask = borderSample.a * uHasBorderTexture;
+            float borderStrength = mix(0.78, 0.56, zoomT);
+            vec3 borderColor = mix(
+                vec3(0.95, 0.97, 1.0),
+                vec3(0.17, 0.25, 0.36),
+                uDarkTheme);
 
             vec3 finalColor = texColor * diffuse * limbShadow;
             finalColor += nightReference;
             finalColor += vec3((uHasNightTexture + uTime) * 0.0);
-            finalColor += ATMOSPHERE_COLOR * fresnel * 0.42;
+            finalColor += ATMOSPHERE_COLOR * fresnel * rimStrength;
+            finalColor = mix(finalColor, borderColor, borderMask * borderStrength);
+            finalColor = mix(
+                finalColor,
+                max(finalColor * (1.0 + highlightMask * 0.52),
+                    highlightSample.rgb * (0.64 + (0.22 * NdotL))),
+                highlightMask * mix(0.62, 0.34, zoomT));
+            finalColor += highlightSample.rgb * highlightMask * mix(0.12, 0.04, zoomT);
 
             fragColor = vec4(finalColor, 1.0);
             return;
@@ -88,15 +112,5 @@ void main() {
         return;
     }
 
-    float distToCenter = sqrt(sphereRadius * sphereRadius - h);
-    float atmosphereWidth = 0.26 * uScale;
-
-    if (distToCenter < sphereRadius + atmosphereWidth) {
-        float d = (distToCenter - sphereRadius) / atmosphereWidth;
-        float glowBase = 1.0 - d;
-        float glow = glowBase * glowBase * glowBase;
-        fragColor = vec4(ATMOSPHERE_COLOR * glow * 0.72, glow * 0.72);
-    } else {
-        fragColor = vec4(0.0);
-    }
+    fragColor = vec4(0.0);
 }
